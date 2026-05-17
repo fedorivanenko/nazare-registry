@@ -43,6 +43,18 @@ components:
     files:
       - snippets/c-marquee.liquid
       - scripts/c-marquee.js
+  s-announcement:
+    kind: section
+    dependencies:
+      - core
+    css:
+      mode: generated
+      entry: styles/s-announcement.css
+      output: assets/s-announcement.css
+      sources:
+        - sections/s-announcement.liquid
+    files:
+      - sections/s-announcement.liquid
   s-hero:
     kind: section
     dependencies:

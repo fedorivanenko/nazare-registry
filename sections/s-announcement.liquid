@@ -1,0 +1,45 @@
+{% render 'section-css', section_name: 's-announcement' %}
+
+<section class="bg-slate-950 px-6 py-3 text-white">
+  <div class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-2 text-center text-sm font-medium sm:flex-row">
+    {% if section.settings.text != blank %}
+      <p>{{ section.settings.text | escape }}</p>
+    {% endif %}
+
+    {% if section.settings.link_label != blank and section.settings.link_url != blank %}
+      <a class="inline-flex items-center text-white underline underline-offset-4 transition hover:text-white/80" href="{{ section.settings.link_url }}">
+        {{ section.settings.link_label | escape }}
+      </a>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Announcement",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Free shipping on orders over $100"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement"
+    }
+  ]
+}
+{% endschema %}

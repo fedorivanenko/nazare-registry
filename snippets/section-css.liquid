@@ -4,6 +4,8 @@
 {% endcomment %}
 
 {% case section_name %}
+  {% when 's-announcement' %}
+    {{ 's-announcement.css' | asset_url | stylesheet_tag }}
   {% when 's-hero' %}
     {{ 's-hero.css' | asset_url | stylesheet_tag }}
   {% when 's-social-video-gallery' %}

@@ -88,5 +88,6 @@ Current components:
 - `c-button`
 - `c-video`
 - `c-marquee`
+- `s-announcement`
 - `s-hero`
 - `s-social-video-gallery`
