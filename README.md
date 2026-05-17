@@ -38,6 +38,8 @@ components:
         build: vite build
         registry: node tooling/registry.mjs
         watch: vite build --watch --emptyOutDir=false
+      dependencies:
+        reefjs: ^13.0.6
       devDependencies:
         "@tailwindcss/vite": ^4.0.0
         tailwindcss: ^4.0.0
@@ -73,7 +75,7 @@ Expected CLI behavior:
 2. Fetch `registry.repo` at `registry.ref`.
 3. Read `registry.manifest`.
 4. Resolve requested components plus dependencies.
-5. Merge component `package.scripts` and `package.devDependencies` into theme `package.json`.
+5. Merge component `package.scripts`, `package.dependencies`, and `package.devDependencies` into theme `package.json`.
 6. Copy `files` into theme.
 7. Generate `css.entry` files in theme for `css.mode: generated`.
 8. Run theme build so Vite emits `css.output` into `assets/`.

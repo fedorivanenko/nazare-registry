@@ -186,6 +186,11 @@ function mergePackageJson(packageJson, components, resolvedNames) {
 			...(packagePatch.scripts ?? {}),
 		};
 
+		nextPackageJson.dependencies = {
+			...(nextPackageJson.dependencies ?? {}),
+			...(packagePatch.dependencies ?? {}),
+		};
+
 		nextPackageJson.devDependencies = {
 			...(nextPackageJson.devDependencies ?? {}),
 			...(packagePatch.devDependencies ?? {}),
