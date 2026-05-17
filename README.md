@@ -17,6 +17,8 @@ nazare.registry.yml     # component manifest
 sections/               # section Liquid source
 snippets/               # snippet Liquid source
 scripts/                # script source
+tooling/                # installable tooling source
+vite.config.js          # build preset template
 ```
 
 No `assets/` here. Shopify `assets/` are compiled theme output.
@@ -25,10 +27,26 @@ No `styles/` here by default. Section CSS entry files are generated in theme fro
 
 ## Manifest
 
-Each component declares files it owns and optional dependencies.
+Each component declares files it owns and optional dependencies. Tooling components may also declare package scripts and dev dependencies.
 
 ```yaml
 components:
+  build-vite:
+    kind: tooling
+    package:
+      scripts:
+        build: vite build
+        registry: node tooling/registry.mjs
+        watch: vite build --watch --emptyOutDir=false
+      devDependencies:
+        "@tailwindcss/vite": ^4.0.0
+        tailwindcss: ^4.0.0
+        vite: ^6.0.0
+        yaml: ^2.9.0
+    files:
+      - vite.config.js
+      - tooling/registry.mjs
+
   s-hero:
     kind: section
     dependencies:
@@ -55,15 +73,17 @@ Expected CLI behavior:
 2. Fetch `registry.repo` at `registry.ref`.
 3. Read `registry.manifest`.
 4. Resolve requested components plus dependencies.
-5. Copy `files` into theme.
-6. Generate `css.entry` files in theme for `css.mode: generated`.
-7. Run theme build so Vite emits `css.output` into `assets/`.
-8. Update theme lockfile.
+5. Merge component `package.scripts` and `package.devDependencies` into theme `package.json`.
+6. Copy `files` into theme.
+7. Generate `css.entry` files in theme for `css.mode: generated`.
+8. Run theme build so Vite emits `css.output` into `assets/`.
+9. Update theme lockfile.
 
 ## Components
 
 Current components:
 
+- `build-vite`
 - `core`
 - `c-button`
 - `c-video`
