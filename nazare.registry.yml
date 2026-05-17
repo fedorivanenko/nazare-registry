@@ -1,0 +1,62 @@
+version: 1
+components:
+  core:
+    kind: core
+    css:
+      mode: generated
+      entry: styles/base.css
+      output: assets/base.css
+      sources:
+        - layout/**/*.liquid
+        - templates/**/*.json
+        - blocks/**/*.liquid
+    files:
+      - scripts/theme.js
+      - snippets/section-css.liquid
+  c-button:
+    kind: snippet
+    files:
+      - snippets/c-button.liquid
+  c-video:
+    kind: snippet
+    files:
+      - snippets/c-video.liquid
+  c-marquee:
+    kind: snippet
+    files:
+      - snippets/c-marquee.liquid
+      - scripts/c-marquee.js
+  s-hero:
+    kind: section
+    dependencies:
+      - core
+      - c-button
+      - c-video
+    css:
+      mode: generated
+      entry: styles/s-hero.css
+      output: assets/s-hero.css
+      sources:
+        - sections/s-hero.liquid
+        - snippets/c-button.liquid
+        - snippets/c-video.liquid
+    files:
+      - sections/s-hero.liquid
+  s-social-video-gallery:
+    kind: section
+    dependencies:
+      - core
+      - c-button
+      - c-video
+      - c-marquee
+    css:
+      mode: generated
+      entry: styles/s-social-video-gallery.css
+      output: assets/s-social-video-gallery.css
+      sources:
+        - sections/s-social-video-gallery.liquid
+        - snippets/c-button.liquid
+        - snippets/c-marquee.liquid
+        - snippets/c-video.liquid
+    files:
+      - sections/s-social-video-gallery.liquid

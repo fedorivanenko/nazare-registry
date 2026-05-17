@@ -1,0 +1,29 @@
+{% doc %}
+  Reusable marquee wrapper for any content.
+
+  @param {string} content - Inner marquee markup
+  @param {boolean} [play_on_hover] - Only autoplay marquee on hover
+  @param {number} [speed] - Marquee speed in px/s
+  @param {string} [class] - Wrapper classes
+  @param {string} [track_class] - Track classes
+  @param {string} [item_class] - Item classes
+{% enddoc %}
+
+{% liquid
+  assign marquee_class = class | default: 'mt-12 cursor-grab touch-pan-y select-none overflow-hidden active:cursor-grabbing'
+  assign marquee_track_class = track_class | default: 'flex gap-4 will-change-transform'
+  assign marquee_item_class = item_class | default: 'aspect-[4/5] w-72 shrink-0 select-none overflow-hidden rounded-3xl bg-slate-100 sm:w-80 lg:w-88'
+  assign marquee_speed = speed | default: 35
+  assign marquee_play_on_hover = play_on_hover | default: false
+%}
+
+<div
+  class="{{ marquee_class }}"
+  data-marquee
+  data-marquee-play-on-hover="{{ marquee_play_on_hover }}"
+  data-marquee-speed="{{ marquee_speed }}"
+>
+  <div class="{{ marquee_track_class }}" data-marquee-track>
+    {{ content }}
+  </div>
+</div>

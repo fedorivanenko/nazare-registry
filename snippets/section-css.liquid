@@ -1,0 +1,11 @@
+{% comment %}
+  Section CSS loader.
+  Keep entries in sync with section styles in /styles.
+{% endcomment %}
+
+{% case section_name %}
+  {% when 's-hero' %}
+    {{ 's-hero.css' | asset_url | stylesheet_tag }}
+  {% when 's-social-video-gallery' %}
+    {{ 's-social-video-gallery.css' | asset_url | stylesheet_tag }}
+{% endcase %}

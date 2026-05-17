@@ -1,0 +1,121 @@
+{% render 'section-css', section_name: 's-hero' %}
+
+{% liquid
+  assign has_background_video = false
+  if section.settings.background_video != blank
+    assign has_background_video = true
+  endif
+
+  assign has_background_image = false
+  if section.settings.background_image != blank
+    assign has_background_image = true
+  endif
+%}
+
+<section class="relative isolate min-h-[70vh] overflow-hidden bg-slate-950 text-white">
+  <div class="absolute inset-0" aria-hidden="true">
+    {% if has_background_video or has_background_image %}
+      {% render 'c-video',
+        video: section.settings.background_video,
+        poster_image: section.settings.background_image,
+        class: 'h-full w-full',
+        image_class: 'h-full w-full object-cover',
+        video_class: 'absolute inset-0 h-full w-full object-cover'
+      %}
+    {% endif %}
+
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-slate-950/55 to-slate-950/80"></div>
+  </div>
+
+  <div class="relative z-10 mx-auto flex min-h-[70vh] w-full max-w-6xl items-center px-6 py-20">
+    <div class="max-w-3xl">
+      {% if section.settings.heading != blank %}
+        <h1 class="text-balance text-5xl font-semibold tracking-tight sm:text-7xl">
+          {{ section.settings.heading | escape }}
+        </h1>
+      {% endif %}
+
+      {% if section.settings.subheading != blank %}
+        <h2 class="mt-5 max-w-2xl text-pretty text-lg leading-8 text-white/85 sm:text-xl">
+          {{ section.settings.subheading | escape }}
+        </h2>
+      {% endif %}
+
+      {% if section.settings.cta_label != blank and section.settings.cta_url != blank %}
+        <div class="mt-8">
+          {% render 'c-button', label: section.settings.cta_label, url: section.settings.cta_url, variant: section.settings.cta_variant %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "video",
+      "id": "background_video",
+      "label": "Background video"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Build fast storefronts."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Liquid first. Small JS. Tailwind v4."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link"
+    },
+    {
+      "type": "select",
+      "id": "cta_variant",
+      "label": "CTA variant",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "ghost",
+          "label": "Ghost"
+        },
+        {
+          "value": "outline",
+          "label": "Outline"
+        }
+      ],
+      "default": "secondary"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero"
+    }
+  ]
+}
+{% endschema %}

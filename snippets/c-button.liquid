@@ -1,0 +1,39 @@
+{% doc %}
+  Reusable CTA button.
+
+  @param {string} label - Button text
+  @param {string} [url] - Link destination
+  @param {string} [variant] - Button variant: primary, secondary, ghost, outline
+  @param {string} [class] - Additional classes
+  @param {string} [target] - Link target
+{% enddoc %}
+
+{% liquid
+  assign button_variant = variant | default: 'primary'
+  assign button_class = 'inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium no-underline transition'
+
+  case button_variant
+    when 'secondary'
+      assign button_class = button_class | append: ' bg-slate-100 text-slate-950 hover:bg-slate-100/80'
+    when 'ghost'
+      assign button_class = button_class | append: ' bg-transparent text-slate-950 hover:bg-slate-100'
+    when 'outline'
+      assign button_class = button_class | append: ' border border-slate-200 bg-white text-slate-950 hover:bg-slate-100'
+    else
+      assign button_class = button_class | append: ' bg-slate-950 text-white hover:bg-slate-950/90'
+  endcase
+
+  if class != blank
+    assign button_class = button_class | append: ' ' | append: class
+  endif
+%}
+
+{% if url != blank %}
+  <a class="{{ button_class }}" href="{{ url }}" {% if target != blank %}target="{{ target }}"{% endif %}>
+    {{ label | escape }}
+  </a>
+{% else %}
+  <button class="{{ button_class }}" type="button">
+    {{ label | escape }}
+  </button>
+{% endif %}
