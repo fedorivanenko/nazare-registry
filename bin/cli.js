@@ -12,6 +12,7 @@ const repoRoot = path.resolve(__dirname, "..");
 const templateRoot = path.join(repoRoot, "templates", "default");
 const defaultRepo = "https://github.com/fedorivanenko/nazare-registry.git";
 const defaultRef = "main";
+let updateNoticeShown = false;
 
 const help = `nazare
 
@@ -233,6 +234,7 @@ Examples:
 	}
 
 	const registryDir = await cloneRegistry(config);
+	await maybeNotifyCliUpdate(registryDir);
 	const manifest = parseYaml(
 		await fs.readFile(path.join(registryDir, config.registry.manifest), "utf8"),
 	);
@@ -317,6 +319,44 @@ async function cloneRegistry(config) {
 	args.push(config.registry.repo, tmpDir);
 	await run("git", args, { stdio: "ignore" });
 	return tmpDir;
+}
+
+async function maybeNotifyCliUpdate(registryDir) {
+	if (updateNoticeShown) return;
+	updateNoticeShown = true;
+
+	try {
+		const currentPkg = await readJson(path.join(repoRoot, "package.json"));
+		const latestPkg = await readJson(path.join(registryDir, "package.json"));
+		const currentVersion = currentPkg.version ?? "0.0.0";
+		const latestVersion = latestPkg.version ?? "0.0.0";
+
+		if (compareVersions(latestVersion, currentVersion) > 0) {
+			console.error(
+				`nazare update available: ${currentVersion} -> ${latestVersion}. Run: nazare self update`,
+			);
+		}
+	} catch {
+		// Update checks should never block registry commands.
+	}
+}
+
+function compareVersions(a, b) {
+	const left = versionParts(a);
+	const right = versionParts(b);
+	const length = Math.max(left.length, right.length);
+	for (let index = 0; index < length; index += 1) {
+		const diff = (left[index] ?? 0) - (right[index] ?? 0);
+		if (diff !== 0) return diff;
+	}
+	return 0;
+}
+
+function versionParts(version) {
+	return String(version)
+		.split(/[.-]/)
+		.map((part) => Number.parseInt(part, 10))
+		.map((part) => (Number.isNaN(part) ? 0 : part));
 }
 
 function normalizeFileMapping(file) {
