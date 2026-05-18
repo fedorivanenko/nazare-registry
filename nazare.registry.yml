@@ -32,7 +32,6 @@ components:
         - blocks/**/*.liquid
     files:
       - scripts/theme.js
-      - snippets/section-css.liquid
   c-button:
     kind: snippet
     files:

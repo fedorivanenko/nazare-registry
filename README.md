@@ -8,7 +8,7 @@ Registry stores component source and metadata. Themes pull from this repo, then 
 
 - Registry is source of truth for components.
 - Theme config points to registry repo/ref/manifest.
-- CLI resolves dependencies, copies source files, generates CSS entries, then theme build compiles assets.
+- CLI resolves dependencies, copies source files, generates CSS entries, generates `snippets/section-css.liquid`, then theme build compiles assets.
 
 ## Files
 
@@ -84,8 +84,9 @@ Expected CLI behavior:
 5. Merge component `package.scripts`, `package.dependencies`, and `package.devDependencies` into theme `package.json`.
 6. Copy `files` into theme.
 7. Generate `css.entry` files in theme for `css.mode: generated`.
-8. Run theme build so Vite emits `css.output` into `assets/`.
-9. Update theme lockfile.
+8. Generate `snippets/section-css.liquid` from installed section CSS policies.
+9. Run theme build so Vite emits `css.output` into `assets/`.
+10. Update theme lockfile.
 
 ## Components
 
