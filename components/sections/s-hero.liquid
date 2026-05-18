@@ -15,7 +15,7 @@
 <section class="relative isolate min-h-[70vh] overflow-hidden bg-slate-950 text-white">
   <div class="absolute inset-0" aria-hidden="true">
     {% if has_background_video or has_background_image %}
-      {% render 'c-video',
+      {% render 'c-bg-video',
         video: section.settings.background_video,
         poster_image: section.settings.background_image,
         class: 'h-full w-full',

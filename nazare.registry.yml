@@ -38,9 +38,22 @@ components:
         to: snippets/c-button.liquid
   c-video:
     kind: snippet
+    js:
+      initializers:
+        - import: ./c-video.js
+          name: initCVideos
     files:
       - from: components/snippets/c-video.liquid
         to: snippets/c-video.liquid
+      - from: components/scripts/c-video.js
+        to: scripts/c-video.js
+  c-bg-video:
+    kind: snippet
+    dependencies:
+      - c-video
+    files:
+      - from: components/snippets/c-bg-video.liquid
+        to: snippets/c-bg-video.liquid
   c-marquee:
     kind: snippet
     js:
@@ -71,7 +84,7 @@ components:
     dependencies:
       - core
       - c-button
-      - c-video
+      - c-bg-video
     css:
       mode: generated
       entry: styles/s-hero.css
@@ -80,6 +93,7 @@ components:
       sources:
         - sections/s-hero.liquid
         - snippets/c-button.liquid
+        - snippets/c-bg-video.liquid
         - snippets/c-video.liquid
     files:
       - from: components/sections/s-hero.liquid

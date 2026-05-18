@@ -1,0 +1,26 @@
+{% doc %}
+  Reusable background video with optional poster image. Wraps c-video with controls hidden.
+
+  @param {video} video - Shopify video object
+  @param {image} [poster_image] - Poster/LCP image rendered before video
+  @param {string} [class] - Wrapper classes
+  @param {string} [image_class] - Poster image classes
+  @param {string} [video_class] - Video classes
+  @param {boolean} [autoplay] - Autoplay video. Defaults to true.
+{% enddoc %}
+
+{% liquid
+  assign wrapper_class = class | default: 'absolute inset-0 h-full w-full overflow-hidden'
+  assign poster_class = image_class | default: 'h-full w-full object-cover'
+  assign player_class = video_class | default: 'absolute inset-0 h-full w-full object-cover'
+%}
+
+{% render 'c-video',
+  video: video,
+  poster_image: poster_image,
+  class: wrapper_class,
+  image_class: poster_class,
+  video_class: player_class,
+  autoplay: autoplay,
+  show_controls: false
+%}

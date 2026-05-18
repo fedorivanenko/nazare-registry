@@ -79,7 +79,7 @@ components:
     dependencies:
       - core
       - c-button
-      - c-video
+      - c-bg-video
     css:
       mode: generated
       entry: styles/s-hero.css
@@ -88,6 +88,7 @@ components:
       sources:
         - sections/s-hero.liquid
         - snippets/c-button.liquid
+        - snippets/c-bg-video.liquid
         - snippets/c-video.liquid
     files:
       - from: components/sections/s-hero.liquid
@@ -116,6 +117,7 @@ Current components:
 - `core`
 - `c-button`
 - `c-video`
+- `c-bg-video`
 - `c-marquee`
 - `s-announcement`
 - `s-hero`
