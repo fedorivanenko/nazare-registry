@@ -40,7 +40,7 @@ const initMarquee = (root, index) => {
 	);
 
 	const speed = Number(root.dataset.marqueeSpeed || 35);
-	const playOnHover = root.dataset.marqueePlayOnHover === "true";
+	const stopOnHover = root.dataset.marqueeStopOnHover === "true";
 	const originals = [...track.children];
 	let contentWidth = 0;
 	let offset = 0;
@@ -99,7 +99,7 @@ const initMarquee = (root, index) => {
 		}
 	};
 
-	const shouldAutoPlay = () => !playOnHover || marqueeState.isHovered;
+	const shouldAutoPlay = () => !stopOnHover || !marqueeState.isHovered;
 
 	const tick = (time) => {
 		const delta = Math.min((time - lastFrame) / 1000, 0.05);

@@ -51,7 +51,7 @@
       <div class="-mx-6">
         {% render 'c-marquee',
           content: marquee_content,
-          play_on_hover: section.settings.marquee_play_on_hover,
+          stop_on_hover: section.settings.marquee_stop_on_hover,
           speed: section.settings.marquee_speed
         %}
       </div>
@@ -112,9 +112,9 @@
     },
     {
       "type": "checkbox",
-      "id": "marquee_play_on_hover",
-      "label": "Play marquee on hover only",
-      "default": false
+      "id": "marquee_stop_on_hover",
+      "label": "Stop marquee on hover",
+      "default": true
     },
     {
       "type": "range",
