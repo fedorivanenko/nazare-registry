@@ -17,6 +17,20 @@ components:
     files:
       - from: components/scripts/core.js
         to: scripts/core.js
+      - from: templates/default/snippets/custom-fonts.liquid
+        to: snippets/custom-fonts.liquid
+      - from: templates/default/snippets/css-variables.liquid
+        to: snippets/css-variables.liquid
+      - from: templates/default/snippets/meta-tags.liquid
+        to: snippets/meta-tags.liquid
+      - from: templates/default/snippets/image.liquid
+        to: snippets/image.liquid
+      - from: templates/default/assets/critical.css
+        to: assets/critical.css
+      - from: templates/default/assets/inter-variable.woff2
+        to: assets/inter-variable.woff2
+      - from: templates/default/assets/inter-variable-italic.woff2
+        to: assets/inter-variable-italic.woff2
   c-button:
     kind: snippet
     files:

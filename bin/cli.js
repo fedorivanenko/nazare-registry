@@ -305,7 +305,7 @@ Examples:
 			await stageWrite(
 				writes,
 				path.join(root, fileMapping.to),
-				await fs.readFile(sourcePath, "utf8"),
+				await fs.readFile(sourcePath),
 				root,
 				yes,
 			);
@@ -681,8 +681,9 @@ async function stageWrite(writes, targetPath, content, root, yes) {
 		.relative(root, targetPath)
 		.replaceAll(path.sep, "/");
 	if (await pathExists(targetPath)) {
-		const existing = await fs.readFile(targetPath, "utf8");
-		if (existing === content) {
+		const existing = await fs.readFile(targetPath);
+		const next = Buffer.isBuffer(content) ? content : Buffer.from(content);
+		if (existing.equals(next)) {
 			console.log(`same  ${relativePath}`);
 			return;
 		}
