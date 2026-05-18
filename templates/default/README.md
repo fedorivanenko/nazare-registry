@@ -17,7 +17,7 @@ pnpm dev            # node tooling/dev.mjs
 pnpm dev:protected  # node tooling/dev.mjs --protected
 nazare list         # list registry components
 nazare pull         # pull registry components
-pnpm watch          # vite build --watch
+pnpm watch          # vite build --watch, auto-restarts when new style entries are added
 pnpm build          # vite build
 ```
 
@@ -91,4 +91,5 @@ The registry CLI checks existing files and asks before overriding changed files.
 
 - Use `pnpm`, not `npm` or `yarn`.
 - `pnpm watch` rebuilds assets only; Shopify CLI handles theme dev separately.
+- `pnpm watch` restarts Vite when `nazare pull` adds or removes `styles/*.css`, because Vite only reads Rollup entry inputs at startup.
 - Tailwind content scan is explicit in each CSS file using `@source`.

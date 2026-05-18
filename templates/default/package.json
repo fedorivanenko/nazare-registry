@@ -7,7 +7,7 @@
 		"dev": "node tooling/dev.mjs",
 		"dev:protected": "node tooling/dev.mjs --protected",
 		"registry": "nazare registry",
-		"watch": "vite build --watch --emptyOutDir=false"
+		"watch": "node tooling/watch.mjs"
 	},
 	"devDependencies": {
 		"@tailwindcss/vite": "^4.0.0",
