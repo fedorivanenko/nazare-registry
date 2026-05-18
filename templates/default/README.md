@@ -73,7 +73,7 @@ Build inputs stay in theme root folders:
 - `scripts/theme.js` -> `assets/theme.js`
 - component scripts are composed through generated `scripts/theme.js`
 
-Section CSS is loaded through generated `snippets/section-css.liquid`. Above-the-fold section CSS is preloaded from `snippets/section-css-preloads.liquid` in `<head>`; other sections use normal stylesheet loading.
+Section CSS is loaded through generated `snippets/section-css.liquid`. Above-the-fold section CSS is loaded from `snippets/section-css-preloads.liquid` in `<head>` with `stylesheet_tag: preload: true`; other sections use normal body-level stylesheet loading.
 
 ## Registry config
 
