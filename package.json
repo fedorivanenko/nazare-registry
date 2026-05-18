@@ -1,20 +1,20 @@
 {
 	"name": "nazare-registry",
-	"version": "0.1.9-dev.0",
+	"version": "0.1.9-dev.1",
 	"private": true,
 	"type": "module",
 	"bin": {
 		"nazare": "./bin/cli.js"
 	},
 	"nazare": {
-		"updateNotice": "Dev build: marquee/video interaction fix. Test with registry.ref: v0.1.9-dev.0.",
+		"updateNotice": "Dev build: marquee/video interaction fix. Test with registry.ref: v0.1.9-dev.1.",
 		"componentUpdates": {
 			"core": "0.1.7",
 			"c-video": "0.1.8",
 			"c-bg-video": "0.1.8",
 			"s-hero": "0.1.8",
-			"c-marquee": "0.1.9-dev.0",
-			"s-social-video-gallery": "0.1.9-dev.0"
+			"c-marquee": "0.1.9-dev.1",
+			"s-social-video-gallery": "0.1.9-dev.1"
 		}
 	}
 }

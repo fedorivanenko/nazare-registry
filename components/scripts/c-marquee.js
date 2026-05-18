@@ -199,10 +199,7 @@ const initMarquee = (root, index) => {
 	root.addEventListener(
 		"click",
 		(event) => {
-			if (
-				performance.now() > suppressClickUntil ||
-				isInteractiveTarget(event.target)
-			) {
+			if (performance.now() > suppressClickUntil) {
 				return;
 			}
 
