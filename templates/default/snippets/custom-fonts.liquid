@@ -1,0 +1,32 @@
+{% comment %}
+  Self-hosted font setup.
+
+  Files:
+  - assets/inter-variable.woff2
+  - assets/inter-variable-italic.woff2
+
+  Use:
+  - This snippet preloads font files.
+  - It emits @font-face rules that point at theme assets.
+{% endcomment %}
+
+<link rel="preload" href="{{ 'inter-variable.woff2' | asset_url }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ 'inter-variable-italic.woff2' | asset_url }}" as="font" type="font/woff2" crossorigin>
+
+{% style %}
+  @font-face {
+    font-family: 'Inter';
+    src: url('{{ 'inter-variable.woff2' | asset_url }}') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Inter';
+    src: url('{{ 'inter-variable-italic.woff2' | asset_url }}') format('woff2');
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+  }
+{% endstyle %}

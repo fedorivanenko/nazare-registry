@@ -1,0 +1,24 @@
+# Excluded from Shopify CLI push/pull/dev.
+
+# Source/build input folders. Shopify only needs compiled assets/ output.
+scripts/
+styles/
+tooling/
+
+# Local tooling/config.
+AGENTS.md
+README.md
+nazare.config.yml
+nazare.lock.yml
+package.json
+pnpm-lock.yaml
+vite.config.js
+
+# Node/tooling artifacts.
+node_modules/
+.env
+.example.env
+.git/
+.gitignore
+.gitattributes
+.DS_Store

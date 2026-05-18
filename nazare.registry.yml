@@ -1,26 +1,7 @@
 version: 1
 components:
-  build-vite:
-    kind: tooling
-    package:
-      scripts:
-        build: vite build
-        registry: node tooling/registry.mjs
-        watch: vite build --watch --emptyOutDir=false
-      dependencies:
-        reefjs: ^13.0.6
-      devDependencies:
-        "@tailwindcss/vite": ^4.0.0
-        tailwindcss: ^4.0.0
-        vite: ^6.0.0
-        yaml: ^2.9.0
-    files:
-      - vite.config.js
-      - tooling/registry.mjs
   core:
     kind: core
-    dependencies:
-      - build-vite
     css:
       mode: generated
       entry: styles/base.css
@@ -31,20 +12,25 @@ components:
         - templates/**/*.json
         - blocks/**/*.liquid
     files:
-      - scripts/theme.js
+      - from: components/scripts/theme.js
+        to: scripts/theme.js
   c-button:
     kind: snippet
     files:
-      - snippets/c-button.liquid
+      - from: components/snippets/c-button.liquid
+        to: snippets/c-button.liquid
   c-video:
     kind: snippet
     files:
-      - snippets/c-video.liquid
+      - from: components/snippets/c-video.liquid
+        to: snippets/c-video.liquid
   c-marquee:
     kind: snippet
     files:
-      - snippets/c-marquee.liquid
-      - scripts/c-marquee.js
+      - from: components/snippets/c-marquee.liquid
+        to: snippets/c-marquee.liquid
+      - from: components/scripts/c-marquee.js
+        to: scripts/c-marquee.js
   s-announcement:
     kind: section
     dependencies:
@@ -57,7 +43,8 @@ components:
       sources:
         - sections/s-announcement.liquid
     files:
-      - sections/s-announcement.liquid
+      - from: components/sections/s-announcement.liquid
+        to: sections/s-announcement.liquid
   s-hero:
     kind: section
     dependencies:
@@ -74,7 +61,8 @@ components:
         - snippets/c-button.liquid
         - snippets/c-video.liquid
     files:
-      - sections/s-hero.liquid
+      - from: components/sections/s-hero.liquid
+        to: sections/s-hero.liquid
   s-social-video-gallery:
     kind: section
     dependencies:
@@ -93,4 +81,5 @@ components:
         - snippets/c-marquee.liquid
         - snippets/c-video.liquid
     files:
-      - sections/s-social-video-gallery.liquid
+      - from: components/sections/s-social-video-gallery.liquid
+        to: sections/s-social-video-gallery.liquid

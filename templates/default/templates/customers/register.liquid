@@ -1,0 +1,7 @@
+{% if customer %}
+  <script>
+    window.location.replace({{ routes.account_url | json }});
+  </script>
+{% else %}
+  {% section 'account-gate' %}
+{% endif %}

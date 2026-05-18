@@ -1,0 +1,9 @@
+{
+	"name": "nazare-registry",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"bin": {
+		"nazare": "./bin/cli.js"
+	}
+}

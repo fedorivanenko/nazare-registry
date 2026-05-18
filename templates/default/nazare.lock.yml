@@ -1,0 +1,13 @@
+version: 1
+registry:
+  repo: https://github.com/fedorivanenko/nazare-registry.git
+  ref: main
+  manifest: nazare.registry.yml
+components:
+  core:
+    kind: core
+    css:
+      mode: generated
+      entry: styles/base.css
+      output: assets/base.css
+      load: normal

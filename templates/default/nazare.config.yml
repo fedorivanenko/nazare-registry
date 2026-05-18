@@ -1,0 +1,4 @@
+registry:
+  repo: https://github.com/fedorivanenko/nazare-registry.git
+  ref: main
+  manifest: nazare.registry.yml

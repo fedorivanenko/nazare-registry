@@ -1,0 +1,87 @@
+<section class="account-gate" data-account-gate>
+  <div class="account-gate__inner">
+    <div class="account-gate__panel account-gate__login">
+      <h1 class="account-gate__title">Log in</h1>
+      <p class="account-gate__text">Use your email and password to access your account.</p>
+
+      {% form 'customer_login' %}
+        {% if form.errors %}
+          <div class="account-gate__message account-gate__message--error">{{ form.errors | default_errors }}</div>
+        {% endif %}
+
+        <div class="account-gate__field">
+          <label for="CustomerEmail">Email</label>
+          <input id="CustomerEmail" type="email" name="customer[email]" autocomplete="email" autocapitalize="off" required>
+        </div>
+
+        <div class="account-gate__field">
+          <label for="CustomerPassword">Password</label>
+          <input id="CustomerPassword" type="password" name="customer[password]" autocomplete="current-password" required>
+        </div>
+
+        <button class="account-gate__button" type="submit">Sign in</button>
+
+        <button class="account-gate__link" type="button" data-account-gate-toggle="#recover">Forgot password?</button>
+      {% endform %}
+    </div>
+
+    <div class="account-gate__panel account-gate__recover">
+      <h2 class="account-gate__title">Reset password</h2>
+      <p class="account-gate__text">We will send a reset link to your email.</p>
+
+      {% form 'recover_customer_password' %}
+        {% if form.posted_successfully? %}
+          <div class="account-gate__message account-gate__message--success">We sent a password reset email.</div>
+        {% endif %}
+
+        {% if form.errors %}
+          <div class="account-gate__message account-gate__message--error">{{ form.errors | default_errors }}</div>
+        {% endif %}
+
+        <div class="account-gate__field">
+          <label for="RecoverEmail">Email</label>
+          <input id="RecoverEmail" type="email" name="email" autocomplete="email" autocapitalize="off" required>
+        </div>
+
+        <button class="account-gate__button" type="submit">Send reset email</button>
+        <button class="account-gate__link" type="button" data-account-gate-toggle="#login">Back to sign in</button>
+      {% endform %}
+    </div>
+
+    <div class="account-gate__panel account-gate__register">
+      <h2 class="account-gate__title">Create account</h2>
+      <p class="account-gate__text">New customer? Create an account in a few seconds.</p>
+
+      {% form 'create_customer' %}
+        {% if form.errors %}
+          <div class="account-gate__message account-gate__message--error">{{ form.errors | default_errors }}</div>
+        {% endif %}
+
+        <div class="account-gate__grid">
+          <div class="account-gate__field">
+            <label for="RegisterFirstName">First name</label>
+            <input id="RegisterFirstName" type="text" name="customer[first_name]" autocomplete="given-name">
+          </div>
+
+          <div class="account-gate__field">
+            <label for="RegisterLastName">Last name</label>
+            <input id="RegisterLastName" type="text" name="customer[last_name]" autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="account-gate__field">
+          <label for="RegisterEmail">Email</label>
+          <input id="RegisterEmail" type="email" name="customer[email]" autocomplete="email" autocapitalize="off" required>
+        </div>
+
+        <div class="account-gate__field">
+          <label for="RegisterPassword">Password</label>
+          <input id="RegisterPassword" type="password" name="customer[password]" autocomplete="new-password" required>
+        </div>
+
+        <button class="account-gate__button" type="submit">Create account</button>
+      {% endform %}
+    </div>
+  </div>
+</section>
+

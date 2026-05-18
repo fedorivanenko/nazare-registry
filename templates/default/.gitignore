@@ -1,0 +1,23 @@
+# OS generated files #
+######################
+.firecrawl
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+node_modules/
+
+# Shopify CLI files
+.shopify/
+
+# Env files
+.env
+.env.*
+!.example.env
+
+## Release files
+release
+*.zip
