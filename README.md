@@ -37,7 +37,7 @@ nazare self update
 
 - Registry is source of truth for components.
 - Theme config points to registry repo/ref/manifest.
-- Global `nazare` CLI resolves dependencies, copies source files, generates CSS entries, generates `snippets/section-css.liquid`, then theme build compiles assets.
+- Global `nazare` CLI resolves dependencies, copies source files, generates CSS entries, generates `scripts/theme.js`, generates `snippets/section-css.liquid`, then theme build compiles assets.
 
 ## Files
 
@@ -60,10 +60,20 @@ CSS load policy lives in manifest `css.load`:
 
 ## Manifest
 
-Each component declares files it owns and optional dependencies. Base build tooling comes from `templates/default`; component pulls should not reinstall it.
+Each component declares files it owns, optional dependencies, and optional JS composition metadata. Base build tooling comes from `templates/default`; component pulls should not reinstall it.
 
 ```yaml
 components:
+  c-marquee:
+    kind: snippet
+    js:
+      initializers:
+        - import: ./c-marquee.js
+          name: initCMarquees
+    files:
+      - from: components/scripts/c-marquee.js
+        to: scripts/c-marquee.js
+
   s-hero:
     kind: section
     dependencies:
@@ -94,7 +104,8 @@ Expected CLI behavior:
 4. Resolve requested components plus dependencies.
 5. Copy `files` into theme.
 6. Generate `css.entry` files in theme for `css.mode: generated`.
-7. Generate `snippets/section-css.liquid` from installed section CSS policies.
+7. Generate `scripts/theme.js` from installed component `js.imports` and `js.initializers`.
+8. Generate `snippets/section-css.liquid` from installed section CSS policies.
 8. Run theme build so Vite emits `css.output` into `assets/`.
 9. Update theme lockfile.
 

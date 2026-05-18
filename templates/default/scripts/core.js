@@ -1,31 +1,3 @@
-import { initCMarquees } from "./c-marquee.js";
-
-const counterRoot = document.querySelector("[data-counter-root]");
-
-if (counterRoot) {
-	const valueEl = counterRoot.querySelector("[data-counter-value]");
-	const incrementBtn = counterRoot.querySelector("[data-counter-increment]");
-	const decrementBtn = counterRoot.querySelector("[data-counter-decrement]");
-
-	let value = 0;
-
-	const render = () => {
-		valueEl.textContent = String(value);
-	};
-
-	incrementBtn.addEventListener("click", () => {
-		value += 1;
-		render();
-	});
-
-	decrementBtn.addEventListener("click", () => {
-		value -= 1;
-		render();
-	});
-
-	render();
-}
-
 const accountGate = document.querySelector("[data-account-gate]");
 
 if (accountGate) {
@@ -65,5 +37,3 @@ if (accountGate) {
 	window.addEventListener("hashchange", syncState);
 	syncState();
 }
-
-initCMarquees();

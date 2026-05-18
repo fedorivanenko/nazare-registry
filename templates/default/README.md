@@ -64,6 +64,7 @@ Build inputs stay in theme root folders:
 
 - `styles/base.css` -> `assets/base.css`
 - `scripts/theme.js` -> `assets/theme.js`
+- component scripts are composed through generated `scripts/theme.js`
 
 Section CSS is loaded through generated `snippets/section-css.liquid`. Above-the-fold sections can preload CSS; other sections use normal stylesheet loading.
 
@@ -72,7 +73,7 @@ Section CSS is loaded through generated `snippets/section-css.liquid`. Above-the
 - `nazare.config.yml` points to registry repo/ref/manifest.
 - `nazare.lock.yml` records installed registry components.
 - Registry owns component source and metadata.
-- Theme owns generated CSS entry files and compiled `assets/` output.
+- Theme owns generated CSS entry files, generated `scripts/theme.js`, and compiled `assets/` output.
 
 Generated CSS entries use Tailwind `@source` directives. Vite scans `styles/*.css` and emits matching files into `assets/`.
 

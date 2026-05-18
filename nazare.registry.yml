@@ -11,9 +11,12 @@ components:
         - layout/**/*.liquid
         - templates/**/*.json
         - blocks/**/*.liquid
+    js:
+      imports:
+        - ./core.js
     files:
-      - from: components/scripts/theme.js
-        to: scripts/theme.js
+      - from: components/scripts/core.js
+        to: scripts/core.js
   c-button:
     kind: snippet
     files:
@@ -26,6 +29,10 @@ components:
         to: snippets/c-video.liquid
   c-marquee:
     kind: snippet
+    js:
+      initializers:
+        - import: ./c-marquee.js
+          name: initCMarquees
     files:
       - from: components/snippets/c-marquee.liquid
         to: snippets/c-marquee.liquid

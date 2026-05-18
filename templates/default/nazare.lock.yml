@@ -6,6 +6,9 @@ registry:
 components:
   core:
     kind: core
+    js:
+      imports:
+        - ./core.js
     css:
       mode: generated
       entry: styles/base.css
