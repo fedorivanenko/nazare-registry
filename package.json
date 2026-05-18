@@ -1,9 +1,15 @@
 {
 	"name": "nazare-registry",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"private": true,
 	"type": "module",
 	"bin": {
 		"nazare": "./bin/cli.js"
+	},
+	"nazare": {
+		"updateNotice": "Core tooling changed. Run: nazare pull core --yes in each theme.",
+		"componentUpdates": {
+			"core": "0.1.4"
+		}
 	}
 }

@@ -14,6 +14,7 @@ Empty Nazare Shopify theme template built with Liquid, Tailwind CSS v4, Vite, Re
 
 ```bash
 pnpm dev            # node tooling/dev.mjs
+pnpm dev -- --theme-editor-sync
 pnpm dev:protected  # node tooling/dev.mjs --protected
 nazare list         # list registry components
 nazare pull         # pull registry components
@@ -40,6 +41,12 @@ If store is password protected:
 
 ```bash
 pnpm dev:protected
+```
+
+Extra flags pass through to `shopify theme dev`:
+
+```bash
+pnpm dev -- --theme-editor-sync
 ```
 
 Shopify CLI can also take full domain:

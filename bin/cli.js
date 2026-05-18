@@ -163,9 +163,24 @@ async function installCli() {
 		console.log(`  export PATH="${binDir}:$PATH"`);
 	}
 
+	await printInstalledUpdateNotice(installDir);
+
 	console.log("");
 	console.log("Run:");
 	console.log("  nazare init my-store");
+}
+
+async function printInstalledUpdateNotice(installDir) {
+	try {
+		const pkg = await readJson(path.join(installDir, "package.json"));
+		const notice = pkg.nazare?.updateNotice;
+		if (!notice) return;
+
+		console.log("");
+		console.log(`Notice: ${notice}`);
+	} catch {
+		// Update notices should never block install/update.
+	}
 }
 
 async function cloneFreshRepo() {
@@ -235,6 +250,8 @@ Examples:
 
 	const registryDir = await cloneRegistry(config);
 	await maybeNotifyCliUpdate(registryDir);
+	const registryPkg = await readJson(path.join(registryDir, "package.json"));
+	const registryVersion = registryPkg.version ?? "0.0.0";
 	const manifest = parseYaml(
 		await fs.readFile(path.join(registryDir, config.registry.manifest), "utf8"),
 	);
@@ -259,12 +276,14 @@ Examples:
 	const existingLock = (await pathExists(lockPath))
 		? parseYaml(await fs.readFile(lockPath, "utf8"))
 		: null;
+	maybeNotifyComponentUpdates(existingLock, registryPkg);
 	const nextLock = buildLock(
 		config,
 		manifest,
 		components,
 		resolvedNames,
 		existingLock,
+		registryVersion,
 	);
 	const writes = [];
 
@@ -307,6 +326,7 @@ Examples:
 		yes,
 	);
 	await stageWatchTooling(writes, root, yes);
+	await stageDevTooling(writes, root, yes);
 	await stageWrite(writes, lockPath, stringifyYaml(nextLock), root, yes);
 	await writeAll(writes, dryRun);
 
@@ -336,9 +356,29 @@ async function maybeNotifyCliUpdate(registryDir) {
 			console.error(
 				`nazare update available: ${currentVersion} -> ${latestVersion}. Run: nazare self update`,
 			);
+			if (latestPkg.nazare?.updateNotice) {
+				console.error(`Notice: ${latestPkg.nazare.updateNotice}`);
+			}
 		}
 	} catch {
 		// Update checks should never block registry commands.
+	}
+}
+
+function maybeNotifyComponentUpdates(existingLock, registryPkg) {
+	const componentUpdates = registryPkg.nazare?.componentUpdates;
+	if (!existingLock?.components || !isPlainObject(componentUpdates)) return;
+
+	for (const [name, requiredVersion] of Object.entries(componentUpdates)) {
+		const installed = existingLock.components[name];
+		if (!installed) continue;
+
+		const installedVersion = installed.version ?? "0.0.0";
+		if (compareVersions(requiredVersion, installedVersion) > 0) {
+			console.error(
+				`${name} update available: ${installedVersion} -> ${requiredVersion}. Run: nazare pull ${name} --yes`,
+			);
+		}
 	}
 }
 
@@ -557,6 +597,32 @@ async function stageWatchTooling(writes, root, yes) {
 	);
 }
 
+async function stageDevTooling(writes, root, yes) {
+	const sourcePath = path.join(templateRoot, "tooling", "dev.mjs");
+	if (!(await pathExists(sourcePath))) return;
+
+	const targetPath = path.join(root, "tooling", "dev.mjs");
+	const content = await fs.readFile(sourcePath, "utf8");
+
+	if (await pathExists(targetPath)) {
+		const existing = await fs.readFile(targetPath, "utf8");
+		if (existing === content) return;
+		if (!isLegacyDevTooling(existing)) {
+			console.log("skip  tooling/dev.mjs appears custom");
+			return;
+		}
+	}
+
+	await stageWrite(writes, targetPath, content, root, yes);
+}
+
+function isLegacyDevTooling(source) {
+	return (
+		source.includes('process.argv.includes("--protected")') &&
+		source.includes('const args = ["theme", "dev", "--store", store];')
+	);
+}
+
 async function stageWrite(writes, targetPath, content, root, yes) {
 	const relativePath = path
 		.relative(root, targetPath)
@@ -586,9 +652,10 @@ async function writeAll(writes, dryRun) {
 	}
 }
 
-function lockEntry(component) {
+function lockEntry(component, registryVersion) {
 	return {
 		kind: component.kind,
+		version: registryVersion,
 		...(component.dependencies ? { dependencies: component.dependencies } : {}),
 		...(component.js ? { js: component.js } : {}),
 		...(component.css
@@ -604,10 +671,17 @@ function lockEntry(component) {
 	};
 }
 
-function buildLock(config, manifest, components, resolvedNames, existingLock) {
+function buildLock(
+	config,
+	manifest,
+	components,
+	resolvedNames,
+	existingLock,
+	registryVersion,
+) {
 	const nextComponents = { ...(existingLock?.components ?? {}) };
 	for (const name of resolvedNames)
-		nextComponents[name] = lockEntry(components[name]);
+		nextComponents[name] = lockEntry(components[name], registryVersion);
 	return {
 		version: manifest.version ?? 1,
 		registry: config.registry,

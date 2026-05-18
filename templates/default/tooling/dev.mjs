@@ -5,14 +5,21 @@ loadEnv();
 
 const store = process.env.SHOPIFY_STORE_URL;
 const password = process.env.SHOPIFY_STORE_PASSWORD;
-const protectedMode = process.argv.includes("--protected");
+const extraArgs = process.argv.slice(2);
+const protectedMode = extraArgs.includes("--protected");
 
 if (!store) {
 	console.error("Missing SHOPIFY_STORE_URL");
 	process.exit(1);
 }
 
-const args = ["theme", "dev", "--store", store];
+const args = [
+	"theme",
+	"dev",
+	"--store",
+	store,
+	...extraArgs.filter((arg) => arg !== "--protected"),
+];
 
 if (protectedMode) {
 	if (!password) {
