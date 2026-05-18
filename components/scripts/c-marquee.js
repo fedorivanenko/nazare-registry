@@ -10,6 +10,14 @@ const stripEditorAttributes = (node) => {
 	}
 };
 
+const isInteractiveTarget = (target) =>
+	target instanceof Element &&
+	Boolean(
+		target.closest(
+			"a, button, input, select, textarea, label, [data-video-play-toggle], [data-video-mute-toggle]",
+		),
+	);
+
 const initMarquee = (root, index) => {
 	const track = root.querySelector("[data-marquee-track]");
 
@@ -124,6 +132,10 @@ const initMarquee = (root, index) => {
 	});
 
 	root.addEventListener("pointerdown", (event) => {
+		if (isInteractiveTarget(event.target)) {
+			return;
+		}
+
 		marqueeState.isDragging = true;
 		pointerId = event.pointerId;
 		pointerStartX = event.clientX;
@@ -187,7 +199,10 @@ const initMarquee = (root, index) => {
 	root.addEventListener(
 		"click",
 		(event) => {
-			if (performance.now() > suppressClickUntil) {
+			if (
+				performance.now() > suppressClickUntil ||
+				isInteractiveTarget(event.target)
+			) {
 				return;
 			}
 
