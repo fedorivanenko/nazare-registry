@@ -4,68 +4,307 @@
 
 Minimal Shopify Liquid theme scaffold for Nazare registry components.
 
-The theme is section-oriented. Each section is treated as a component with:
+Nazare theme is section-oriented. Each section is treated as a component with:
 
 - a `.liquid` section file in `sections/`
 - static Liquid snippet dependencies via `{% render 'snippet-name' %}`
 - Tailwind utility classes in Liquid markup
-- optional JS modules declared through `nazare-js-uses` directives
+- optional JS modules declared through `data-nazare-js-uses`
+- optional CSS load policy declared through `data-nazare-css-load`
 
-Minimal section example:
+## Component conventions
+
+Sections:
+`sections/<section-name>.liquid`
+`scripts/sections/<section-name>.js`
+
+Snippets:
+`snippets/<snippet-name>.liquid`
+`scripts/snippets/<snippet-name>.js`
+
+Runtime JS module keys use source-like names:
+`sections/s-hero`
+`snippets/c-video`
+
+## Nazare attributes
+
+Nazare build/runtime metadata lives on the component root element.
 
 ```liquid
-{% comment %}
-  nazare-css-load: preload
-  nazare-js-uses: sections/s-hero
-{% endcomment %}
+<section
+  data-nazare-js-uses="sections/s-hero"
+  data-nazare-css-load="preload"
+>
+```
 
-<section class="px-6 py-12" data-nazare-section="s-hero">
+Supported attributes:
+
+- `data-nazare-js-uses="<module-key>"`
+- `data-nazare-css-load="normal | preload"`
+
+Defaults:
+
+- missing `data-nazare-css-load` means `normal`
+- missing `data-nazare-js-uses` means no JS chunk for that element
+
+## Minimal section example
+
+```liquid
+<section
+  class="px-6 py-12"
+  data-nazare-js-uses="sections/s-hero"
+  data-nazare-css-load="preload"
+>
   <h1 class="text-4xl font-bold">{{ section.settings.heading }}</h1>
   {% render 'c-button', label: section.settings.button_label %}
 </section>
 ```
 
-This example defines `sections/s-hero.liquid`, uses Tailwind utilities in markup, statically depends on `snippets/c-button.liquid`, declares `scripts/sections/s-hero.js` through `nazare-js-uses`, and declares the section CSS chunk load mode as `preload`.
+This example defines `sections/s-hero.liquid`, uses Tailwind utilities in markup, statically depends on `snippets/c-button.liquid`, declares `scripts/sections/s-hero.js` through `data-nazare-js-uses`, declares the section CSS chunk load mode as `preload`, and exposes a runtime mount node through `data-nazare-js-uses="sections/s-hero"`.
 
-### Build Time Behavior
+## Build-time behavior
 
-Tailwind & Comment directives & `render` = build-time
+Tailwind utilities, Nazare attributes, and static `{% render %}` calls are build-time inputs.
 
 This example outputs:
+
 - CSS output: `assets/s-hero.css`, which includes Tailwind utilities used by `sections/s-hero.liquid` and its static snippet dependency `snippets/c-button.liquid`
 - JS output: lazy-loaded section chunk `assets/s-hero.js`, referenced by global runtime `assets/theme.js`
-- The Vite plugin generates `snippets/section-css.liquid` and `snippets/section-css-preloads.liquid` to bridge compiled section CSS chunks into Liquid runtime rendering.
+- CSS preload mapping: `s-hero` maps to `assets/s-hero.css` in `snippets/section-css-preloads.liquid`
+- CSS runtime mapping: non-preloaded section CSS chunks map through `snippets/section-css.liquid`
 
-To do this, the Nazare Vite plugin scans local `.liquid` files and follows static `{% render %}` references to discover component usage. It also extracts `nazare-js-uses` and `nazare-css-load` directives.
+The Nazare Vite plugin scans local `.liquid` files, follows static `{% render %}` references, extracts `data-nazare-js-uses` and `data-nazare-css-load` attributes, and generates Liquid bridge snippets for compiled section CSS chunks.
 
-Caveat:
-- dynamic render, for example `{% render snippet_name %}`, cannot be statically analyzed and is avoided in registry components
+## Build scanner algorithm
 
-### Runtime Behavior
+For each `sections/*.liquid` file, plugin:
 
-`data-nazare` is the runtime mount marker.
+1. reads section source
+2. extracts `data-nazare-css-load` and `data-nazare-js-uses` attributes from the section root element
+3. extracts static `{% render 'snippet-name' %}` references
+4. recursively scans each referenced `snippets/<snippet-name>.liquid`
+5. adds section file and all static snippet dependencies as Tailwind scan sources for that section CSS entry
+6. creates CSS entry `styles/<section-name>.css`
+7. maps CSS output to `assets/<section-name>.css`
+8. maps JS module key from `data-nazare-js-uses` to `scripts/<module-key>.js`
 
-At runtime, `assets/theme.js` scans for `[data-nazare]`, lazy-loads the matching JS module once, and calls its `init(node)` export once for every matching section or snippet instance.
+Generated CSS entry example for `styles/s-hero.css`:
+
+```css
+@import "tailwindcss/theme" source(none);
+@import "tailwindcss/utilities" source(none);
+
+@source "../sections/s-hero.liquid";
+@source "../snippets/c-button.liquid";
+```
+
+Scanner rules:
+
+- static render is supported: `{% render 'c-button' %}`
+- dynamic render is not supported: `{% render snippet_name %}`
+- nested static snippet renders are followed recursively
+- render cycles are detected and reported as errors
+- missing snippets are reported as errors
+- missing JS modules declared by `data-nazare-js-uses` are reported as errors
+
+## Vite integration
+
+The Nazare Vite plugin provides build inputs:
+
+- `styles/base.css`
+- generated `styles/<section-name>.css` entries
+- `scripts/theme.js`
+- lazy JS modules discovered from `data-nazare-js-uses`
+
+Vite emits:
+
+- `assets/base.css`
+- `assets/<section-name>.css`
+- `assets/theme.js`
+- lazy JS chunks such as `assets/s-hero.js`
+
+Stable output names are part of the Nazare Vite config contract. Section CSS and JS chunks use the section or snippet name when possible.
+
+## Generated Liquid bridge snippets
+
+### `snippets/section-css.liquid`
+
+Generated snippet for normal CSS loading:
+
+```liquid
+{% comment %}
+  Generated by Nazare. Do not edit directly.
+{% endcomment %}
+
+{% case section_name %}
+  {% when 's-social-video-gallery' %}
+    {{ 's-social-video-gallery.css' | asset_url | stylesheet_tag }}
+{% endcase %}
+```
+
+Sections with `data-nazare-css-load="normal"` render this snippet:
+
+```liquid
+{% render 'section-css', section_name: 's-social-video-gallery' %}
+```
+
+### `snippets/section-css-preloads.liquid`
+
+Generated snippet for preload CSS loading:
+
+```liquid
+{% comment %}
+  Generated by Nazare. Do not edit directly.
+{% endcomment %}
+
+{{ 's-hero.css' | asset_url | stylesheet_tag: preload: true }}
+```
+
+Theme layout renders this snippet in `<head>`:
+
+```liquid
+{% render 'section-css-preloads' %}
+```
+
+## Runtime behavior
+
+`data-nazare-js-uses` is the runtime JS mount marker.
+
+At runtime, `assets/theme.js` scans for `[data-nazare-js-uses]`, lazy-loads the matching JS module once, and calls its `init(node)` export once for every matching section or snippet instance.
 
 ```js
+const modules = {
+  ...import.meta.glob("./sections/*.js"),
+  ...import.meta.glob("./snippets/*.js"),
+};
 const modulePromises = new Map();
 const mounted = new WeakMap();
 
-async function initNazare(root = document) {
-  for (const node of root.querySelectorAll("[data-nazare]")) {
-    const key = node.dataset.nazare;
+function importModule(key) {
+  const load = modules[`./${key}.js`];
+
+  if (!load) {
+    console.warn(`[nazare] Missing JS module for ${key}`);
+    return Promise.resolve(null);
+  }
+
+  return load();
+}
+
+function nazareNodes(root) {
+  const selector = "[data-nazare-js-uses]";
+  const nodes = [...root.querySelectorAll(selector)];
+
+  if (root.matches?.(selector)) {
+    nodes.unshift(root);
+  }
+
+  return nodes;
+}
+
+export async function initNazare(root = document) {
+  for (const node of nazareNodes(root)) {
+    const key = node.dataset.nazareJsUses;
 
     if (mounted.get(node) === key) continue;
-    mounted.set(node, key);
 
     if (!modulePromises.has(key)) {
       modulePromises.set(key, importModule(key));
     }
 
     const module = await modulePromises.get(key);
-    module.init?.(node);
+    if (!module?.init) continue;
+
+    module.init(node);
+    mounted.set(node, key);
   }
 }
+
+initNazare();
 ```
 
 Component modules are singleton-loaded, but component state is per DOM node. Modules use scoped queries such as `node.querySelector(...)` and avoid shared mutable state unless intentional.
+
+## Component JS module contract
+
+Component JS modules export `init(node)`.
+
+```js
+const state = new WeakMap();
+
+export function init(node) {
+  if (state.has(node)) return;
+
+  const cleanup = mount(node);
+  state.set(node, cleanup);
+}
+
+function mount(node) {
+  const button = node.querySelector("button");
+
+  function onClick() {
+    // instance behavior
+  }
+
+  button?.addEventListener("click", onClick);
+
+  return () => {
+    button?.removeEventListener("click", onClick);
+  };
+}
+```
+
+Optional cleanup support:
+
+```js
+export function destroy(node) {
+  // remove timers, listeners, observers, media state
+}
+```
+
+## Shopify lifecycle
+
+Global runtime initializes on first load:
+
+```js
+initNazare(document);
+```
+
+Theme editor section reload initializes only new section DOM:
+
+```js
+document.addEventListener("shopify:section:load", (event) => {
+  initNazare(event.target);
+});
+```
+
+Theme editor section unload calls optional cleanup:
+
+```js
+document.addEventListener("shopify:section:unload", (event) => {
+  destroyNazare(event.target);
+});
+```
+
+## Error and warning behavior
+
+Errors:
+
+- missing statically rendered snippet
+- recursive render cycle
+- malformed Nazare attribute
+- missing JS module declared by `data-nazare-js-uses`
+
+Warnings:
+
+- dynamic render usage
+- unknown `data-nazare-js-uses` runtime key
+- CSS chunk requested but no utility classes are discovered
+
+## Caveats
+
+Dynamic render cannot be statically analyzed and is avoided in registry components:
+
+```liquid
+{% render snippet_name %}
+```
