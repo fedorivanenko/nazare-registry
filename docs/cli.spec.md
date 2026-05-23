@@ -2,53 +2,81 @@
 
 ## Purpose
 
-Nazare CLI initiates and facilitates the relationship between a user theme repo and the Nazare registry source.
+Nazare CLI manages relationship between a user theme repo and the Nazare registry origin.
 
-The CLI copies registry templates and components into the user repo. After copy, the user owns the files. The CLI tracks component origin and last added version, but build/runtime integration is derived from local theme files by the Nazare Vite plugin.
+Its job is limited to init, pull, and explicit overwrite/update flows for theme and component files that come from the registry.
+
+The CLI copies registry theme files and components into the user repo. After copy, the user owns the files. The CLI tracks component origin and installed component versions, but build/runtime integration is derived from local theme files by Vite and the Nazare Vite plugin.
 
 ## Registry contents
 
 Registry contains two main pieces:
 
-- Registry template
+- Registry theme
   Minimal Liquid theme scaffold and required infrastructure to run, build, and extend theme
 - Registry components
   Installable snippets, sections, scripts, assets, and other component files
+
+Theme config schema is defined in `docs/theme-config.spec.md`.
+
+Theme scaffold requirements are defined in `docs/theme-scaffold.spec.md`.
+
+Registry manifest schema is defined in `docs/registry-manifest.spec.md`.
+
+Component package contents rules are defined in `docs/component-package.spec.md`.
+
+Test plan is defined in `docs/test-plan.spec.md`.
 
 ## Actions
 
 ### CLI
 
-- Check for CLI updates
 - Update the CLI
 
-### Template
+### Theme
 
-- Initialize theme from registry template
-- Compare local template files with upstream template
-- Explicitly overwrite template files
+- Pull theme files from registry origin
+- Explicitly overwrite theme files from origin
 
-Template files are user-owned after initialization. The CLI does not silently synchronize template files with upstream changes.
+Theme files are user-owned after pull. The CLI does not silently synchronize theme files with origin changes.
 
 ### Components
 
 - List components available in registry
 - Add component to theme
-- List installed components
-- Check for component updates
+- List installed theme and components
+- Check for component version changes from origin
 - Check component dependencies and install them in bulk
-- Compare local component files with upstream component version
-- Overwrite existing component files explicitly
-- Validate component files for supported Nazare attributes
+- Overwrite existing component files explicitly from origin
 
-Supported Nazare attributes:
+Dependency resolution is automatic during component add. File conflicts from both requested components and dependencies require explicit overwrite behavior.
 
-- `data-nazare-js-uses`
-- `data-nazare-css-load`
+For v1, `nazare list` outputs component names with origin versions only. `nazare installed` outputs installed item names with installed versions only, including theme when present. `nazare outdated` outputs installed item names with installed and origin versions, including theme when present.
+
+## Validation ownership
+
+CLI validates origin relation and install state:
+
+- `nazare.config.yml` schema
+- `nazare.lock.yml` schema
+- `nazare.registry.yml` schema
+- registry fetch and manifest resolution
+- component existence
+- dependency graph validity
+- source file existence in registry
+- destination path safety
+- version field format in manifest
+- theme block existence for `nazare theme pull`
+
+CLI does not validate local theme build graph metadata.
+
+That validation belongs to the Nazare Vite plugin.
 
 ## Component install model
 
 Component install copies local source files into the theme.
+
+When `nazare add` is called, the CLI resolves requested components plus transitive dependencies from the registry manifest before any files are copied.
 
 Component files may include:
 
@@ -65,13 +93,16 @@ If target file exists, CLI requires explicit choice:
 
 - skip
 - overwrite
-- show diff
+- all
+- none
 
 Default action is skip.
 
+Conflict prompts are per file, not per component or per dependency.
+
 ## Build boundary
 
-CLI does not own build/runtime wiring.
+CLI does not own build, runtime wiring, or generated build artifacts.
 
 CLI does not generate:
 
@@ -81,26 +112,28 @@ CLI does not generate:
 - `snippets/section-css-preloads.liquid`
 - lazy JS chunk mappings
 
-These are owned by the Nazare Vite plugin and derived from local theme files.
+These are owned by Vite and the Nazare Vite plugin and are derived from local theme files, not from CLI install state.
 
 ## Ownership boundaries
 
 CLI owns:
 
-- repo initialization
+- theme initialization via config and lockfile creation
 - registry fetch
+- theme pull/overwrite flows
+- component add/overwrite flows
 - component copy
 - dependency resolution
 - install manifest / lockfile
-- last added component version
-- explicit overwrite and diff flows
+- installed component version tracking
+- explicit overwrite flows
 
 Nazare Vite plugin owns:
 
 - scanning local Liquid files
 - following static `{% render %}` references
-- extracting `data-nazare-js-uses`
-- extracting `data-nazare-css-load`
+- extracting `data-nazare-use`
+- extracting section `nazare:css` directives
 - generating CSS entries
 - generating `section-css` Liquid bridge snippets
 - producing lazy JS chunks
@@ -112,7 +145,23 @@ Theme/user owns:
 - copied assets
 - local modifications after install
 
+## Registry fetch model
+
+CLI resolves configured registry origin as snapshot of `repo` at `ref`, reads `manifest` from that snapshot, and uses that snapshot for theme and component operations.
+
+Supported `ref` forms in v1 are branch, tag, and commit sha.
+
+CLI may use a local cache of resolved registry snapshots. Cache storage details are implementation details in v1.
+
+V1 only guarantees public registry support. Private registry authentication flow is not specified yet.
+
 ## Manifest / lockfile role
+
+Theme config schema is defined separately in `docs/theme-config.spec.md`.
+
+Registry manifest schema is defined separately in `docs/registry-manifest.spec.md`.
+
+Theme lockfile schema is defined separately in `docs/theme-lockfile.spec.md`.
 
 CLI manifest or lockfile stores install history and registry origin.
 
@@ -120,11 +169,21 @@ It tracks:
 
 - installed component name
 - source registry component
-- last added version
+- installed component version
 - copied file list
 - dependencies installed by CLI
 
 It does not define build graph truth. Build graph truth comes from local files and Nazare Vite plugin scanning.
+
+## Versioning behavior
+
+In v1, source selection and version tracking are separate concerns.
+
+- registry `ref` selects source snapshot
+- `theme.version` and component `version` are metadata read from manifest and stored in lockfile
+- `nazare add <component>` installs from configured registry `ref`
+- `nazare outdated` lists installed theme and component versions against current origin theme and component versions at configured registry `ref`
+- `nazare add <component>@version` is not supported
 
 ## Commands
 
@@ -132,9 +191,9 @@ Suggested v1 commands:
 
 ```bash
 nazare init [name]
+nazare theme pull
 nazare list
-nazare add <component>[@version]
-nazare diff <component>[@version]
+nazare add <component>
 nazare outdated
 nazare installed
 nazare self update
@@ -148,6 +207,117 @@ nazare registry list
 nazare registry pull <component>
 ```
 
+## `init` behavior
+
+`nazare init [name]` initializes Nazare relationship in a theme repo.
+
+It creates project directory when `name` is provided, writes `nazare.config.yml` and `nazare.lock.yml`, and does not pull theme files automatically.
+
+`init` does not care whether target directory is empty. It only checks whether `nazare.lock.yml` already exists at target location.
+
+After `init`, user must explicitly run `nazare theme pull` to copy theme files from origin.
+
+## `theme pull` behavior
+
+`nazare theme pull` copies theme files from configured registry origin into current theme repo and updates lockfile theme metadata.
+
+Theme file conflicts require explicit overwrite behavior.
+
+For v1, conflict prompt choices should include per-file `skip` and `overwrite`, plus bulk `all` and `none` behavior for remaining conflicts.
+
+Lockfile theme metadata updates only when at least one theme file is actually copied or overwritten. If all files are skipped, command succeeds and lockfile remains unchanged.
+
+`lockfile.theme.files` records only theme files actually copied or overwritten by the CLI. It is cumulative across pulls and does not remove previously tracked files when later pulls skip them.
+
+## `add` behavior
+
+`nazare add <component>` resolves requested component plus transitive dependencies from configured registry origin.
+
+For each file in requested components and dependencies:
+
+- missing target path is copied
+- existing target path requires explicit prompt
+
+For v1, conflict prompt choices should include per-file `skip` and `overwrite`, plus bulk `all` and `none` behavior for remaining conflicts.
+
+Lockfile component metadata updates only for components where at least one file is actually copied or overwritten. If all files for a component are skipped, that component entry remains unchanged.
+
+Component file tracking is cumulative across adds and overwrites and records only files actually written by the CLI.
+
+If requested component or dependency has skipped files, CLI should warn that resulting local theme state may be incomplete relative to origin.
+
+## Flags
+
+V1 standard flags:
+
+- `--yes`
+- `--json`
+
+`--yes` auto-accepts overwrite for all file conflicts in the current command.
+
+`--json` requests machine-readable output for `nazare list`, `nazare installed`, and `nazare outdated`.
+
+Recommended v1 JSON row shapes:
+
+- `list`: `{ name, version }`
+- `installed`: `{ kind, name, version }`
+- `outdated`: `{ kind, name, installedVersion, originVersion }`
+
+## Exit codes
+
+V1 exit codes:
+
+- `0` success
+- `1` general command failure
+- `2` validation, config, lockfile, or manifest error
+- `3` registry fetch or origin resolution error
+- `4` user-canceled or unresolved conflict error
+
+Version differences reported by `nazare outdated` do not change success exit code.
+
+For v1, `nazare outdated` lists all installed tracked items, not only changed items.
+
+## Remove / update scope
+
+V1 does not include a `remove` command.
+
+V1 does not include a generic `update` command for themes or components.
+
+V1 update behavior is limited to:
+
+- `nazare theme pull`
+- `nazare add <component>`
+- explicit overwrite choices during file conflicts
+- `nazare outdated` for version visibility
+
+## CLI error and warning behavior
+
+CLI command errors:
+
+- missing `nazare.config.yml` when command requires initialized theme
+- missing `nazare.lock.yml` when command requires initialized theme
+- invalid config schema
+- invalid lockfile schema
+- registry fetch failure
+- unresolved registry `ref`
+- missing registry manifest
+- invalid registry manifest
+- missing requested component
+- dependency cycle in manifest
+- missing component source file in registry
+- unsafe destination path
+- invalid component version format
+- missing theme block for `nazare theme pull`
+- invalid theme version format
+- target already initialized when `nazare.lock.yml` exists on `init`
+
+CLI warnings:
+
+- skipped conflicting theme file
+- skipped conflicting component file
+- requested component had skipped files, resulting local theme may be incomplete
+- dependency had skipped files, resulting local theme may be incomplete
+
 ## Non-goals
 
 CLI does not provide automatic reconciliation of drifted user files.
@@ -157,11 +327,10 @@ CLI avoids words like:
 - sync
 - reconcile
 - update safely
-- merge upstream
+- merge origin
 
 Preferred words:
 
 - add
 - copy
-- compare
 - overwrite
