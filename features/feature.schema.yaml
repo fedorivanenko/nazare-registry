@@ -1,0 +1,94 @@
+schemaVersion: 1
+
+featureDocument:
+  filePattern: "features/[0-9][0-9][0-9]-*.md"
+  purpose: "Lock the structure for feature description documents."
+
+requiredSections:
+  - heading
+  - status
+  - goal
+  - scope
+  - codebaseOwnership
+  - successBehavior
+  - failureBehavior
+  - acceptanceCriteria
+  - testPlan
+
+sections:
+  heading:
+    format: "# <number> — <title>"
+    required: true
+    rules:
+      - "Number must match the numeric prefix in the file name."
+      - "Title should describe user-visible feature outcome."
+
+  status:
+    format: "Status: <status>"
+    required: true
+    allowedValues:
+      - planned
+      - ready
+      - in-progress
+      - done
+      - blocked
+    rules:
+      - "Place directly below the heading."
+
+  goal:
+    heading: "## Goal"
+    required: true
+    rules:
+      - "State why this feature exists in one or two short paragraphs."
+      - "Avoid implementation details unless they are user-visible contract."
+
+  scope:
+    heading: "## Scope"
+    required: true
+    rules:
+      - "Define what this feature includes."
+      - "Define user-visible commands, files, or outputs when relevant."
+      - "Do not include future feature behavior."
+
+  codebaseOwnership:
+    heading: "## Codebase ownership"
+    required: true
+    rules:
+      - "List repo files or broad areas this feature may create or change."
+      - "List boundaries this feature must not cross."
+      - "Keep ownership high-level; avoid internal function/module design."
+
+  successBehavior:
+    heading: "## Success behavior"
+    required: true
+    rules:
+      - "Describe observable success behavior."
+      - "Include user commands and expected output when relevant."
+      - "Include owned user files/paths when feature creates, updates, or deletes them."
+      - "Include exit codes, warnings, or idempotency only when user-visible."
+
+  failureBehavior:
+    heading: "## Failure behavior"
+    required: true
+    rules:
+      - "Describe observable failure behavior."
+      - "Include clear error or warning cases."
+      - "Include non-zero exit behavior when relevant."
+      - "Feature must not mutate unrelated user files on failure."
+
+  acceptanceCriteria:
+    heading: "## Acceptance criteria"
+    required: true
+    rules:
+      - "Use a concise checklist."
+      - "Reference behavior coverage instead of duplicating every behavior detail."
+      - "Criteria must be testable or reviewable."
+
+  testPlan:
+    heading: "## Test plan"
+    required: true
+    rules:
+      - "Describe how acceptance criteria will be verified."
+      - "Use manual checks when automated tests are not available yet."
+      - "Include setup, command, expected result, and cleanup when relevant."
+      - "Do not duplicate every acceptance criterion unless it clarifies execution."
