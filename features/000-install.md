@@ -1,6 +1,6 @@
 # 000 — Install Nazare CLI
 
-Status: ready
+Status: done
 
 ## Goal
 
@@ -83,6 +83,8 @@ Installer prints a clear warning when install succeeds but `~/.local/bin` is not
 - `README.md` documents install command and Node.js requirement
 
 ## Test plan
+
+Result: tested and passed.
 
 Manual checks:
 
