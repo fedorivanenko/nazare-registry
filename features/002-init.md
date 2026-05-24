@@ -27,6 +27,8 @@ nonGoals:
   - Adding or updating components
   - Fetching or validating the remote registry manifest
   - Creating Shopify theme scaffold files
+  - Adopting existing nazare.config.yml without a lockfile
+  - Force-overwriting existing init files
 
 codebaseOwnership:
   owns:
@@ -64,6 +66,7 @@ Included:
 - `nazare.lock.yml` creation
 - README init instructions
 - clear failure when target already has `nazare.lock.yml`
+- clear failure when target has `nazare.config.yml` without `nazare.lock.yml`
 
 ---
 
@@ -105,7 +108,8 @@ Included:
 ## Failure behavior
 
 - If target `nazare.lock.yml` already exists, init exits non-zero with a clear error.
-- Init must not overwrite existing `nazare.lock.yml`.
+- If target `nazare.config.yml` exists but `nazare.lock.yml` does not, init exits non-zero with a clear error.
+- Init must not overwrite existing `nazare.lock.yml` or `nazare.config.yml`.
 - If `--repo` is missing a value or has an invalid repo form, init exits non-zero with a clear error.
 - If target directory cannot be created, init exits non-zero with a clear error.
 - If target files cannot be written, init exits non-zero with a clear error.
@@ -129,6 +133,8 @@ Result: not tested yet.
   - Verify in temp parent directory.
 - [ ] init fails when `nazare.lock.yml` exists
   - Verify existing lockfile content remains unchanged.
+- [ ] init fails when `nazare.config.yml` exists without `nazare.lock.yml`
+  - Verify existing config content remains unchanged.
 - [ ] failed init does not mutate theme or component files
   - Verify with temp fixture files.
 
@@ -139,6 +145,12 @@ Result: not tested yet.
 `nazare.init` should write only local config and lockfile state. Registry fetch and manifest validation belong to later theme/component commands.
 
 `nazare.lock.yml` is the guard for an initialized repo. Existing lockfile means the target is already initialized.
+
+Existing `nazare.config.yml` without `nazare.lock.yml` is ambiguous state. F-002 should fail instead of adopting or overwriting it.
+
+A future `nazare init --adopt` could validate an existing `nazare.config.yml` and create a matching `nazare.lock.yml` without changing the config.
+
+A future `nazare init --force` could reset init state by replacing config and lockfile, but must define backup or explicit destructive confirmation behavior first.
 
 `nazare init [directory]` should create the directory when it does not exist, then apply the same lockfile guard inside that directory.
 
@@ -152,6 +164,5 @@ Default registry ref should use `refs/heads/main` to match installer URL behavio
 
 ## Open questions
 
-- Should `nazare init` fail when `nazare.config.yml` exists but `nazare.lock.yml` does not?
 - Should `nazare init [directory]` reject path separators or allow nested paths?
 - Should init also expose `--ref <ref>` now, or keep only `--repo <repo>` until registry fetch exists?
