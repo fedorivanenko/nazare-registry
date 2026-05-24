@@ -29,12 +29,14 @@ nonGoals:
 
 codebaseOwnership:
   owns:
-    - bin/nazare.js
-    - install.sh
-    - README.md CLI update instructions
-    - package.json
-    - ~/.nazare
-    - ~/.local/bin/nazare when Nazare-owned
+    repo:
+      - bin/nazare.js
+      - install.sh
+      - README.md CLI update instructions
+      - package.json
+    install:
+      - ~/.nazare
+      - ~/.local/bin/nazare when Nazare-owned
 
   mustNotModify:
     - unrelated files under ~/.local/bin
@@ -116,17 +118,13 @@ Result: not tested yet.
 
 - `package.json.version` is the source of truth for CLI version.
 - Version values must be valid SemVer strings.
-- `nazare --version` prints exactly the installed CLI version and exits with code `0`.
+- `nazare --version` prints exactly the installed CLI version.
 - Installed CLI package metadata must preserve the copied `package.json.version`.
-- Generated install metadata must record the installed version and the originally installed ref/source.
+- Generated install metadata under `~/.nazare` must record installed version, originally installed ref/source, install time, and CLI source URL.
 - After `nazare self update`, installed package metadata and generated install metadata must agree on version.
 - Missing or invalid version metadata is a CLI error.
 
-The repo must be an npm-standard package with `package.json` as source of truth for CLI package version.
-
 Installer should copy enough package metadata into the installed CLI so `nazare --version` does not need network access.
-
-Installer should also generate install metadata under `~/.nazare` that records installed version, installed ref/source, install time, and CLI source URL.
 
 `nazare self update` should reuse installer ownership checks instead of introducing a second write policy.
 
