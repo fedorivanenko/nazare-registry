@@ -168,7 +168,7 @@ A future `nazare init --force` could reset init state by replacing config and lo
 
 Default registry repo should be `github.com/fedorivanenko/nazare`.
 
-`--repo <repo>` should accept the public GitHub repo forms defined in `docs/theme-config.spec.md`.
+`--repo <repo>` should accept the public GitHub repo forms defined in `spec/theme-config.spec.md`.
 
 Default registry ref should use `refs/heads/main` to match installer URL behavior and avoid ambiguous raw branch resolution.
 
