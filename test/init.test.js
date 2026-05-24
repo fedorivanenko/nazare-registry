@@ -164,6 +164,21 @@ describe("nazare init", () => {
 		expect(await pathExists(join(cwd, "nazare.lock.yml"))).toBe(false);
 	});
 
+	it.each([
+		["missing repo", ["--repo"], "--repo"],
+		["invalid repo", ["--repo", "not-github/repo"], "repo"],
+		["missing ref", ["--ref"], "--ref"],
+		["empty ref", ["--ref", ""], "--ref"],
+	])("rejects %s", async (_label, args, message) => {
+		const cwd = await makeTempDir();
+		const result = await runCli(["init", ...args], { cwd });
+
+		expect(result.code).not.toBe(0);
+		expect(result.stderr).toContain(message);
+		expect(await pathExists(join(cwd, "nazare.config.yml"))).toBe(false);
+		expect(await pathExists(join(cwd, "nazare.lock.yml"))).toBe(false);
+	});
+
 	it("fails when lockfile exists and preserves existing files", async () => {
 		const cwd = await makeTempDir();
 		await writeFile(join(cwd, "nazare.lock.yml"), "existing lock\n");

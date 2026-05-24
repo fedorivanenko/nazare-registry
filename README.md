@@ -27,6 +27,26 @@ nazare --help
 nazare --version
 ```
 
+## Init
+
+Initialize Nazare files in a theme repo:
+
+```sh
+nazare init
+```
+
+Create a new theme directory and initialize it:
+
+```sh
+nazare init my-theme
+```
+
+Use a custom registry origin or ref:
+
+```sh
+nazare init --repo github.com/fedorivanenko/nazare --ref refs/heads/main
+```
+
 ## Update
 
 Update a Nazare-owned CLI install from its originally installed source:

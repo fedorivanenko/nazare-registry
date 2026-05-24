@@ -127,28 +127,30 @@ Included:
 
 ## Verification
 
-Result: Vitest test design added; tests currently fail until `nazare init` is implemented.
+Result: tested and passed.
 
-- [ ] `nazare init` creates `nazare.config.yml`
-  - Verify in temp directory.
-- [ ] `nazare init` creates `nazare.lock.yml`
-  - Verify in temp directory.
-- [ ] generated files use default registry metadata
-  - Verify file contents.
-- [ ] `nazare init --repo <repo>` writes custom registry repo metadata
-  - Verify config and lockfile contents.
-- [ ] `nazare init --ref <ref>` writes custom registry ref metadata
-  - Verify config and lockfile contents.
-- [ ] `nazare init [directory]` creates target directory and initial files
-  - Verify in temp parent directory.
-- [ ] `nazare init [directory]` rejects directory values containing path separators
-  - Verify with `/` and `\\` path separators.
-- [ ] init fails when `nazare.lock.yml` exists
-  - Verify existing lockfile content remains unchanged.
-- [ ] init fails when `nazare.config.yml` exists without `nazare.lock.yml`
-  - Verify existing config content remains unchanged.
-- [ ] failed init does not mutate theme or component files
-  - Verify with temp fixture files.
+- [x] `nazare init` creates `nazare.config.yml`
+  - Verified in temp directory with Vitest.
+- [x] `nazare init` creates `nazare.lock.yml`
+  - Verified in temp directory with Vitest.
+- [x] generated files use default registry metadata
+  - Verified file contents with Vitest.
+- [x] `nazare init --repo <repo>` writes custom registry repo metadata
+  - Verified config and lockfile contents with Vitest.
+- [x] `nazare init --ref <ref>` writes custom registry ref metadata
+  - Verified config and lockfile contents with Vitest.
+- [x] `nazare init [directory]` creates target directory and initial files
+  - Verified in temp parent directory with Vitest.
+- [x] `nazare init [directory]` rejects directory values containing path separators
+  - Verified with `/` and `\\` path separators with Vitest.
+- [x] init fails when `nazare.lock.yml` exists
+  - Verified existing lockfile content remains unchanged with Vitest.
+- [x] init fails when `nazare.config.yml` exists without `nazare.lock.yml`
+  - Verified existing config content remains unchanged with Vitest.
+- [x] failed init does not mutate theme or component files
+  - Verified with temp fixture files in Vitest.
+- [x] invalid or missing `--repo` and `--ref` values fail before writing files
+  - Verified with Vitest.
 
 ---
 
