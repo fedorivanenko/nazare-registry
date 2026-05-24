@@ -112,6 +112,16 @@ Result: not tested yet.
 
 ## Architecture notes
 
+### Versioning contract
+
+- `package.json.version` is the source of truth for CLI version.
+- Version values must be valid SemVer strings.
+- `nazare --version` prints exactly the installed CLI version and exits with code `0`.
+- Installed CLI package metadata must preserve the copied `package.json.version`.
+- Generated install metadata must record the installed version and the originally installed ref/source.
+- After `nazare self update`, installed package metadata and generated install metadata must agree on version.
+- Missing or invalid version metadata is a CLI error.
+
 The repo must be an npm-standard package with `package.json` as source of truth for CLI package version.
 
 Installer should copy enough package metadata into the installed CLI so `nazare --version` does not need network access.
