@@ -66,8 +66,20 @@ frontmatter:
       requiredFields:
         - owns
         - mustNotModify
+      fields:
+        owns:
+          type: object
+          allowedFields:
+            - repo
+            - install
+          rules:
+            - "Use repo for files inside the project repository."
+            - "Use install for user install paths created or updated by the feature."
+        mustNotModify:
+          type: array
+          itemType: string
       rules:
-        - "List repo paths, generated paths, or broad areas owned by the feature."
+        - "List repo paths, generated paths, installed paths, or broad areas owned by the feature."
         - "List boundaries this feature must not cross."
 
 requiredSections:

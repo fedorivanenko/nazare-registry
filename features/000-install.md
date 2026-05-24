@@ -25,11 +25,13 @@ nonGoals:
 
 codebaseOwnership:
   owns:
-    - install.sh
-    - bin/nazare.js
-    - README.md install instructions
-    - ~/.nazare
-    - ~/.local/bin/nazare when Nazare-owned
+    repo:
+      - install.sh
+      - bin/nazare.js
+      - README.md install instructions
+    install:
+      - ~/.nazare
+      - ~/.local/bin/nazare when Nazare-owned
 
   mustNotModify:
     - unrelated files under ~/.local/bin
