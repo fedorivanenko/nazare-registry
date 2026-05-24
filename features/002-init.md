@@ -14,7 +14,8 @@ surfaces:
     - nazare init
     - nazare init [directory]
     - nazare init --repo <repo>
-    - nazare init [directory] --repo <repo>
+    - nazare init --ref <ref>
+    - nazare init [directory] --repo <repo> --ref <ref>
 
 invariants:
   - Init must not overwrite existing nazare.lock.yml
@@ -62,6 +63,7 @@ Included:
 - `nazare init`
 - optional project directory creation via `nazare init [directory]`
 - optional registry origin override via `--repo <repo>`
+- optional registry ref override via `--ref <ref>`
 - `nazare.config.yml` creation
 - `nazare.lock.yml` creation
 - README init instructions
@@ -75,7 +77,9 @@ Included:
 - Running `nazare init` in a theme repo creates `nazare.config.yml` and `nazare.lock.yml` in the current directory.
 - Running `nazare init [directory]` creates the project directory when needed and writes initial files there.
 - Running `nazare init --repo <repo>` uses the provided registry repo in generated files.
-- Generated `nazare.config.yml` uses default registry metadata when `--repo` is omitted:
+- Running `nazare init --ref <ref>` uses the provided registry ref in generated files.
+- `nazare init [directory]` rejects directory values containing path separators.
+- Generated `nazare.config.yml` uses default registry metadata when `--repo` and `--ref` are omitted:
 
   ```yaml
   schemaVersion: 1
@@ -111,6 +115,8 @@ Included:
 - If target `nazare.config.yml` exists but `nazare.lock.yml` does not, init exits non-zero with a clear error.
 - Init must not overwrite existing `nazare.lock.yml` or `nazare.config.yml`.
 - If `--repo` is missing a value or has an invalid repo form, init exits non-zero with a clear error.
+- If `--ref` is missing a value or is empty, init exits non-zero with a clear error.
+- If `[directory]` contains path separators, init exits non-zero with a clear error.
 - If target directory cannot be created, init exits non-zero with a clear error.
 - If target files cannot be written, init exits non-zero with a clear error.
 - Failed init must not mutate theme files or component files.
@@ -128,6 +134,8 @@ Result: not tested yet.
 - [ ] generated files use default registry metadata
   - Verify file contents.
 - [ ] `nazare init --repo <repo>` writes custom registry repo metadata
+  - Verify config and lockfile contents.
+- [ ] `nazare init --ref <ref>` writes custom registry ref metadata
   - Verify config and lockfile contents.
 - [ ] `nazare init [directory]` creates target directory and initial files
   - Verify in temp parent directory.
@@ -150,9 +158,11 @@ Existing `nazare.config.yml` without `nazare.lock.yml` is ambiguous state. F-002
 
 A future `nazare init --adopt` could validate an existing `nazare.config.yml` and create a matching `nazare.lock.yml` without changing the config.
 
-A future `nazare init --force` could reset init state by replacing config and lockfile, but must define backup or explicit destructive confirmation behavior first.
+A future `nazare init --force` could reset init state by replacing config and lockfile, but it must require destructive confirmation behavior before writing.
 
 `nazare init [directory]` should create the directory when it does not exist, then apply the same lockfile guard inside that directory.
+
+`nazare init [directory]` should reject values containing `/` or `\\` path separators. Nested target paths are out of scope for F-002.
 
 Default registry repo should be `github.com/fedorivanenko/nazare`.
 
@@ -160,9 +170,10 @@ Default registry repo should be `github.com/fedorivanenko/nazare`.
 
 Default registry ref should use `refs/heads/main` to match installer URL behavior and avoid ambiguous raw branch resolution.
 
+`--ref <ref>` should accept any non-empty branch, tag, or commit string. Full registry ref resolution belongs to later registry fetch behavior.
+
 ---
 
 ## Open questions
 
-- Should `nazare init [directory]` reject path separators or allow nested paths?
-- Should init also expose `--ref <ref>` now, or keep only `--repo <repo>` until registry fetch exists?
+- None
