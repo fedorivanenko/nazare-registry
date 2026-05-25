@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -36,6 +37,10 @@ async function runCli(args, options = {}) {
 	}
 }
 
+function sha256(value) {
+	return createHash("sha256").update(value).digest("hex");
+}
+
 async function writeRegistry(root, files) {
 	const entries = [];
 	for (const [filePath, content] of Object.entries(files)) {
@@ -52,7 +57,7 @@ async function writeRegistry(root, files) {
 		);
 		await writeFile(join(root, "theme", "default", filePath), content);
 		entries.push(
-			`    - from: theme/default/${filePath}\n      to: ${filePath}`,
+			`    - from: theme/default/${filePath}\n      to: ${filePath}\n      checksum:\n        algorithm: sha256\n        value: ${sha256(content)}`,
 		);
 	}
 
@@ -173,6 +178,39 @@ describe("nazare theme update", () => {
 		expect(result).toMatchObject({ code: 0, stderr: "" });
 		expect(await readFile(lockPath, "utf8")).not.toContain(
 			"templates/old.json",
+		);
+	});
+
+	it("fails before mutation when registry checksum mismatches source content", async () => {
+		const cwd = await makeTempDir();
+		const registry = await makeTempDir("nazare-registry-test-");
+		await writeRegistry(registry, {
+			"layout/theme.liquid": "layout\n",
+			"templates/index.json": "old index\n",
+		});
+		await initAndPull(cwd, registry);
+		await writeRegistry(registry, {
+			"layout/theme.liquid": "layout\n",
+			"templates/index.json": "new index\n",
+		});
+		const manifestPath = join(registry, "nazare.registry.yml");
+		await writeFile(
+			manifestPath,
+			(await readFile(manifestPath, "utf8")).replace(
+				sha256("new index\n"),
+				sha256("tampered\n"),
+			),
+		);
+
+		const result = await runCli(["theme", "update"], {
+			cwd,
+			env: { NAZARE_REGISTRY_DIR: registry },
+		});
+
+		expect(result.code).not.toBe(0);
+		expect(result.stderr).toContain("Theme file checksum mismatch");
+		expect(await readFile(join(cwd, "templates", "index.json"), "utf8")).toBe(
+			"old index\n",
 		);
 	});
 

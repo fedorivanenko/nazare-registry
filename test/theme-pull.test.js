@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -34,6 +35,10 @@ async function runCli(args, options = {}) {
 			stderr: error.stderr ?? "",
 		};
 	}
+}
+
+function sha256(value) {
+	return createHash("sha256").update(value).digest("hex");
 }
 
 async function writeRegistry(root, manifest) {
@@ -164,6 +169,50 @@ components: {}
 
 		expect(result.code).not.toBe(0);
 		expect(result.stderr).toContain("Unsafe theme file source path");
+	});
+
+	it("fails before writes when registry checksum mismatches source content", async () => {
+		const cwd = await makeTempDir();
+		const registry = await makeTempDir("nazare-registry-test-");
+		await runCli(["init"], { cwd });
+		await mkdir(join(registry, "theme", "default", "layout"), {
+			recursive: true,
+		});
+		await writeFile(
+			join(registry, "theme", "default", "layout", "theme.liquid"),
+			"layout\n",
+		);
+		await writeRegistry(
+			registry,
+			`schemaVersion: 1
+
+registry:
+  name: nazare
+
+theme:
+  version: 1.0.0
+  source: theme/default
+  files:
+    - from: theme/default/layout/theme.liquid
+      to: layout/theme.liquid
+      checksum:
+        algorithm: sha256
+        value: ${sha256("tampered\n")}
+
+components: {}
+`,
+		);
+
+		const result = await runCli(["theme", "pull", "--yes"], {
+			cwd,
+			env: { NAZARE_REGISTRY_DIR: registry },
+		});
+
+		expect(result.code).not.toBe(0);
+		expect(result.stderr).toContain("Theme file checksum mismatch");
+		await expect(
+			readFile(join(cwd, "layout", "theme.liquid"), "utf8"),
+		).rejects.toThrow();
 	});
 
 	it("pulls scaffold that can install dependencies and build", async () => {

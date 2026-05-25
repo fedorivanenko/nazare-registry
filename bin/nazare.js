@@ -392,6 +392,9 @@ function parseThemeManifest(source) {
 		const filesMatch = line.match(/^\s+files:\s*$/);
 		const fromMatch = line.match(/^\s*-\s+from:\s*(.+)$/);
 		const toMatch = line.match(/^\s+to:\s*(.+)$/);
+		const checksumMatch = line.match(/^\s+checksum:\s*$/);
+		const algorithmMatch = line.match(/^\s+algorithm:\s*(.+)$/);
+		const valueMatch = line.match(/^\s+value:\s*(.+)$/);
 
 		if (versionMatch) theme.version = versionMatch[1].trim();
 		if (sourceMatch) theme.source = sourceMatch[1].trim();
@@ -402,6 +405,15 @@ function parseThemeManifest(source) {
 		}
 		if (inFiles && toMatch && current) {
 			current.to = toMatch[1].trim();
+		}
+		if (inFiles && checksumMatch && current) {
+			current.checksum = {};
+		}
+		if (inFiles && algorithmMatch && current?.checksum) {
+			current.checksum.algorithm = algorithmMatch[1].trim();
+		}
+		if (inFiles && valueMatch && current?.checksum) {
+			current.checksum.value = valueMatch[1].trim();
 		}
 	}
 
@@ -434,6 +446,14 @@ function isSafeRelativePath(value) {
 	);
 }
 
+function hasValidRegistryChecksum(file) {
+	return (
+		file.checksum?.algorithm === "sha256" &&
+		typeof file.checksum.value === "string" &&
+		/^[0-9a-f]{64}$/.test(file.checksum.value)
+	);
+}
+
 function ensureSafeThemeFiles(theme) {
 	const seenTargets = new Set();
 
@@ -443,6 +463,9 @@ function ensureSafeThemeFiles(theme) {
 		}
 		if (!isSafeRelativePath(file.to)) {
 			throw new Error(`Unsafe theme file target path: ${file.to}`);
+		}
+		if (!hasValidRegistryChecksum(file)) {
+			throw new Error(`Invalid theme file checksum metadata: ${file.from}`);
 		}
 		if (seenTargets.has(file.to)) {
 			throw new Error(`Duplicate theme file target path: ${file.to}`);
@@ -643,14 +666,17 @@ async function readCurrentTheme(registry) {
 
 	const sources = new Map();
 	for (const file of theme.files) {
+		let content;
 		try {
-			sources.set(
-				file.from,
-				await readRegistryFile(registry, registryRoot, file.from),
-			);
+			content = await readRegistryFile(registry, registryRoot, file.from);
 		} catch {
 			throw new Error(`Missing theme file source: ${file.from}`);
 		}
+		const actualChecksum = sha256(content);
+		if (actualChecksum !== file.checksum.value) {
+			throw new Error(`Theme file checksum mismatch: ${file.from}`);
+		}
+		sources.set(file.from, content);
 	}
 
 	return { theme, sources };
@@ -681,14 +707,7 @@ async function themePull(args) {
 		const lockSource = fs.readFileSync(lockPath, "utf8");
 		const registry = parseRegistryYaml(configSource, "nazare.config.yml");
 		parseRegistryYaml(lockSource, "nazare.lock.yml");
-		const registryRoot = resolveRegistryRoot();
-		const manifest = await readRegistryFile(
-			registry,
-			registryRoot,
-			registry.manifest,
-		);
-		const theme = parseThemeManifest(manifest.toString("utf8"));
-		ensureSafeThemeFiles(theme);
+		const { theme, sources } = await readCurrentTheme(registry);
 
 		const conflicts = theme.files.filter((file) =>
 			fs.existsSync(path.join(cwd, file.to)),
@@ -697,18 +716,6 @@ async function themePull(args) {
 			throw new Error(
 				`Theme file conflicts require --yes: ${conflicts.map((file) => file.to).join(", ")}`,
 			);
-		}
-
-		const sources = new Map();
-		for (const file of theme.files) {
-			try {
-				sources.set(
-					file.from,
-					await readRegistryFile(registry, registryRoot, file.from),
-				);
-			} catch {
-				throw new Error(`Missing theme file source: ${file.from}`);
-			}
 		}
 
 		const writtenFiles = [];
@@ -721,7 +728,7 @@ async function themePull(args) {
 			writtenFiles.push({
 				path: file.to,
 				source: file.from,
-				checksum: { algorithm: "sha256", value: sha256(content) },
+				checksum: file.checksum,
 			});
 			process.stdout.write(`Wrote ${file.to}\n`);
 		}
@@ -824,12 +831,12 @@ async function themeUpdate(args) {
 			}
 
 			const registryContent = sources.get(manifestFile.from);
-			const registryChecksum = sha256(registryContent);
+			const registryChecksum = manifestFile.checksum.value;
 			const registryFile = {
 				path: manifestFile.to,
 				source: manifestFile.from,
 				content: registryContent,
-				checksum: { algorithm: "sha256", value: registryChecksum },
+				checksum: manifestFile.checksum,
 			};
 
 			if (!hasChecksum) {
@@ -892,7 +899,7 @@ async function themeUpdate(args) {
 				path: manifestFile.to,
 				source: manifestFile.from,
 				content,
-				checksum: { algorithm: "sha256", value: sha256(content) },
+				checksum: manifestFile.checksum,
 			});
 		}
 

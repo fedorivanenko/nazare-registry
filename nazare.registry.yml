@@ -9,23 +9,53 @@ theme:
   files:
     - from: theme/default/layout/theme.liquid
       to: layout/theme.liquid
+      checksum:
+        algorithm: sha256
+        value: 4db8dc3fd1a68099723f50cc0d086ded4175ef950bd77feaf0ce11d240d5986b
     - from: theme/default/templates/index.json
       to: templates/index.json
+      checksum:
+        algorithm: sha256
+        value: 42bfee47c6cf8d979227087182c7ed13f8cded0fb02145ee65f5c33b3844c1ca
     - from: theme/default/sections/s-main.liquid
       to: sections/s-main.liquid
+      checksum:
+        algorithm: sha256
+        value: fb4dfb2f3ae1616bf72157130aa847f1741f8e73b9c79f4d590a6375314ffd7a
     - from: theme/default/config/settings_schema.json
       to: config/settings_schema.json
+      checksum:
+        algorithm: sha256
+        value: e2eb618c1a894a638d2bb201924ad47960e3c642c9f1b55d8ebe9f7998e1c6cb
     - from: theme/default/nazare/vite-plugin.js
       to: nazare/vite-plugin.js
+      checksum:
+        algorithm: sha256
+        value: 706146f0045a83a755bd2900b229e2b618a67b4580ff8193b407fad5fd039f6b
     - from: theme/default/package.json
       to: package.json
+      checksum:
+        algorithm: sha256
+        value: b2c89bc180041277236696f0f872ccbb02417b7b81acdadde34e9595e0ae5c84
     - from: theme/default/vite.config.js
       to: vite.config.js
+      checksum:
+        algorithm: sha256
+        value: 0a3b585e39c4bbcfecabf26e581daebd48f9c9b6bbac379c40f9b5d358902682
     - from: theme/default/styles/base.css
       to: styles/base.css
+      checksum:
+        algorithm: sha256
+        value: 22182f483467aa7b68ddebc99ec078d974da916fb9ea1b3c3272cd4c5fb03c6b
     - from: theme/default/.gitignore
       to: .gitignore
+      checksum:
+        algorithm: sha256
+        value: aa402b82a1f9635a2668370966bc988cd8ebeea82f62b333dc53a7dc304198ab
     - from: theme/default/shopify.theme.toml
       to: shopify.theme.toml
+      checksum:
+        algorithm: sha256
+        value: 4c454e3c7c76178e84796525272b6e579de62954ea455323ddaf505e7ebbd7d7
 
 components: {}
