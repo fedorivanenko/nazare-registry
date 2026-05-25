@@ -1,0 +1,285 @@
+---
+schemaVersion: 1
+
+id: F-003
+title: Pull Theme
+status: planned
+
+dependencies:
+  - F-000
+  - F-001
+  - F-002
+
+surfaces:
+  cli:
+    - nazare theme pull
+    - nazare theme pull --yes
+  storefront:
+    - minimal Shopify Liquid theme scaffold
+    - Nazare runtime integration points
+
+invariants:
+  - Theme pull must require an initialized Nazare theme repo
+  - Theme pull must read the registry origin from nazare.config.yml
+  - Theme pull must copy only files declared by the registry manifest theme block
+  - Theme pull must never silently overwrite existing user files
+  - Theme files are user-owned after copy
+  - Lockfile theme metadata must change only when at least one theme file is written
+  - Failed theme pull must not partially mutate lockfile metadata when avoidable
+
+nonGoals:
+  - Adding or updating components
+  - Implementing nazare add <component>
+  - Implementing nazare pull <component>
+  - Implementing a generic nazare pull command
+  - Component dependency resolution
+  - Theme drift detection or reconciliation
+  - Removing old theme files
+  - Adopting existing Shopify themes
+  - Full Shopify skeleton theme
+  - Demo sections or starter content beyond the minimum valid scaffold
+  - Implementing the Nazare Vite plugin
+
+codebaseOwnership:
+  owns:
+    repo:
+      - bin/nazare.js theme pull command handling
+      - README.md theme pull instructions
+      - test/ CLI theme pull tests
+      - nazare.registry.yml theme block
+      - templates/default/ minimal registry theme scaffold
+      - generated theme files declared by manifest theme.files
+      - nazare.lock.yml theme metadata in user theme repo
+
+  mustNotModify:
+    - component registry behavior
+    - component files not declared by manifest theme.files
+    - existing user theme files unless explicitly overwritten by user choice or --yes
+    - Vite plugin generated files
+    - install metadata
+---
+
+# 003 — Pull Theme
+
+## Goal
+
+Add `nazare theme pull` so an initialized theme repo can pull the initial Nazare theme scaffold from the configured registry origin.
+
+The pulled theme should be the thinnest valid Shopify Liquid scaffold needed for Nazare usage: enough to render, run local development, and support later component adds, without shipping a full starter theme.
+
+---
+
+## Scope
+
+Included:
+
+- `nazare theme pull`
+- `nazare theme pull --yes`
+- registry origin resolution from `nazare.config.yml`
+- registry manifest read from the resolved origin snapshot
+- manifest `theme` block validation
+- minimal registry theme scaffold under `templates/default/`
+- file copy from registry paths to local theme paths
+- interactive conflict handling for existing target files
+- lockfile `theme` metadata updates
+- README theme pull instructions
+- Vitest coverage for theme pull success and failure behavior
+
+### Initial theme scaffold
+
+The v1 scaffold should be thinner than Shopify skeleton theme.
+
+The scaffold should include only files required for:
+
+- valid minimal Shopify Liquid theme structure
+- initial page render
+- Nazare runtime and build integration points
+- later component installation by CLI
+
+Every scaffold file must satisfy at least one of those requirements. Demo content, broad starter theme sections, and optional Shopify skeleton conveniences are out of scope.
+
+Expected scaffold shape:
+
+- one baseline layout, such as `layout/theme.liquid`
+- one minimal render path for the default page, such as a template and one section
+- minimal config files required for Shopify theme validity
+- Nazare asset/runtime hook points needed by local build output
+
+### Registry manifest theme block
+
+The registry manifest must support a `theme` block:
+
+```yaml
+theme:
+  version: 1.0.0
+  source: templates/default
+  files:
+    - from: templates/default/layout/theme.liquid
+      to: layout/theme.liquid
+```
+
+Required fields:
+
+- `theme.version`: exact SemVer 2.0.0 string
+- `theme.source`: non-empty registry-side scaffold root path
+- `theme.files`: non-empty array of file mappings
+
+Each `theme.files` entry requires:
+
+- `from`: relative path inside registry repo
+- `to`: relative path inside target theme repo
+
+Path rules:
+
+- `from` and `to` must use forward slashes
+- `from` and `to` must not be absolute paths
+- `from` and `to` must not contain `..`
+- `from` must exist in the resolved registry snapshot
+- `to` must remain inside the target theme root after normalization
+- duplicate `to` paths are invalid
+
+### Conflict choices
+
+When a target file already exists, the command must require explicit conflict resolution.
+
+Interactive choices:
+
+- `skip`: skip the current file
+- `overwrite`: overwrite the current file
+- `all`: overwrite this and all remaining conflicts
+- `none`: skip this and all remaining conflicts
+
+`--yes` must behave like choosing `all` for file conflicts.
+
+---
+
+## Success behavior
+
+- Running `nazare theme pull` in an initialized repo resolves the configured registry origin and reads the configured manifest.
+- If the manifest has a valid `theme` block, missing target files are copied from registry `from` paths to local `to` paths.
+- Copied files preserve text content exactly as stored in the registry snapshot.
+- Existing target files are not overwritten unless the user chooses `overwrite`, chooses `all`, or passes `--yes`.
+- Skipped files produce warnings and do not cause command failure.
+- A command with all conflicts explicitly skipped exits with code `0`.
+- If at least one theme file is copied or overwritten, `nazare.lock.yml` is updated with theme metadata.
+- If all theme files are skipped, `nazare.lock.yml` remains unchanged.
+- Successful theme pull prints written file paths and exits with code `0`.
+
+Expected lockfile theme metadata after at least one written file:
+
+```yaml
+theme:
+  version: 1.0.0
+  source: templates/default
+  installedAt: "2026-05-25T00:00:00.000Z"
+  files:
+    - path: layout/theme.liquid
+      source: templates/default/layout/theme.liquid
+```
+
+Lockfile rules:
+
+- `theme.version` is copied from manifest `theme.version`.
+- `theme.source` is copied from manifest `theme.source`.
+- `theme.installedAt` is the pull time as an RFC 3339 timestamp.
+- `theme.files` records only files actually copied or overwritten by the CLI.
+- `theme.files` is cumulative across pulls.
+- Existing tracked file entries are updated when that same path is overwritten.
+- Previously tracked files are not removed when later pulls skip them.
+
+---
+
+## Failure behavior
+
+- If current directory is not initialized with `nazare.config.yml` and `nazare.lock.yml`, theme pull exits non-zero with a clear error.
+- If `nazare.config.yml` is invalid, theme pull exits non-zero with a clear error before writing theme files.
+- If `nazare.lock.yml` is invalid, theme pull exits non-zero with a clear error before writing theme files.
+- If registry origin cannot be resolved, theme pull exits non-zero with a clear error before writing theme files.
+- If registry manifest is missing or invalid, theme pull exits non-zero with a clear error before writing theme files.
+- If manifest has no `theme` block, theme pull exits non-zero with a clear error.
+- If `theme.version`, `theme.source`, or `theme.files` is invalid, theme pull exits non-zero with a clear error before writing theme files.
+- If any theme file path is unsafe, theme pull exits non-zero with a clear error before writing theme files.
+- If any declared `from` file is missing in the registry snapshot, theme pull exits non-zero with a clear error before writing theme files.
+- In non-interactive mode, if conflicts exist and `--yes` is not provided, theme pull exits non-zero before writing files.
+- Failed theme pull must not mutate component lockfile entries.
+- Failed theme pull must not mutate files outside declared `theme.files` destinations.
+
+---
+
+## Verification
+
+Result: planned.
+
+- [ ] `nazare theme pull` copies missing scaffold files
+  - Verify with a temp initialized repo and registry fixture.
+- [ ] copied scaffold is thinner than Shopify skeleton but valid enough for initial render
+  - Verify fixture file list and minimal theme smoke test.
+- [ ] missing `nazare.config.yml` fails before writing files
+  - Verify target directory remains unchanged.
+- [ ] missing `nazare.lock.yml` fails before writing files
+  - Verify target directory remains unchanged.
+- [ ] invalid config fails before writing files
+  - Verify no scaffold files are created.
+- [ ] invalid lockfile fails before writing files
+  - Verify no scaffold files are created.
+- [ ] missing manifest fails before writing files
+  - Verify clear error and unchanged target files.
+- [ ] missing manifest `theme` block fails before writing files
+  - Verify clear error and unchanged target files.
+- [ ] invalid `theme.version` fails before writing files
+  - Verify SemVer validation.
+- [ ] unsafe `from` and `to` paths fail before writing files
+  - Verify absolute paths, `..`, backslashes, and escaping target root are rejected.
+- [ ] duplicate `to` paths fail before writing files
+  - Verify clear validation error.
+- [ ] existing target file can be skipped
+  - Verify local file content remains unchanged and warning is printed.
+- [ ] existing target file can be overwritten
+  - Verify local file content is replaced and lockfile records the path.
+- [ ] conflict choice `all` overwrites remaining conflicts
+  - Verify all conflicted files are replaced.
+- [ ] conflict choice `none` skips remaining conflicts
+  - Verify all remaining conflicted files are unchanged.
+- [ ] `--yes` overwrites all conflicts
+  - Verify no prompt is required.
+- [ ] all skipped conflicts leave lockfile unchanged
+  - Verify exact lockfile content before and after.
+- [ ] partial writes update lockfile with only written files
+  - Verify skipped files are not added to `theme.files`.
+- [ ] repeated pulls keep `theme.files` cumulative
+  - Verify previously tracked files are not removed after later skips.
+
+---
+
+## Architecture notes
+
+`nazare.theme.pull` is the first command that reads the remote registry origin. It should establish shared internal primitives for future component commands without implementing component behavior in this feature.
+
+Useful shared primitives may include:
+
+- config parsing and validation
+- lockfile parsing and validation
+- GitHub registry repo normalization
+- registry snapshot fetch/read
+- manifest parsing and validation
+- safe path normalization
+- conflict planning and prompt handling
+- atomic-ish lockfile write after file copy plan execution
+
+The command should plan and validate all manifest paths before writing any theme file. This avoids partial scaffold writes caused by invalid later entries.
+
+File writes and lockfile writes should be separated. Theme files are copied first according to explicit conflict choices. Lockfile metadata is updated only after the set of actually written files is known.
+
+The registry scaffold lives in this repo for the default registry. The scaffold is source content, not generated output.
+
+Theme files become user-owned immediately after copy. Later pulls can offer overwrite, but must not silently synchronize or reconcile drift.
+
+`nazare theme pull` is canonical for theme scaffold install. Bare `nazare pull` remains out of scope to avoid ambiguity with future component install behavior.
+
+---
+
+## Open questions
+
+- What exact minimal Shopify file set is required for the first scaffold fixture?
+- Should the baseline render path use `templates/index.json` plus one section, or a thinner Liquid template path?
+- Should theme pull support `--json` in v1, or reserve JSON output for list-style commands only?
