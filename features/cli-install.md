@@ -1,7 +1,7 @@
 ---
 schemaVersion: 1
 
-id: F-000
+id: cli-install
 title: Install Nazare CLI
 status: done
 
@@ -42,7 +42,7 @@ codebaseOwnership:
     - non-install CLI command behavior
 ---
 
-# 000 — Install Nazare CLI
+# Install Nazare CLI
 
 ## Goal
 
