@@ -12,6 +12,10 @@ const baseCssPath = new URL(
 	import.meta.url,
 );
 const gitignorePath = new URL("../theme/default/.gitignore", import.meta.url);
+const envExamplePath = new URL(
+	"../theme/default/.env.example",
+	import.meta.url,
+);
 const layoutPath = new URL(
 	"../theme/default/layout/theme.liquid",
 	import.meta.url,
@@ -41,13 +45,16 @@ describe("theme build pipeline", () => {
 		expect(manifest).toContain(
 			"- from: theme/default/.gitignore\n      to: .gitignore",
 		);
+		expect(manifest).toContain(
+			"- from: theme/default/.env.example\n      to: .env.example",
+		);
 	});
 
 	it("exposes dev, build, and watch scripts with Vite and Tailwind dependencies", async () => {
 		const packageJson = JSON.parse(await readText(packagePath));
 
 		expect(packageJson.scripts).toEqual({
-			dev: "shopify theme dev",
+			dev: "set -a; [ -f .env ] && . ./.env; set +a; shopify theme dev",
 			build: "vite build",
 			watch: "vite build --watch",
 		});
@@ -102,9 +109,18 @@ describe("theme build pipeline", () => {
 		const gitignore = await readText(gitignorePath);
 
 		expect(gitignore).toContain("node_modules/");
+		expect(gitignore).toContain(".env");
+		expect(gitignore).toContain(".env.*");
+		expect(gitignore).toContain("!.env.example");
 		expect(gitignore).not.toContain("assets/");
 		expect(gitignore).not.toContain("styles/");
 		expect(gitignore).not.toContain("scripts/theme.js");
 		expect(gitignore).not.toContain("snippets/section-css");
+	});
+
+	it("documents optional Shopify store pinning", async () => {
+		const envExample = await readText(envExamplePath);
+
+		expect(envExample).toContain("SHOPIFY_FLAG_STORE=your-store.myshopify.com");
 	});
 });
