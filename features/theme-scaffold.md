@@ -192,9 +192,6 @@ Follow [`docs/policies/naming-policy.md`](../docs/policies/naming-policy.md).
 For v1 scaffold:
 
 - starter section file is `sections/s-main.liquid`
-- `templates/index.json` should reference section type `s-main`
-- Shopify JSON template instance keys may remain local keys such as `main`
-
-## Open questions
-
-- Is `templates/index.json` the best minimum render path, or should v1 use a Liquid template?
+- minimum render path is `templates/index.json`
+- `templates/index.json` should contain one section instance with local key `main`
+- that instance should reference section type `s-main`
