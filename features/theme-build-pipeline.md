@@ -95,14 +95,29 @@ theme:
   files:
     - from: theme/default/package.json
       to: package.json
+      checksum:
+        algorithm: sha256
+        value: 3b7b7f1f4c8c0d36c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f4
     - from: theme/default/vite.config.js
       to: vite.config.js
+      checksum:
+        algorithm: sha256
+        value: 4c8c0d36c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f43b7b7f1f
     - from: theme/default/styles/base.css
       to: styles/base.css
+      checksum:
+        algorithm: sha256
+        value: c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f43b7b7f1f4c8c0d36
     - from: theme/default/.gitignore
       to: .gitignore
+      checksum:
+        algorithm: sha256
+        value: d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f43b7b7f1f4c8c0d36c9d6f2f3
     - from: theme/default/shopify.theme.toml
       to: shopify.theme.toml
+      checksum:
+        algorithm: sha256
+        value: a5b4c3d2e1f0a9b8c7d6e5f43b7b7f1f4c8c0d36c9d6f2f3d1b2a1a0c9e8d7f6
 ```
 
 These entries are additive to the Shopify-only files from `theme-scaffold`.
@@ -271,6 +286,7 @@ Generated files are not scaffold source and must not be listed in `theme.files` 
 
 - The repo contains the build pipeline files listed in this feature under `theme/default/`.
 - The default registry manifest contains valid `theme.files` entries for those build pipeline files.
+- Every build pipeline `theme.files[]` entry includes `checksum.algorithm: sha256` and a `checksum.value` matching the source file bytes.
 - Every build pipeline `theme.files[].from` path exists in the repo.
 - Every build pipeline `theme.files[].to` path is a safe relative theme path.
 - `package.json` exposes local `dev`, `build`, and `watch` scripts, where `dev` runs `shopify theme dev -e development --nodelete`.
@@ -310,6 +326,8 @@ Result: planned.
   - Verify `package.json`, `vite.config.js`, `styles/base.css`, `.gitignore`, and `shopify.theme.toml` exist.
 - [ ] `nazare.registry.yml` contains valid `theme.files` entries for build pipeline files
   - Verify manifest parse and schema test.
+- [ ] build pipeline manifest entries include matching SHA-256 checksum metadata
+  - Verify checksum values equal current source file bytes.
 - [ ] every build pipeline `theme.files[].from` exists
   - Verify manifest-to-filesystem test.
 - [ ] every build pipeline `theme.files[].to` is safe

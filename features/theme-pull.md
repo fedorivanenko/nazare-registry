@@ -96,6 +96,9 @@ theme:
   files:
     - from: theme/default/layout/theme.liquid
       to: layout/theme.liquid
+      checksum:
+        algorithm: sha256
+        value: 3b7b7f1f4c8c0d36c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f4
 ```
 
 Required fields:
@@ -110,6 +113,8 @@ Each `theme.files` entry requires:
 
 - `from`: relative path inside registry repo
 - `to`: relative path inside target theme repo
+- `checksum.algorithm`: `sha256`
+- `checksum.value`: lowercase 64-character SHA-256 hex digest of the registry `from` file content
 
 Path rules:
 
@@ -117,6 +122,7 @@ Path rules:
 - `from` and `to` must not be absolute paths
 - `from` and `to` must not contain `..`
 - `from` must exist in the resolved registry snapshot
+- `checksum.value` must match the SHA-256 digest of the resolved registry `from` file before any write
 - `to` must remain inside the target theme root after normalization
 - duplicate `to` paths are invalid
 
@@ -139,6 +145,7 @@ Interactive choices:
 
 - Running `nazare theme pull` in an initialized repo resolves the configured registry origin and reads the configured manifest.
 - If the manifest has a valid `theme` block, missing target files are copied from registry `from` paths to local `to` paths.
+- Before copying or overwriting each file, the CLI computes SHA-256 for the resolved registry `from` file and verifies it matches manifest `theme.files[].checksum.value`.
 - Copied files preserve text content exactly as stored in the registry snapshot.
 - Existing target files are not overwritten unless the user chooses `overwrite`, chooses `all`, or passes `--yes`.
 - Skipped files produce warnings and do not cause command failure.
@@ -169,8 +176,8 @@ Lockfile rules:
 - `theme.source` is copied from manifest `theme.source`.
 - `theme.installedAt` is the pull time as an RFC 3339 timestamp.
 - `theme.files` records only files actually copied or overwritten by the CLI.
-- `theme.files[].checksum.algorithm` is `sha256`.
-- `theme.files[].checksum.value` is the SHA-256 checksum of the copied registry file content.
+- `theme.files[].checksum.algorithm` is copied from the registry manifest entry and must be `sha256`.
+- `theme.files[].checksum.value` is copied from the registry manifest entry after the registry file content is verified against it.
 - `theme.files` is cumulative across pulls.
 - Existing tracked file entries are updated when that same path is overwritten.
 - Previously tracked files are not removed when later pulls skip them.
@@ -188,6 +195,7 @@ Lockfile rules:
 - If `theme.version`, `theme.source`, or `theme.files` is invalid, theme pull exits non-zero with a clear error before writing theme files.
 - If any theme file path is unsafe, theme pull exits non-zero with a clear error before writing theme files.
 - If any declared `from` file is missing in the registry snapshot, theme pull exits non-zero with a clear error before writing theme files.
+- If any manifest checksum metadata is missing, malformed, unsupported, or does not match the resolved registry file content, theme pull exits non-zero with a clear error before writing theme files.
 - In non-interactive mode, if conflicts exist and `--yes` is not provided, theme pull exits non-zero before writing files.
 - Failed theme pull must not mutate component lockfile entries.
 - Failed theme pull must not mutate files outside declared `theme.files` destinations.
@@ -216,8 +224,10 @@ Result: planned.
   - Verify SemVer validation.
 - [ ] valid `theme.version` is stored in lockfile as scaffold provenance
   - Verify lockfile `theme.version` equals manifest `theme.version` after a write.
-- [ ] copied files are stored with SHA-256 checksum metadata
-  - Verify lockfile checksum values equal copied file content checksums.
+- [ ] registry manifest checksum metadata is required and verified before writes
+  - Verify missing, malformed, unsupported, and mismatched manifest checksum metadata fail before mutation.
+- [ ] copied files are stored with SHA-256 checksum metadata from the verified registry manifest
+  - Verify lockfile checksum values equal manifest checksum values and copied file content checksums.
 - [ ] unsafe `from` and `to` paths fail before writing files
   - Verify absolute paths, `..`, backslashes, and escaping target root are rejected.
 - [ ] duplicate `to` paths fail before writing files

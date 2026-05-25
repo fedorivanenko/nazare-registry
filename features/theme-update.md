@@ -79,7 +79,7 @@ Included:
 - `nazare theme update --force`
 - `nazare theme update --check`
 - registry resolution from `nazare.config.yml`
-- current manifest `theme` block validation using `theme-pull` rules
+- current manifest `theme` block validation using `theme-pull` rules, including per-file registry checksum metadata
 - tracked-file safety checks using `nazare.lock.yml` checksum metadata
 - update of unmodified tracked files
 - deletion of obsolete unmodified tracked files
@@ -87,9 +87,23 @@ Included:
 - lockfile metadata updates after successful writes/deletes
 - README instructions and Vitest coverage
 
-### Lockfile checksum contract
+### Checksum contract
 
-Each tracked theme file must have last-installed content checksum:
+Registry manifest `theme.files[]` entries are the checksum source of truth for registry content:
+
+```yaml
+theme:
+  files:
+    - from: theme/default/layout/theme.liquid
+      to: layout/theme.liquid
+      checksum:
+        algorithm: sha256
+        value: 3b7b7f1f4c8c0d36c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f4
+```
+
+For every current manifest entry, update must compute SHA-256 for the resolved registry `from` file and verify it matches manifest `checksum.value` before planning writes. Missing, malformed, unsupported, or mismatched registry checksum metadata is invalid.
+
+Each tracked theme file in `nazare.lock.yml` stores the last-installed verified registry checksum:
 
 ```yaml
 theme:
@@ -113,7 +127,7 @@ Local state:
 - obsolete: tracked file no longer appears in current manifest by `path`/`source`
 - untracked target: manifest target path absent from lockfile `theme.files`
 
-Missing checksum metadata is migrated when it can be proven safe: if a current tracked local file equals current registry content, update may add checksum metadata without rewriting the file. If the local file differs, update must fail unless `--force` is passed. Missing obsolete files without checksum metadata may be untracked.
+Missing lockfile checksum metadata is migrated when it can be proven safe: if a current tracked local file equals the current verified registry content, update may add checksum metadata from the registry manifest without rewriting the file. If the local file differs, update must fail unless `--force` is passed. Missing obsolete lockfile checksum metadata may be untracked.
 
 ### Operation rules
 
@@ -138,7 +152,7 @@ Missing checksum metadata is migrated when it can be proven safe: if a current t
 
 ## Success behavior
 
-- Resolves registry, reads current manifest, validates paths, and plans all operations before mutation.
+- Resolves registry, reads current manifest, validates paths and registry checksum metadata, verifies registry file bytes against manifest checksums, and plans all operations before mutation.
 - Writes changed unmodified tracked files with current registry content.
 - Deletes obsolete unmodified tracked files.
 - Copies new manifest files whose target paths are absent.
@@ -153,7 +167,7 @@ After successful mutation:
 - `theme.version` and `theme.source` come from current manifest.
 - `theme.installedAt` is preserved when present.
 - `theme.updatedAt` is set to update time as RFC 3339 timestamp.
-- written/new files have `path`, `source`, and `checksum: { algorithm: sha256, value: <written-content-sha256> }`.
+- written/new files have `path`, `source`, and `checksum` copied from the verified current registry manifest entry.
 - obsolete deleted/already-missing files are removed from `theme.files`.
 - component lockfile data is unchanged.
 
@@ -165,9 +179,10 @@ Before any mutation, exit non-zero with clear error when:
 
 - repo lacks `nazare.config.yml` or `nazare.lock.yml`
 - lockfile lacks `theme` metadata
-- config, lockfile, registry origin, manifest, manifest `theme` block, version, source, or files are invalid
+- config, lockfile, registry origin, manifest, manifest `theme` block, version, source, files, or checksum metadata are invalid
 - any manifest `from`/`to` path is unsafe, duplicate, or missing in registry snapshot
-- any tracked entry lacks checksum metadata and cannot be safely migrated
+- any manifest checksum does not match resolved registry file content
+- any tracked entry lacks lockfile checksum metadata and cannot be safely migrated
 - any current tracked installed file is modified or missing, unless `--force` is passed
 - any obsolete tracked file is modified, unless `--force` is passed
 - any new manifest target exists locally but is untracked, unless `--force` is passed
@@ -180,8 +195,10 @@ Failed update must not mutate theme files, component lockfile entries, or files 
 
 Result: planned.
 
+- [ ] verifies registry manifest checksums before planning mutations
+  - Verify missing, malformed, unsupported, and mismatched manifest checksum metadata fail before mutation.
 - [ ] unmodified tracked file updates
-  - Verify checksum match before update, new content after update, new checksum in lockfile.
+  - Verify checksum match before update, new content after update, new checksum in lockfile copied from the verified registry manifest.
 - [ ] modified current tracked file fails before mutation
   - Verify all files and lockfile unchanged.
 - [ ] `--force` overwrites modified current tracked file
@@ -198,8 +215,8 @@ Result: planned.
   - Verify file and lockfile entry removed.
 - [ ] obsolete already-missing tracked file untracks
   - Verify lockfile entry removed without delete attempt.
-- [ ] missing checksum metadata is added when local file equals registry
-  - Verify lockfile gets checksum and file content remains unchanged.
+- [ ] missing lockfile checksum metadata is added when local file equals verified registry content
+  - Verify lockfile gets checksum from the registry manifest and file content remains unchanged.
 - [ ] missing checksum metadata fails when local file differs from registry
   - Verify clear metadata error and lockfile unchanged.
 - [ ] new manifest file copies when target absent
@@ -227,11 +244,12 @@ Reuse `theme-pull` primitives for config, lockfile, registry, manifest, and safe
 
 Plan phases:
 
-1. Validate config, lockfile, manifest, and all paths.
-2. Classify tracked files by checksum and current manifest membership.
-3. Build full operation plan: writes, deletes, new copies, lockfile changes.
-4. Execute file operations only after full plan is safe.
-5. Update lockfile only after file operations finish.
+1. Validate config, lockfile, manifest, checksum metadata, and all paths.
+2. Verify all current manifest checksums against resolved registry file bytes.
+3. Classify tracked files by lockfile checksum and current manifest membership.
+4. Build full operation plan: writes, deletes, new copies, lockfile changes.
+5. Execute file operations only after full plan is safe.
+6. Update lockfile only after file operations finish.
 
 Checksum metadata is the local-modification authority. Do not compare local files to current registry to detect edits; registry may have changed. Do not attempt three-way merge.
 

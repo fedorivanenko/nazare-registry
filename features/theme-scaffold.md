@@ -97,12 +97,24 @@ theme:
   files:
     - from: theme/default/layout/theme.liquid
       to: layout/theme.liquid
+      checksum:
+        algorithm: sha256
+        value: 3b7b7f1f4c8c0d36c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f4
     - from: theme/default/templates/index.json
       to: templates/index.json
+      checksum:
+        algorithm: sha256
+        value: 4c8c0d36c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f43b7b7f1f
     - from: theme/default/sections/main.liquid
       to: sections/main.liquid
+      checksum:
+        algorithm: sha256
+        value: c9d6f2f3d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f43b7b7f1f4c8c0d36
     - from: theme/default/config/settings_schema.json
       to: config/settings_schema.json
+      checksum:
+        algorithm: sha256
+        value: d1b2a1a0c9e8d7f6a5b4c3d2e1f0a9b8c7d6e5f43b7b7f1f4c8c0d36c9d6f2f3
 ```
 
 `theme.version` is the registry scaffold version. It is not the local user theme version.
@@ -121,6 +133,7 @@ theme:
 - The repo contains `theme/default/` with the v1 Shopify-only scaffold files listed in this feature.
 - The default registry manifest contains valid `theme.files` entries for those files.
 - `theme.version` is a valid SemVer 2.0.0 string.
+- Every `theme.files[]` entry owned by this feature includes `checksum.algorithm: sha256` and a `checksum.value` matching the source file bytes.
 - Every `theme.files[].from` path owned by this feature exists in the repo.
 - Every `theme.files[].to` path owned by this feature is a safe relative theme path.
 - The scaffold includes one starter section only.
@@ -150,6 +163,8 @@ Result: planned.
   - Verify with fixture file-list test.
 - [ ] `nazare.registry.yml` contains valid `theme.files` entries for scaffold files
   - Verify manifest parse and schema test.
+- [ ] scaffold manifest entries include matching SHA-256 checksum metadata
+  - Verify checksum values equal current source file bytes.
 - [ ] every owned `theme.files[].from` exists
   - Verify manifest-to-filesystem test.
 - [ ] every owned `theme.files[].to` is safe
