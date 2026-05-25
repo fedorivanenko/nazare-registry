@@ -24,6 +24,7 @@ invariants:
   - Theme pull must copy only files declared by the registry manifest theme block
   - Theme pull must never silently overwrite existing user files
   - Theme files are user-owned after copy
+  - Manifest theme.version is required and identifies the registry scaffold version, not the user theme version
   - Lockfile theme metadata must change only when at least one theme file is written
   - Failed theme pull must not partially mutate lockfile metadata when avoidable
 
@@ -120,9 +121,11 @@ theme:
 
 Required fields:
 
-- `theme.version`: exact SemVer 2.0.0 string
+- `theme.version`: exact SemVer 2.0.0 string identifying the registry scaffold version
 - `theme.source`: non-empty registry-side scaffold root path
 - `theme.files`: non-empty array of file mappings
+
+`theme.version` is provenance and update-visibility metadata for the scaffold copied from the registry. It is not the local user theme version and does not imply that user-owned files still match the registry after edits.
 
 Each `theme.files` entry requires:
 
@@ -179,7 +182,8 @@ theme:
 
 Lockfile rules:
 
-- `theme.version` is copied from manifest `theme.version`.
+- `theme.version` is copied from manifest `theme.version` and represents the installed registry scaffold version.
+- `theme.version` does not assert that local user-owned files are unchanged from that registry version.
 - `theme.source` is copied from manifest `theme.source`.
 - `theme.installedAt` is the pull time as an RFC 3339 timestamp.
 - `theme.files` records only files actually copied or overwritten by the CLI.
@@ -228,6 +232,8 @@ Result: planned.
   - Verify clear error and unchanged target files.
 - [ ] invalid `theme.version` fails before writing files
   - Verify SemVer validation.
+- [ ] valid `theme.version` is stored in lockfile as scaffold provenance
+  - Verify lockfile `theme.version` equals manifest `theme.version` after a write.
 - [ ] unsafe `from` and `to` paths fail before writing files
   - Verify absolute paths, `..`, backslashes, and escaping target root are rejected.
 - [ ] duplicate `to` paths fail before writing files
