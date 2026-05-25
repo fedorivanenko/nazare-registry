@@ -1,14 +1,14 @@
 ---
 schemaVersion: 1
 
-id: F-003
+id: theme-scaffold
 title: Minimal Theme Scaffold
 status: planned
 
 dependencies:
-  - F-000
-  - F-001
-  - F-002
+  - cli-install
+  - cli-self-update
+  - cli-init
 
 surfaces:
   storefront:
@@ -65,7 +65,7 @@ codebaseOwnership:
     - install metadata
 ---
 
-# 003 — Minimal Theme Scaffold
+# Minimal Theme Scaffold
 
 ## Goal
 
@@ -163,7 +163,7 @@ Result: planned.
 - [ ] scaffold includes no product, collection, cart, page, blog, or article template implementations
   - Verify those template files are absent until component package features add them.
 - [ ] scaffold includes no build pipeline files
-  - Verify `package.json`, `vite.config.js`, `styles/base.css`, and `.gitignore` are absent until F-004.
+  - Verify `package.json`, `vite.config.js`, `styles/base.css`, and `.gitignore` are absent until theme-build-pipeline.
 - [ ] generated Vite plugin output is not included as scaffold source
   - Verify generated paths are absent from `theme.files` and `theme/default/`.
 - [ ] scaffold stays thinner than Shopify skeleton

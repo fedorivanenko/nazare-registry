@@ -1,13 +1,13 @@
 ---
 schemaVersion: 1
 
-id: F-002
+id: cli-init
 title: Initialize Nazare Theme Repo
 status: planned
 
 dependencies:
-  - F-000
-  - F-001
+  - cli-install
+  - cli-self-update
 
 surfaces:
   cli:
@@ -48,7 +48,7 @@ codebaseOwnership:
     - registry files
 ---
 
-# 002 — Initialize Nazare Theme Repo
+# Initialize Nazare Theme Repo
 
 ## Goal
 
@@ -160,13 +160,13 @@ Result: tested and passed.
 
 `nazare.lock.yml` is the guard for an initialized repo. Existing lockfile means the target is already initialized.
 
-Existing `nazare.config.yml` without `nazare.lock.yml` is ambiguous state. F-002 should fail instead of adopting or overwriting it.
+Existing `nazare.config.yml` without `nazare.lock.yml` is ambiguous state. `cli-init` should fail instead of adopting or overwriting it.
 
 A future `nazare init --adopt` could validate an existing `nazare.config.yml` and create a matching `nazare.lock.yml` without changing the config.
 
 A future `nazare init --force` could reset init state by replacing config and lockfile, but it must require destructive confirmation behavior before writing.
 
-`nazare init [directory]` should reject values containing `/` or `\\` path separators before creating directories. Nested target paths are out of scope for F-002.
+`nazare init [directory]` should reject values containing `/` or `\\` path separators before creating directories. Nested target paths are out of scope for `cli-init`.
 
 `nazare init [directory]` should create the directory when it does not exist, then apply the same lockfile guard inside that directory.
 

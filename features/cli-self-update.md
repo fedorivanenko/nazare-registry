@@ -1,12 +1,12 @@
 ---
 schemaVersion: 1
 
-id: F-001
+id: cli-self-update
 title: Nazare CLI Versioning and Update
 status: done
 
 dependencies:
-  - F-000
+  - cli-install
 
 surfaces:
   cli:
@@ -49,7 +49,7 @@ codebaseOwnership:
     - component files
 ---
 
-# 001 — Nazare CLI Versioning and Update
+# Nazare CLI Versioning and Update
 
 ## Goal
 
@@ -143,7 +143,7 @@ Result: tested and passed.
 
 Installer should copy enough package metadata into the installed CLI so `nazare --version` does not need network access.
 
-Vitest is the project test harness for CLI behavior that can run locally without network access. F-001 keeps installer/update integration checks as temp `HOME` shell scenarios, while version/help smoke coverage lives in `test/` and runs via `npm test`.
+Vitest is the project test harness for CLI behavior that can run locally without network access. `cli-self-update` keeps installer/update integration checks as temp `HOME` shell scenarios, while version/help smoke coverage lives in `test/` and runs via `npm test`.
 
 `nazare self update` should reuse installer ownership checks instead of introducing a second write policy.
 

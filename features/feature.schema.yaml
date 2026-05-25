@@ -1,7 +1,7 @@
 schemaVersion: 1
 
 featureDocument:
-  filePattern: "features/[0-9][0-9][0-9]-*.md"
+  filePattern: "features/*.md"
   purpose: "Lock the structure for feature description documents."
   format: "YAML frontmatter followed by markdown body."
 
@@ -16,9 +16,11 @@ frontmatter:
     id:
       required: true
       type: string
-      format: "F-<number>"
+      format: "semantic kebab-case id"
       rules:
-        - "Number must match the numeric prefix in the file name."
+        - "Use a stable semantic id that matches the file name without .md."
+        - "Use lowercase letters, numbers, and hyphens only."
+        - "Do not encode global sequence numbers in ids."
     title:
       required: true
       type: string
@@ -94,10 +96,10 @@ requiredSections:
 
 sections:
   heading:
-    format: "# <number> — <title>"
+    format: "# <title>"
     required: true
     rules:
-      - "Number and title must match frontmatter id/title."
+      - "Heading title must match frontmatter title."
   goal:
     heading: "## Goal"
     required: true

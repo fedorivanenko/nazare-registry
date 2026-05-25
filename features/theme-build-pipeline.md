@@ -1,15 +1,15 @@
 ---
 schemaVersion: 1
 
-id: F-004
+id: theme-build-pipeline
 title: Theme Build Pipeline
 status: planned
 
 dependencies:
-  - F-000
-  - F-001
-  - F-002
-  - F-003
+  - cli-install
+  - cli-self-update
+  - cli-init
+  - theme-scaffold
 
 surfaces:
   storefront:
@@ -54,7 +54,7 @@ codebaseOwnership:
     - install metadata
 ---
 
-# 004 — Theme Build Pipeline
+# Theme Build Pipeline
 
 ## Goal
 
@@ -97,7 +97,7 @@ theme:
       to: .gitignore
 ```
 
-These entries are additive to the Shopify-only files from F-003.
+These entries are additive to the Shopify-only files from `theme-scaffold`.
 
 ### Required file intent
 

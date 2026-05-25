@@ -1,16 +1,16 @@
 ---
 schemaVersion: 1
 
-id: F-005
+id: theme-pull
 title: Pull Theme
 status: planned
 
 dependencies:
-  - F-000
-  - F-001
-  - F-002
-  - F-003
-  - F-004
+  - cli-install
+  - cli-self-update
+  - cli-init
+  - theme-scaffold
+  - theme-build-pipeline
 
 surfaces:
   cli:
@@ -58,13 +58,13 @@ codebaseOwnership:
     - install metadata
 ---
 
-# 005 — Pull Theme
+# Pull Theme
 
 ## Goal
 
 Add `nazare theme pull` so an initialized theme repo can pull the Nazare theme scaffold from the configured registry origin.
 
-This feature owns CLI copy, conflict, validation, and lockfile behavior. The scaffold source files and default manifest file list are owned by F-003 Minimal Theme Scaffold and F-004 Theme Build Pipeline.
+This feature owns CLI copy, conflict, validation, and lockfile behavior. The scaffold source files and default manifest file list are owned by theme-scaffold and theme-build-pipeline.
 
 ---
 
@@ -251,7 +251,7 @@ The command should plan and validate all manifest paths before writing any theme
 
 File writes and lockfile writes should be separated. Theme files are copied first according to explicit conflict choices. Lockfile metadata is updated only after the set of actually written files is known.
 
-The registry scaffold lives in this repo for the default registry but is owned by F-003. This feature should treat registry theme files as data declared by the manifest.
+The registry scaffold lives in this repo for the default registry but is owned by `theme-scaffold` and `theme-build-pipeline`. This feature should treat registry theme files as data declared by the manifest.
 
 Theme files become user-owned immediately after copy. Later pulls can offer overwrite, but must not silently synchronize or reconcile drift.
 
