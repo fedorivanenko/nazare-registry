@@ -106,7 +106,7 @@ These entries are additive to the Shopify-only files from `theme-scaffold`.
 ### Required file intent
 
 - `package.json`: local `dev`, `build`, and `watch` scripts plus package metadata required by the scaffold.
-- `vite.config.js`: Vite, Tailwind, and Nazare Vite plugin wiring for the local theme.
+- `vite.config.js`: Vite, Tailwind, and relative import wiring for the vendored Nazare Vite plugin.
 - `styles/base.css`: Tailwind-powered base CSS entry imported by the build pipeline.
 - `.gitignore`: ignores dependency folders and local-only tooling state, but does not ignore generated build outputs.
 
@@ -262,7 +262,7 @@ Generated files are not scaffold source and must not be listed in `theme.files` 
 - Every build pipeline `theme.files[].from` path exists in the repo.
 - Every build pipeline `theme.files[].to` path is a safe relative theme path.
 - `package.json` exposes local `dev`, `build`, and `watch` scripts.
-- `vite.config.js` wires the Vite/Tailwind build pipeline and real Nazare Vite plugin for the local theme.
+- `vite.config.js` wires the Vite/Tailwind build pipeline and vendored Nazare Vite plugin for the local theme.
 - `styles/base.css` is the base CSS entry.
 - `layout/theme.liquid` contains CSS bridge and module runtime hook points.
 - `sections/s-main.liquid` contains the section CSS contract hook point.
@@ -330,7 +330,7 @@ A JavaScript UI framework does not belong in this feature. The scaffold runtime 
 
 The Nazare Vite plugin is owned by `theme-build-plugin`. This feature depends on that plugin and should not attempt to provide placeholder behavior without it.
 
-`vite.config.js` should import and use the real Nazare Vite plugin. A pulled theme with this build pipeline is not expected to build or render correctly if the plugin is missing, because generated runtime files and bridge snippets come from the plugin.
+`vite.config.js` should import and use the vendored plugin by relative path, such as `./nazare/vite-plugin.js`. A pulled theme with this build pipeline is not expected to build or render correctly if the plugin is missing, because generated runtime files and bridge snippets come from the plugin.
 
 Generated files must remain generated. They should be absent from registry scaffold source and `theme.files`, but trackable in user theme repos after generation.
 
