@@ -17,17 +17,19 @@ dependencies:
 surfaces:
   cli:
     - nazare theme update
+    - nazare theme update --force
+    - nazare theme update --check
 
 invariants:
   - Requires initialized repo and existing lockfile theme metadata
   - Reads registry origin from nazare.config.yml
   - Uses current registry manifest theme block as update target
   - Checks all tracked installed theme files before any write or delete
-  - Overwrites only tracked files whose local checksum matches lockfile checksum
-  - Deletes only obsolete tracked files whose local checksum matches lockfile checksum
+  - Overwrites only unmodified tracked files unless --force is explicitly passed
+  - Deletes only unmodified obsolete tracked files unless --force is explicitly passed
   - Fails before mutation when current tracked files are modified or missing
   - Fails before mutation when obsolete tracked files are modified
-  - Never overwrites modified user files
+  - Never overwrites modified user files unless --force is explicitly passed
   - Never deletes untracked files
   - Updates lockfile theme metadata only after successful file operations
 
@@ -37,8 +39,8 @@ nonGoals:
   - Implementing nazare add <component>
   - Implementing nazare pull <component>
   - Implementing a generic nazare update command
-  - Removing untracked or modified old theme files
-  - Reverting or merging user modifications
+  - Removing untracked old theme files
+  - Merging user modifications
   - Adopting existing Shopify themes
   - JSON output mode
 
@@ -65,7 +67,7 @@ codebaseOwnership:
 
 Add `nazare theme update` to safely fast-forward installed Nazare scaffold files from the configured registry without clobbering user edits.
 
-Unmodified tracked files update. Modified tracked files stop the command before any mutation. Obsolete unmodified tracked files may be deleted. Untracked files are never deleted.
+Unmodified tracked files update. Modified tracked files stop the command before any mutation unless `--force` is passed. Obsolete unmodified tracked files may be deleted. Untracked files are never deleted. `--check` reports the plan without mutating files.
 
 ---
 
@@ -74,6 +76,8 @@ Unmodified tracked files update. Modified tracked files stop the command before 
 Included:
 
 - `nazare theme update`
+- `nazare theme update --force`
+- `nazare theme update --check`
 - registry resolution from `nazare.config.yml`
 - current manifest `theme` block validation using `theme-pull` rules
 - tracked-file safety checks using `nazare.lock.yml` checksum metadata
@@ -115,13 +119,17 @@ Missing checksum metadata is unsafe. Update must fail before mutation and ask us
 
 - Current tracked file + unmodified + registry content changed -> overwrite and update checksum.
 - Current tracked file + modified -> fail before mutation.
+- Current tracked file + modified + `--force` -> overwrite and update checksum.
 - Current tracked file + missing -> fail before mutation.
+- Current tracked file + missing + `--force` -> restore from registry and update checksum.
 - Obsolete tracked file + unmodified -> delete file and remove lockfile entry.
 - Obsolete tracked file + modified -> fail before mutation.
+- Obsolete tracked file + modified + `--force` -> delete file and remove lockfile entry.
 - Obsolete tracked file + missing -> remove lockfile entry during successful update.
 - New manifest target + absent locally -> copy and add lockfile entry.
 - New manifest target + exists locally -> fail before mutation because ownership is ambiguous.
-- Untracked local files -> never delete.
+- New manifest target + exists locally + `--force` -> overwrite and add lockfile entry.
+- Untracked local files -> never delete unless they are current manifest targets and `--force` is passed.
 
 ---
 
@@ -133,6 +141,9 @@ Missing checksum metadata is unsafe. Update must fail before mutation and ask us
 - Copies new manifest files whose target paths are absent.
 - No-op update exits `0`, prints no-op message, and leaves lockfile unchanged.
 - Successful mutation prints written/deleted paths and exits `0`.
+- `--check` exits `0` when update can proceed safely, prints planned writes/deletes/no-op, and does not mutate files or lockfile.
+- `--check` exits non-zero for the same safety errors as normal update and does not mutate files or lockfile.
+- `--force` may overwrite modified current files, restore missing current files, delete modified obsolete files, and overwrite existing untracked manifest targets.
 
 After successful mutation:
 
@@ -154,9 +165,9 @@ Before any mutation, exit non-zero with clear error when:
 - config, lockfile, registry origin, manifest, manifest `theme` block, version, source, or files are invalid
 - any manifest `from`/`to` path is unsafe, duplicate, or missing in registry snapshot
 - any tracked entry lacks checksum metadata
-- any current tracked installed file is modified or missing
-- any obsolete tracked file is modified
-- any new manifest target exists locally but is untracked
+- any current tracked installed file is modified or missing, unless `--force` is passed
+- any obsolete tracked file is modified, unless `--force` is passed
+- any new manifest target exists locally but is untracked, unless `--force` is passed
 
 Failed update must not mutate theme files, component lockfile entries, or files outside current/previously tracked `theme.files` destinations.
 
@@ -170,12 +181,18 @@ Result: planned.
   - Verify checksum match before update, new content after update, new checksum in lockfile.
 - [ ] modified current tracked file fails before mutation
   - Verify all files and lockfile unchanged.
+- [ ] `--force` overwrites modified current tracked file
+  - Verify file becomes registry content and checksum updates.
 - [ ] missing current tracked file fails before mutation
   - Verify clear missing-path error and lockfile unchanged.
+- [ ] `--force` restores missing current tracked file
+  - Verify file is recreated from registry and checksum updates.
 - [ ] obsolete unmodified tracked file deletes
   - Verify file removed and lockfile entry removed.
 - [ ] obsolete modified tracked file fails before mutation
   - Verify file and lockfile unchanged.
+- [ ] `--force` deletes obsolete modified tracked file
+  - Verify file and lockfile entry removed.
 - [ ] obsolete already-missing tracked file untracks
   - Verify lockfile entry removed without delete attempt.
 - [ ] missing checksum metadata fails before mutation
@@ -184,8 +201,14 @@ Result: planned.
   - Verify file created and lockfile entry has checksum.
 - [ ] new manifest file fails when target exists untracked
   - Verify ambiguous-path error and target unchanged.
+- [ ] `--force` overwrites existing untracked manifest target
+  - Verify file becomes registry content and lockfile entry is added.
 - [ ] no-op update leaves lockfile unchanged
   - Verify exact before/after lockfile.
+- [ ] `--check` reports planned operations without mutation
+  - Verify files and lockfile unchanged for write/delete plan.
+- [ ] `--check` reports safety errors without mutation
+  - Verify non-zero exit and unchanged files/lockfile.
 - [ ] successful update preserves `theme.installedAt` and sets `theme.updatedAt`
 - [ ] untracked files are never deleted
 - [ ] standard validation failures mutate nothing
@@ -207,9 +230,12 @@ Plan phases:
 
 Checksum metadata is the local-modification authority. Do not compare local files to current registry to detect edits; registry may have changed. Do not attempt three-way merge.
 
+`--force` is explicit confirmation for destructive overwrite/delete behavior. It still must not affect paths outside current manifest targets or previously tracked theme files.
+
+`--check` uses the same planner as update, but stops before mutation and reports the plan.
+
 ---
 
 ## Open questions
 
-- Should future `nazare theme update --force` overwrite modified files after explicit confirmation?
-- Should future `nazare theme update --check` report pending updates without writing files?
+None.
