@@ -301,7 +301,7 @@ Generated paths:
 - `.gitignore` ignores local `.env` files.
 - Generated Vite plugin output is not committed as registry scaffold source, but is intended to be git tracked after generation in user theme repos.
 - The local build depends on the Nazare Vite plugin and fails if that plugin is unavailable or cannot generate required runtime and bridge files.
-- Vite watch remains stable after the first build because generated runtime, bridge, and section CSS files are only rewritten when their content changes.
+- Vite watch remains stable after the first build because generated runtime, bridge, and section CSS files are only rewritten when their content changes, and generated Shopify asset output paths are excluded from Vite watch inputs.
 
 ---
 
@@ -318,7 +318,7 @@ Generated paths:
 - If required build input/output mappings are missing from `vite.config.js`, validation tests fail.
 - If generated Vite plugin output is committed as registry scaffold source before generation, validation tests fail.
 - If the Nazare Vite plugin dependency is missing or not wired in `vite.config.js`, build-pipeline validation tests fail.
-- If the Nazare Vite plugin rewrites unchanged generated runtime, bridge, or section CSS files on each build, Vite watch can loop and plugin validation tests fail.
+- If the Nazare Vite plugin rewrites unchanged generated runtime, bridge, or section CSS files on each build, or if Vite watches generated `assets/**` output, Vite watch can loop and validation tests fail.
 
 ---
 
@@ -339,7 +339,7 @@ Result: implementation present; final feature-doc checklist still needs reconcil
 - [ ] `package.json` exposes local `dev`, `build`, and `watch` scripts
   - Verify package fixture assertions, including `shopify theme dev -e development --nodelete`.
 - [ ] `vite.config.js` wires Nazare theme build behavior
-  - Verify config fixture assertions, including real Nazare Vite plugin import/use.
+  - Verify config fixture assertions, including real Nazare Vite plugin import/use and `assets/**` watch exclusion.
 - [ ] `styles/base.css` exists as base CSS entry
   - Verify file existence and basic content.
 - [ ] layout has Nazare CSS preload and module runtime hook points

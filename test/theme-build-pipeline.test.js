@@ -74,6 +74,7 @@ describe("theme build pipeline", () => {
 		);
 		expect(config).toContain("nazareThemePlugin()");
 		expect(config).toContain("tailwindcss()");
+		expect(config).toContain('exclude: ["assets/**"]');
 		expect(config).toContain('outDir: "assets"');
 		expect(config).toContain("emptyOutDir: false");
 		expect(config).toContain('base: "styles/base.css"');
