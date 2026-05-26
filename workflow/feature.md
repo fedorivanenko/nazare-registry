@@ -9,14 +9,15 @@ git checkout main
 git pull --ff-only
 ```
 
-- Choose one feature file under `features/`.
+- Choose one feature file under `features/cli/` or `features/components/`.
 - If missing, create it from `features/feature.schema.yaml`.
 - Keep scope small: one user-visible command, behavior, or registry package.
 - Check relevant policies in `docs/policies/`.
 - Commit accepted scope directly to `main`:
 
 ```sh
-git add features/<feature-id>.md docs/policies docs/backlog.md
+git add features/cli/<feature-id>.md docs/policies docs/backlog.md
+# or: git add features/components/<feature-id>.md docs/policies docs/backlog.md
 git commit -m "docs: design <feature-id>"
 git push origin main
 ```
