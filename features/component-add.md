@@ -13,6 +13,7 @@ dependencies:
   - theme-build-plugin
   - theme-build-pipeline
   - theme-pull
+  - component-registry
   - component-list
 
 surfaces:
