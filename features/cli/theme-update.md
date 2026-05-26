@@ -19,6 +19,7 @@ surfaces:
     - nazare theme update
     - nazare theme update --force
     - nazare theme update --check
+    - nazare theme update --skip-conflicts
 
 invariants:
   - Requires initialized repo and existing lockfile theme metadata
@@ -27,9 +28,10 @@ invariants:
   - Checks all tracked installed theme files before any write or delete
   - Overwrites only unmodified tracked files unless --force is explicitly passed
   - Deletes only unmodified obsolete tracked files unless --force is explicitly passed
-  - Fails before mutation when current tracked files are modified or missing
-  - Fails before mutation when obsolete tracked files are modified
+  - Fails before mutation when current tracked files are modified or missing unless --force or --skip-conflicts is explicitly passed
+  - Fails before mutation when obsolete tracked files are modified unless --force or --skip-conflicts is explicitly passed
   - Never overwrites modified user files unless --force is explicitly passed
+  - --skip-conflicts skips unsafe user-touched files and continues safe mutations
   - Never deletes untracked files
   - Updates lockfile theme metadata only after successful file operations
 
@@ -78,12 +80,14 @@ Included:
 - `nazare theme update`
 - `nazare theme update --force`
 - `nazare theme update --check`
+- `nazare theme update --skip-conflicts`
 - registry resolution from `nazare.config.yml`
 - current manifest `theme` block validation using `theme-pull` rules, including per-file registry checksum metadata
 - tracked-file safety checks using `nazare.lock.yml` checksum metadata
 - update of unmodified tracked files
 - deletion of obsolete unmodified tracked files
 - copy of new manifest files only when target path is absent
+- skip-conflicts mode for continuing around modified, missing, obsolete modified, and existing untracked targets without overwriting/deleting them
 - lockfile metadata updates after successful writes/deletes
 - README instructions and Vitest coverage
 
@@ -136,15 +140,19 @@ Missing lockfile checksum metadata is migrated when it can be proven safe: if a 
 - Current tracked file + missing checksum + local differs from registry -> fail before mutation.
 - Current tracked file + missing checksum + local differs from registry + `--force` -> overwrite and update checksum.
 - Current tracked file + modified -> fail before mutation.
+- Current tracked file + modified + `--skip-conflicts` -> skip file, leave local file and lockfile entry unchanged, continue safe mutations.
 - Current tracked file + modified + `--force` -> overwrite and update checksum.
 - Current tracked file + missing -> fail before mutation.
+- Current tracked file + missing + `--skip-conflicts` -> skip file, leave lockfile entry unchanged, continue safe mutations.
 - Current tracked file + missing + `--force` -> restore from registry and update checksum.
 - Obsolete tracked file + unmodified -> delete file and remove lockfile entry.
 - Obsolete tracked file + modified -> fail before mutation.
+- Obsolete tracked file + modified + `--skip-conflicts` -> skip file, leave local file and lockfile entry unchanged, continue safe mutations.
 - Obsolete tracked file + modified + `--force` -> delete file and remove lockfile entry.
 - Obsolete tracked file + missing -> remove lockfile entry during successful update.
 - New manifest target + absent locally -> copy and add lockfile entry.
 - New manifest target + exists locally -> fail before mutation because ownership is ambiguous.
+- New manifest target + exists locally + `--skip-conflicts` -> skip target, leave local file untracked, continue safe mutations.
 - New manifest target + exists locally + `--force` -> overwrite and add lockfile entry.
 - Untracked local files -> never delete unless they are current manifest targets and `--force` is passed.
 
@@ -160,6 +168,7 @@ Missing lockfile checksum metadata is migrated when it can be proven safe: if a 
 - Successful mutation prints written/deleted paths and exits `0`.
 - `--check` exits `0` when update can proceed safely, prints planned writes/deletes/no-op, and does not mutate files or lockfile.
 - `--check` exits non-zero for the same safety errors as normal update and does not mutate files or lockfile.
+- `--skip-conflicts` prints skipped paths, leaves skipped files and lockfile entries unchanged, continues safe writes/deletes/untracks, and exits `0` when remaining plan succeeds.
 - `--force` may overwrite modified current files, restore missing current files, delete modified obsolete files, and overwrite existing untracked manifest targets.
 
 After successful mutation:
@@ -175,7 +184,7 @@ After successful mutation:
 
 ## Failure behavior
 
-Before any mutation, exit non-zero with clear error when:
+Before any mutation, exit non-zero with clear error when not using `--skip-conflicts` for file safety conflicts:
 
 - repo lacks `nazare.config.yml` or `nazare.lock.yml`
 - lockfile lacks `theme` metadata
@@ -183,9 +192,9 @@ Before any mutation, exit non-zero with clear error when:
 - any manifest `from`/`to` path is unsafe, duplicate, or missing in registry snapshot
 - any manifest checksum does not match resolved registry file content
 - any tracked entry lacks lockfile checksum metadata and cannot be safely migrated
-- any current tracked installed file is modified or missing, unless `--force` is passed
-- any obsolete tracked file is modified, unless `--force` is passed
-- any new manifest target exists locally but is untracked, unless `--force` is passed
+- any current tracked installed file is modified or missing, unless `--force` or `--skip-conflicts` is passed
+- any obsolete tracked file is modified, unless `--force` or `--skip-conflicts` is passed
+- any new manifest target exists locally but is untracked, unless `--force` or `--skip-conflicts` is passed
 
 Failed update must not mutate theme files, component lockfile entries, or files outside current/previously tracked `theme.files` destinations.
 
@@ -203,16 +212,22 @@ Result: implementation present; final feature-doc checklist still needs reconcil
   - Verify all files and lockfile unchanged.
 - [ ] `--force` overwrites modified current tracked file
   - Verify file becomes registry content and checksum updates.
+- [ ] `--skip-conflicts` skips modified current tracked file and updates other safe files
+  - Verify skipped file and its lockfile entry remain unchanged while safe file changes apply.
 - [ ] missing current tracked file fails before mutation
   - Verify clear missing-path error and lockfile unchanged.
 - [ ] `--force` restores missing current tracked file
   - Verify file is recreated from registry and checksum updates.
+- [ ] `--skip-conflicts` skips missing current tracked file and updates other safe files
+  - Verify missing file remains missing and its lockfile entry remains unchanged while safe file changes apply.
 - [ ] obsolete unmodified tracked file deletes
   - Verify file removed and lockfile entry removed.
 - [ ] obsolete modified tracked file fails before mutation
   - Verify file and lockfile unchanged.
 - [ ] `--force` deletes obsolete modified tracked file
   - Verify file and lockfile entry removed.
+- [ ] `--skip-conflicts` skips obsolete modified tracked file
+  - Verify file and lockfile entry remain unchanged while safe operations apply.
 - [ ] obsolete already-missing tracked file untracks
   - Verify lockfile entry removed without delete attempt.
 - [ ] missing lockfile checksum metadata is added when local file equals verified registry content
@@ -225,6 +240,8 @@ Result: implementation present; final feature-doc checklist still needs reconcil
   - Verify ambiguous-path error and target unchanged.
 - [ ] `--force` overwrites existing untracked manifest target
   - Verify file becomes registry content and lockfile entry is added.
+- [ ] `--skip-conflicts` skips existing untracked manifest target
+  - Verify local untracked file remains unchanged and safe operations apply.
 - [ ] no-op update leaves lockfile unchanged
   - Verify exact before/after lockfile.
 - [ ] `--check` reports planned operations without mutation
@@ -254,6 +271,8 @@ Plan phases:
 Checksum metadata is the local-modification authority. Do not compare local files to current registry to detect edits; registry may have changed. Do not attempt three-way merge.
 
 `--force` is explicit confirmation for destructive overwrite/delete behavior. It still must not affect paths outside current manifest targets or previously tracked theme files.
+
+`--skip-conflicts` is non-destructive. It converts file safety conflicts into skipped plan items, but it must not suppress registry validation, unsafe path, checksum mismatch, or malformed lockfile errors.
 
 `--check` uses the same planner as update, but stops before mutation and reports the plan.
 
