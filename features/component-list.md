@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: component-list
 title: List Components
-status: planned
+status: done
 
 dependencies:
   - cli-install
@@ -128,17 +128,17 @@ Failure must not mutate files, lockfile entries, or install metadata.
 
 ## Verification
 
-Result: planned.
+Result: done.
 
-- [ ] `nazare list` prints registry components in stable table order
-- [ ] installed IDs show `installed` status
-- [ ] empty registry prints no-components message and exits `0`
-- [ ] `nazare list --installed` lists only lockfile components
-- [ ] empty installed list prints no-installed message and exits `0`
-- [ ] invalid metadata fails before output
-- [ ] missing/invalid init state fails
-- [ ] unknown args fail clearly
-- [ ] command is read-only
+- [x] `nazare list` prints registry components in stable table order
+- [x] installed IDs show `installed` status
+- [x] empty registry prints no-components message and exits `0`
+- [x] `nazare list --installed` lists only lockfile components
+- [x] empty installed list prints no-installed message and exits `0`
+- [x] invalid metadata fails before output
+- [x] missing/invalid init state fails
+- [x] unknown args fail clearly
+- [x] command is read-only
 
 ---
 
