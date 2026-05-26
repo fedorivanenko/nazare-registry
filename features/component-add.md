@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: component-add
 title: Add Component
-status: planned
+status: done
 
 dependencies:
   - cli-install
@@ -185,23 +185,23 @@ Failure must not mutate component files, theme files, lockfile entries, or files
 
 ## Verification
 
-Result: planned.
+Result: done.
 
-- [ ] valid component installs files and lockfile metadata
-- [ ] dependency installs with requested component
-- [ ] unchanged installed component is no-op
-- [ ] missing component fails before mutation
-- [ ] invalid component ID fails before mutation
-- [ ] invalid registry metadata fails before mutation
-- [ ] checksum mismatch fails before mutation
-- [ ] unsafe/disallowed destination fails before mutation
-- [ ] duplicate destinations fail before mutation
-- [ ] existing untracked target fails before mutation
-- [ ] modified installed dependency fails before mutation
-- [ ] missing installed dependency file fails before mutation
-- [ ] installed component needing update fails before mutation
-- [ ] circular dependencies fail before mutation
-- [ ] standard validation failures mutate nothing
+- [x] valid component installs files and lockfile metadata
+- [x] dependency installs with requested component
+- [x] unchanged installed component is no-op
+- [x] missing component fails before mutation
+- [x] invalid component ID fails before mutation
+- [x] invalid registry metadata fails before mutation
+- [x] checksum mismatch fails before mutation
+- [x] unsafe/disallowed destination fails before mutation
+- [x] duplicate destinations fail before mutation
+- [x] existing untracked target fails before mutation
+- [x] modified installed dependency fails before mutation
+- [x] missing installed dependency file fails before mutation
+- [x] installed component needing update fails before mutation
+- [x] circular dependencies fail before mutation
+- [x] standard validation failures mutate nothing
 
 ---
 
@@ -221,5 +221,4 @@ This additive CLI command should be a minor release per `docs/policies/release-p
 
 ## Open questions
 
-- Should v1 support `--force` for untracked target overwrite, or stay non-destructive?
-- Should dependency components be first-class lockfile entries or marked transitive for future remove behavior?
+None. v1 has no `--force`; untracked targets fail. Dependency components are first-class lockfile entries.

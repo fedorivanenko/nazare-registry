@@ -117,6 +117,14 @@ List installed components recorded in `nazare.lock.yml`:
 nazare list --installed
 ```
 
+Install a component and any missing dependencies:
+
+```sh
+nazare add c-button
+```
+
+`nazare add` verifies registry file checksums before writing, refuses untracked target conflicts, and records installed component ownership in `nazare.lock.yml`.
+
 ## Update
 
 Update a Nazare-owned CLI install from its originally installed source:

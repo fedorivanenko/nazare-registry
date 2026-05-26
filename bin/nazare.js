@@ -13,6 +13,7 @@ Usage:
   nazare --version
   nazare init [directory] [--repo <repo>] [--ref <ref>]
   nazare list [--installed]
+  nazare add <component>
   nazare theme pull [--yes]
   nazare theme update [--force] [--check]
   nazare self update [latest|--source <ref>]
@@ -20,6 +21,7 @@ Usage:
 Commands:
   init [directory]    Initialize Nazare relationship in a theme repo
   list                List registry components or installed components
+  add <component>     Install a registry component and its dependencies
   theme pull          Pull registry theme scaffold into an initialized theme repo
   theme update        Safely update installed theme scaffold files
   self update         Update the Nazare CLI install from its original source, latest release, or --source override
@@ -423,7 +425,7 @@ function parseComponentManifest(source) {
 		const component = components[currentId];
 		const versionMatch = line.match(/^ {4}version:\s*(.+)$/);
 		const typeMatch = line.match(/^ {4}type:\s*(.+)$/);
-		const dependenciesInlineMatch = line.match(/^ {4}dependencies:\s*(.+)$/);
+		const dependenciesInlineMatch = line.match(/^ {4}dependencies:\s*(\S.*)$/);
 		const dependenciesBlockMatch = line.match(/^ {4}dependencies:\s*$/);
 		const dependencyMatch = line.match(/^ {6}-\s+(.+)$/);
 		const filesMatch = line.match(/^ {4}files:\s*$/);
@@ -651,6 +653,8 @@ function parseInstalledComponents(source) {
 	let currentId;
 	let inDependencies = false;
 	let inFiles = false;
+	let inChecksum = false;
+	let currentFile;
 
 	for (let index = componentsLineIndex + 1; index < lines.length; index += 1) {
 		const line = lines[index];
@@ -663,6 +667,8 @@ function parseInstalledComponents(source) {
 			components[currentId] = {};
 			inDependencies = false;
 			inFiles = false;
+			inChecksum = false;
+			currentFile = undefined;
 			continue;
 		}
 
@@ -673,12 +679,16 @@ function parseInstalledComponents(source) {
 		const component = components[currentId];
 		const versionMatch = line.match(/^ {4}version:\s*(.+)$/);
 		const typeMatch = line.match(/^ {4}type:\s*(.+)$/);
-		const dependenciesInlineMatch = line.match(/^ {4}dependencies:\s*(.+)$/);
+		const dependenciesInlineMatch = line.match(/^ {4}dependencies:\s*(\S.*)$/);
 		const dependenciesBlockMatch = line.match(/^ {4}dependencies:\s*$/);
 		const dependencyMatch = line.match(/^ {6}-\s+(.+)$/);
 		const timestampMatch = line.match(/^ {4}(installedAt|updatedAt):\s*(.*)$/);
 		const filesMatch = line.match(/^ {4}files:\s*(.*)$/);
-		const nestedIgnoredMatch = line.match(/^ {6,}.+$/);
+		const pathMatch = line.match(/^ {6}-\s+path:\s*(.+)$/);
+		const sourceMatch = line.match(/^ {8}source:\s*(.+)$/);
+		const checksumMatch = line.match(/^ {8}checksum:\s*$/);
+		const algorithmMatch = line.match(/^ {10}algorithm:\s*(.+)$/);
+		const valueMatch = line.match(/^ {10}value:\s*(.+)$/);
 
 		if (versionMatch) {
 			component.version = versionMatch[1].trim();
@@ -708,15 +718,36 @@ function parseInstalledComponents(source) {
 			continue;
 		}
 		if (filesMatch) {
+			component.files = [];
 			inDependencies = false;
 			inFiles = filesMatch[1].trim() === "";
+			inChecksum = false;
 			continue;
 		}
-		if (
-			timestampMatch ||
-			nestedIgnoredMatch ||
-			(inFiles && /^ {4,}.+$/.test(line))
-		) {
+		if (inFiles && pathMatch) {
+			currentFile = { path: pathMatch[1].trim() };
+			component.files.push(currentFile);
+			inChecksum = false;
+			continue;
+		}
+		if (inFiles && sourceMatch && currentFile && !inChecksum) {
+			currentFile.source = sourceMatch[1].trim();
+			continue;
+		}
+		if (inFiles && checksumMatch && currentFile) {
+			currentFile.checksum = {};
+			inChecksum = true;
+			continue;
+		}
+		if (inFiles && inChecksum && algorithmMatch && currentFile?.checksum) {
+			currentFile.checksum.algorithm = algorithmMatch[1].trim();
+			continue;
+		}
+		if (inFiles && inChecksum && valueMatch && currentFile?.checksum) {
+			currentFile.checksum.value = valueMatch[1].trim();
+			continue;
+		}
+		if (timestampMatch) {
 			inDependencies = false;
 			continue;
 		}
@@ -767,6 +798,24 @@ function validateInstalledComponentMetadata(components) {
 		}
 		if (!Array.isArray(component.dependencies)) {
 			throw new Error(`Invalid installed component dependencies: ${id}`);
+		}
+		if (component.files !== undefined) {
+			if (!Array.isArray(component.files)) {
+				throw new Error(`Invalid installed component files: ${id}`);
+			}
+			for (const file of component.files) {
+				if (!isSafeRelativePath(file.path)) {
+					throw new Error(`Unsafe installed component file path: ${id}`);
+				}
+				if (!isSafeRelativePath(file.source)) {
+					throw new Error(`Unsafe installed component file source: ${id}`);
+				}
+				if (!hasValidChecksum(file)) {
+					throw new Error(
+						`Invalid installed component file checksum metadata: ${id}`,
+					);
+				}
+			}
 		}
 		const seenDependencies = new Set();
 		for (const dependency of component.dependencies) {
@@ -895,6 +944,236 @@ async function listComponents(args) {
 		return 0;
 	} catch (error) {
 		process.stderr.write(`nazare list error: ${error.message}\n`);
+		return 1;
+	}
+}
+
+function parseAddArgs(args) {
+	if (args.length !== 1) {
+		throw new Error("Usage: nazare add <component>");
+	}
+	const id = args[0];
+	if (!isValidComponentId(id)) {
+		throw new Error(`Invalid component ID: ${id}`);
+	}
+	return id;
+}
+
+function componentInstallOrder(components, requestedId) {
+	if (!components[requestedId]) {
+		throw new Error(`Component not found in registry: ${requestedId}`);
+	}
+	const order = [];
+	const seen = new Set();
+	function visit(id) {
+		if (seen.has(id)) return;
+		const component = components[id];
+		if (!component) {
+			throw new Error(`Missing component dependency: ${id}`);
+		}
+		for (const dependency of component.dependencies) visit(dependency);
+		seen.add(id);
+		order.push(id);
+	}
+	visit(requestedId);
+	return order;
+}
+
+function componentFilesFromManifest(component) {
+	return component.files.map((file) => ({
+		path: file.to,
+		source: file.from,
+		checksum: file.checksum,
+	}));
+}
+
+function componentMatchesLock(manifestComponent, lockComponent) {
+	if (!lockComponent) return false;
+	if (manifestComponent.version !== lockComponent.version) return false;
+	if (manifestComponent.type !== lockComponent.type) return false;
+	if (
+		JSON.stringify(manifestComponent.dependencies) !==
+		JSON.stringify(lockComponent.dependencies)
+	) {
+		return false;
+	}
+	const manifestFiles = componentFilesFromManifest(manifestComponent).sort(
+		(a, b) => a.path.localeCompare(b.path),
+	);
+	const lockFiles = [...(lockComponent.files ?? [])].sort((a, b) =>
+		a.path.localeCompare(b.path),
+	);
+	return JSON.stringify(manifestFiles) === JSON.stringify(lockFiles);
+}
+
+function assertInstalledFilesUnmodified(cwd, id, component) {
+	if (!Array.isArray(component.files)) {
+		throw new Error(`Invalid installed component files: ${id}`);
+	}
+	for (const file of component.files) {
+		const targetPath = path.join(cwd, file.path);
+		if (!fs.existsSync(targetPath)) {
+			throw new Error(`Installed component file is missing: ${file.path}`);
+		}
+		if (sha256(fs.readFileSync(targetPath)) !== file.checksum.value) {
+			throw new Error(`Installed component file is modified: ${file.path}`);
+		}
+	}
+}
+
+function componentLockEntry(manifestComponent, timestamp) {
+	return {
+		version: manifestComponent.version,
+		type: manifestComponent.type,
+		installedAt: timestamp,
+		updatedAt: timestamp,
+		dependencies: [...manifestComponent.dependencies],
+		files: componentFilesFromManifest(manifestComponent),
+	};
+}
+
+function renderDependencyList(dependencies) {
+	if (dependencies.length === 0) return "[]";
+	return `\n${dependencies.map((dependency) => `    - ${dependency}`).join("\n")}`;
+}
+
+function renderComponentLockEntry(id, component) {
+	const files = component.files
+		.map(
+			(file) =>
+				`      - path: ${file.path}\n        source: ${file.source}\n        checksum:\n          algorithm: sha256\n          value: ${file.checksum.value}`,
+		)
+		.join("\n");
+	return `  ${id}:\n    version: ${component.version}\n    type: ${component.type}\n    installedAt: "${component.installedAt}"\n    updatedAt: "${component.updatedAt}"\n    dependencies: ${renderDependencyList(component.dependencies)}\n    files:\n${files}`;
+}
+
+function extractThemeBlock(lockSource) {
+	const match = lockSource.match(/(?:^|\n)(theme:\n[\s\S]*)$/);
+	return match ? match[1].trimEnd() : "";
+}
+
+function renderComponentLockYaml(registry, components, themeBlock = "") {
+	const ids = Object.keys(components);
+	const renderedComponents =
+		ids.length === 0
+			? "components: {}"
+			: `components:\n${ids.map((id) => renderComponentLockEntry(id, components[id])).join("\n")}`;
+	const renderedTheme = themeBlock ? `\n\n${themeBlock}\n` : "";
+	return `${renderRegistryYaml(registry)}\n${renderedComponents}\n${renderedTheme}`;
+}
+
+async function readCurrentComponentsWithSources(registry, ids) {
+	const registryRoot = resolveRegistryRoot();
+	const manifest = await readRegistryFile(
+		registry,
+		registryRoot,
+		registry.manifest,
+	);
+	const components = parseComponentManifest(manifest.toString("utf8"));
+	const sources = new Map();
+
+	for (const id of ids) {
+		const component = components[id];
+		if (!component) continue;
+		for (const file of component.files) {
+			let content;
+			try {
+				content = await readRegistryFile(registry, registryRoot, file.from);
+			} catch {
+				throw new Error(`Missing component file source: ${file.from}`);
+			}
+			if (sha256(content) !== file.checksum.value) {
+				throw new Error(`Component file checksum mismatch: ${file.from}`);
+			}
+			sources.set(file.from, content);
+		}
+	}
+
+	return { components, sources };
+}
+
+async function addComponent(args) {
+	try {
+		const requestedId = parseAddArgs(args);
+		const cwd = process.cwd();
+		const { lockPath, lockSource, registry } = readProjectState(cwd);
+		const installedComponents = parseInstalledComponents(lockSource);
+		const registryComponents = await readCurrentComponents(registry);
+		const order = componentInstallOrder(registryComponents, requestedId);
+		const { components, sources } = await readCurrentComponentsWithSources(
+			registry,
+			order,
+		);
+		const plannedWrites = [];
+		const nextComponents = { ...installedComponents };
+		const ownership = new Map();
+
+		for (const [id, component] of Object.entries(installedComponents)) {
+			for (const file of component.files ?? []) {
+				if (ownership.has(file.path) && ownership.get(file.path).id !== id) {
+					throw new Error(
+						`Component file target has multiple owners: ${file.path}`,
+					);
+				}
+				ownership.set(file.path, { id, file });
+			}
+		}
+
+		for (const id of order) {
+			const manifestComponent = components[id];
+			const installedComponent = installedComponents[id];
+
+			if (installedComponent) {
+				if (!componentMatchesLock(manifestComponent, installedComponent)) {
+					throw new Error(`Installed component requires update: ${id}`);
+				}
+				assertInstalledFilesUnmodified(cwd, id, installedComponent);
+				continue;
+			}
+
+			for (const file of manifestComponent.files) {
+				const targetPath = path.join(cwd, file.to);
+				const owner = ownership.get(file.to);
+				if (owner) {
+					throw new Error(`Component file target already owned: ${file.to}`);
+				}
+				if (fs.existsSync(targetPath)) {
+					throw new Error(`Component file target exists untracked: ${file.to}`);
+				}
+				plannedWrites.push({ file, targetPath });
+			}
+		}
+
+		if (plannedWrites.length === 0) {
+			process.stdout.write(`Component already installed: ${requestedId}\n`);
+			return 0;
+		}
+
+		const timestamp = new Date().toISOString();
+		for (const id of order) {
+			if (!installedComponents[id]) {
+				nextComponents[id] = componentLockEntry(components[id], timestamp);
+			}
+		}
+
+		for (const write of plannedWrites) {
+			fs.mkdirSync(path.dirname(write.targetPath), { recursive: true });
+			fs.writeFileSync(write.targetPath, sources.get(write.file.from));
+			process.stdout.write(`Wrote ${write.file.to}\n`);
+		}
+
+		fs.writeFileSync(
+			lockPath,
+			renderComponentLockYaml(
+				registry,
+				nextComponents,
+				extractThemeBlock(lockSource),
+			),
+		);
+		process.stdout.write(`Installed components: ${order.join(", ")}\n`);
+		return 0;
+	} catch (error) {
+		process.stderr.write(`nazare add error: ${error.message}\n`);
 		return 1;
 	}
 }
@@ -1612,6 +1891,10 @@ async function main(argv) {
 
 	if (command === "list") {
 		return listComponents(argv.slice(1));
+	}
+
+	if (command === "add") {
+		return addComponent(argv.slice(1));
 	}
 
 	if (command === "theme" && subcommand === "pull") {
