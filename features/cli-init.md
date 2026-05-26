@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: cli-init
 title: Initialize Nazare Theme Repo
-status: planned
+status: done
 
 dependencies:
   - cli-install

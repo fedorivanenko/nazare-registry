@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: theme-build-plugin
 title: Theme Build Plugin
-status: planned
+status: in-progress
 
 dependencies:
   - cli-install
@@ -284,7 +284,7 @@ No content hashes in v1 output names.
 
 ## Verification
 
-Result: planned.
+Result: implementation present; final feature-doc checklist still needs reconciliation.
 
 - [ ] scans section with no snippets
 - [ ] scans section with static snippet dependency

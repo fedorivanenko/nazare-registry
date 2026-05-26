@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: theme-scaffold
 title: Minimal Theme Scaffold
-status: planned
+status: in-progress
 
 dependencies:
   - cli-install
@@ -41,7 +41,7 @@ codebaseOwnership:
     repo:
       - theme/default/layout/theme.liquid
       - theme/default/templates/index.json
-      - theme/default/sections/main.liquid
+      - theme/default/sections/s-main.liquid
       - theme/default/config/settings_schema.json
       - nazare.registry.yml theme block entries for minimal scaffold files
       - README.md minimal theme scaffold notes
@@ -157,7 +157,7 @@ theme:
 
 ## Verification
 
-Result: planned.
+Result: implementation present; final feature-doc checklist still needs reconciliation.
 
 - [ ] `theme/default/` contains the exact Shopify-only v1 scaffold file list
   - Verify with fixture file-list test.

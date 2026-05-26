@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: theme-build-pipeline
 title: Theme Build Pipeline
-status: planned
+status: in-progress
 
 dependencies:
   - cli-install
@@ -320,7 +320,7 @@ Generated files are not scaffold source and must not be listed in `theme.files` 
 
 ## Verification
 
-Result: planned.
+Result: implementation present; final feature-doc checklist still needs reconciliation.
 
 - [ ] `theme/default/` contains build pipeline files
   - Verify `package.json`, `vite.config.js`, `styles/base.css`, `.gitignore`, and `shopify.theme.toml` exist.

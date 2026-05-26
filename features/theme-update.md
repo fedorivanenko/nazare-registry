@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: theme-update
 title: Update Theme
-status: planned
+status: in-progress
 
 dependencies:
   - cli-install
@@ -193,7 +193,7 @@ Failed update must not mutate theme files, component lockfile entries, or files 
 
 ## Verification
 
-Result: planned.
+Result: implementation present; final feature-doc checklist still needs reconciliation.
 
 - [ ] verifies registry manifest checksums before planning mutations
   - Verify missing, malformed, unsupported, and mismatched manifest checksum metadata fail before mutation.

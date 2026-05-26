@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: theme-pull
 title: Pull Theme
-status: planned
+status: in-progress
 
 dependencies:
   - cli-install
@@ -204,7 +204,7 @@ Lockfile rules:
 
 ## Verification
 
-Result: planned.
+Result: implementation present; final feature-doc checklist still needs reconciliation.
 
 - [ ] `nazare theme pull` copies missing manifest-declared theme files
   - Verify with a temp initialized repo and registry fixture.
