@@ -1,7 +1,7 @@
 schemaVersion: 1
 
 featureDocument:
-  filePattern: "features/*.md"
+  filePattern: "features/{cli,components}/*.md"
   purpose: "Lock the structure for feature description documents."
   format: "YAML frontmatter followed by markdown body."
 
