@@ -34,6 +34,7 @@ invariants:
   - --skip-conflicts skips unsafe user-touched files and continues safe mutations
   - Never deletes untracked files
   - Updates lockfile theme metadata only after successful file operations
+  - Preserves existing lockfile component metadata exactly when rewriting theme metadata
 
 nonGoals:
   - Implementing nazare theme pull
@@ -89,6 +90,7 @@ Included:
 - copy of new manifest files only when target path is absent
 - skip-conflicts mode for continuing around modified, missing, obsolete modified, and existing untracked targets without overwriting/deleting them
 - lockfile metadata updates after successful writes/deletes
+- preservation of existing component lockfile metadata during every theme lockfile rewrite
 - stdout reporting for every mutation the command performs, including file writes, deletes, lockfile untracks, checksum metadata migrations, and skipped conflicts
 - README instructions and Vitest coverage
 
@@ -252,6 +254,7 @@ Result: implementation present; final feature-doc checklist still needs reconcil
 - [ ] `--check` reports safety errors without mutation
   - Verify non-zero exit and unchanged files/lockfile.
 - [ ] successful update preserves `theme.installedAt` and sets `theme.updatedAt`
+- [x] successful update preserves existing `components:` lockfile metadata
 - [ ] untracked files are never deleted
 - [ ] standard validation failures mutate nothing
   - Verify missing/invalid config, lockfile, manifest, theme block, unsafe paths, duplicate paths, and missing registry files.

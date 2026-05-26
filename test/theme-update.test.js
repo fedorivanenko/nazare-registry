@@ -494,6 +494,47 @@ describe("nazare theme update", () => {
 		);
 	});
 
+	it("preserves component lockfile metadata during forced update", async () => {
+		const cwd = await makeTempDir();
+		const registry = await makeTempDir("nazare-registry-test-");
+		await writeRegistry(registry, { "layout/theme.liquid": "old layout\n" });
+		await initAndPull(cwd, registry);
+		const lockPath = join(cwd, "nazare.lock.yml");
+		const componentBlock = `components:
+  s-announcement:
+    version: 1.0.0
+    type: section
+    installedAt: "2026-05-26T00:00:00.000Z"
+    updatedAt: "2026-05-26T00:00:00.000Z"
+    dependencies: []
+    files:
+      - path: sections/s-announcement.liquid
+        source: components/s-announcement/s-announcement.liquid
+        checksum:
+          algorithm: sha256
+          value: ${"a".repeat(64)}`;
+		await writeFile(
+			lockPath,
+			(await readFile(lockPath, "utf8")).replace(
+				"components: {}",
+				componentBlock,
+			),
+		);
+		await writeFile(join(cwd, "layout", "theme.liquid"), "user edit\n");
+		await writeRegistry(registry, { "layout/theme.liquid": "new layout\n" });
+
+		const result = await runCli(["theme", "update", "--force"], {
+			cwd,
+			env: { NAZARE_REGISTRY_DIR: registry },
+		});
+
+		expect(result).toMatchObject({ code: 0, stderr: "" });
+		const lockfile = await readFile(lockPath, "utf8");
+		expect(lockfile).toContain("s-announcement:");
+		expect(lockfile).toContain("sections/s-announcement.liquid");
+		expect(lockfile).not.toContain("components: {}");
+	});
+
 	it("check reports plan without mutation", async () => {
 		const cwd = await makeTempDir();
 		const registry = await makeTempDir("nazare-registry-test-");

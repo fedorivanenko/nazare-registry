@@ -80,6 +80,40 @@ describe("nazare theme pull", () => {
 		expect(lockfile).toContain("algorithm: sha256");
 	});
 
+	it("preserves component lockfile metadata when writing theme metadata", async () => {
+		const cwd = await makeTempDir();
+		await runCli(["init"], { cwd });
+		const lockPath = join(cwd, "nazare.lock.yml");
+		const componentBlock = `components:
+  s-announcement:
+    version: 1.0.0
+    type: section
+    installedAt: "2026-05-26T00:00:00.000Z"
+    updatedAt: "2026-05-26T00:00:00.000Z"
+    dependencies: []
+    files:
+      - path: sections/s-announcement.liquid
+        source: components/s-announcement/s-announcement.liquid
+        checksum:
+          algorithm: sha256
+          value: ${"a".repeat(64)}`;
+		await writeFile(
+			lockPath,
+			(await readFile(lockPath, "utf8")).replace(
+				"components: {}",
+				componentBlock,
+			),
+		);
+
+		const result = await runCli(["theme", "pull", "--yes"], { cwd });
+
+		expect(result).toMatchObject({ code: 0, stderr: "" });
+		const lockfile = await readFile(lockPath, "utf8");
+		expect(lockfile).toContain("s-announcement:");
+		expect(lockfile).toContain("sections/s-announcement.liquid");
+		expect(lockfile).not.toContain("components: {}");
+	});
+
 	it("fails before writes when not initialized", async () => {
 		const cwd = await makeTempDir();
 		const result = await runCli(["theme", "pull", "--yes"], { cwd });
