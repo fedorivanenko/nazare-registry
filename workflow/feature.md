@@ -60,10 +60,6 @@ Use the feature doc ID for `<feature-id>`, for example `feat/component-list`.
 
 ## 6. Verify locally
 
-Follow `docs/policies/testing-policy.md`. Prefer targeted tests during implementation and run affected test files before PR/release.
-
-Typical full local check:
-
 ```sh
 npx vitest run
 biome check bin/nazare.js test README.md install.sh

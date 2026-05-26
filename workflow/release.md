@@ -1,16 +1,16 @@
 # Release Workflow
 
-Policy: `docs/policies/release-policy.md` and `docs/policies/testing-policy.md`.
+Policy: `docs/policies/release-policy.md`.
 
 Release only for CLI/installer behavior changes, or registry changes that require new installed CLI support. Registry content/docs/tests alone usually need no release.
 
 Version: patch = bug fix, minor = additive command/flag, major = breaking behavior. Tag format: `vMAJOR.MINOR.PATCH`.
 
 ```sh
-# verify; use targeted/affected tests per testing policy for narrow bugfixes
+# verify
 git status --short
-npx vitest run <affected-test-files>
-biome check <changed-code-files>
+npx vitest run
+biome check bin/nazare.js test README.md install.sh
 
 # bump
 npm version <new-version> --no-git-tag-version
