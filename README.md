@@ -105,6 +105,18 @@ components:
 
 Component IDs use `s-<name>` for sections, `c-<name>` for snippets, and optional unprefixed names for packages like `core`. File sources must stay under `components/<component-id>/`. File destinations must stay under component-safe roots such as `sections/`, `snippets/`, `templates/`, `assets/`, `styles/`, or `scripts/` component subdirectories.
 
+List available registry components from an initialized theme repo:
+
+```sh
+nazare list
+```
+
+List installed components recorded in `nazare.lock.yml`:
+
+```sh
+nazare list --installed
+```
+
 ## Update
 
 Update a Nazare-owned CLI install from its originally installed source:

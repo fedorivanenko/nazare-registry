@@ -12,12 +12,14 @@ Usage:
   nazare --help
   nazare --version
   nazare init [directory] [--repo <repo>] [--ref <ref>]
+  nazare list [--installed]
   nazare theme pull [--yes]
   nazare theme update [--force] [--check]
   nazare self update [latest|--source <ref>]
 
 Commands:
   init [directory]    Initialize Nazare relationship in a theme repo
+  list                List registry components or installed components
   theme pull          Pull registry theme scaffold into an initialized theme repo
   theme update        Safely update installed theme scaffold files
   self update         Update the Nazare CLI install from its original source, latest release, or --source override
@@ -27,6 +29,7 @@ Options:
   -v, --version       Show CLI version
   --repo <repo>       Registry GitHub repo for init
   --ref <ref>         Registry ref for init
+  --installed         Show installed components from nazare.lock.yml
   --source <ref>      Update from a branch, tag, full ref, or commit SHA
   --yes               Overwrite theme file conflicts without prompting
   --force             Overwrite modified theme update files
@@ -625,6 +628,275 @@ function validateComponentMetadata(components) {
 		visited.add(id);
 	}
 	for (const id of ids) visit(id);
+}
+
+function parseInstalledComponents(source) {
+	const lines = source.split("\n");
+	const componentsLineIndex = lines.findIndex((line) =>
+		/^components:\s*/.test(line),
+	);
+
+	if (componentsLineIndex === -1) {
+		throw new Error("Invalid nazare.lock.yml: missing components block");
+	}
+
+	const componentsLine = lines[componentsLineIndex];
+	const inlineValue = componentsLine.replace(/^components:\s*/, "").trim();
+	if (inlineValue === "{}") return {};
+	if (inlineValue !== "") {
+		throw new Error("Invalid components block in nazare.lock.yml");
+	}
+
+	const components = {};
+	let currentId;
+	let inDependencies = false;
+	let inFiles = false;
+
+	for (let index = componentsLineIndex + 1; index < lines.length; index += 1) {
+		const line = lines[index];
+		if (line.trim() === "") continue;
+		if (/^\S/.test(line)) break;
+
+		const componentMatch = line.match(/^ {2}([a-z0-9]+(?:-[a-z0-9]+)*):\s*$/);
+		if (componentMatch) {
+			currentId = componentMatch[1];
+			components[currentId] = {};
+			inDependencies = false;
+			inFiles = false;
+			continue;
+		}
+
+		if (!currentId) {
+			throw new Error("Invalid components block in nazare.lock.yml");
+		}
+
+		const component = components[currentId];
+		const versionMatch = line.match(/^ {4}version:\s*(.+)$/);
+		const typeMatch = line.match(/^ {4}type:\s*(.+)$/);
+		const dependenciesInlineMatch = line.match(/^ {4}dependencies:\s*(.+)$/);
+		const dependenciesBlockMatch = line.match(/^ {4}dependencies:\s*$/);
+		const dependencyMatch = line.match(/^ {6}-\s+(.+)$/);
+		const timestampMatch = line.match(/^ {4}(installedAt|updatedAt):\s*(.*)$/);
+		const filesMatch = line.match(/^ {4}files:\s*(.*)$/);
+		const nestedIgnoredMatch = line.match(/^ {6,}.+$/);
+
+		if (versionMatch) {
+			component.version = versionMatch[1].trim();
+			continue;
+		}
+		if (typeMatch) {
+			component.type = typeMatch[1].trim();
+			continue;
+		}
+		if (dependenciesInlineMatch) {
+			component.dependencies = parseComponentListValue(
+				dependenciesInlineMatch[1],
+				`components.${currentId}.dependencies`,
+			);
+			inDependencies = false;
+			inFiles = false;
+			continue;
+		}
+		if (dependenciesBlockMatch) {
+			component.dependencies = [];
+			inDependencies = true;
+			inFiles = false;
+			continue;
+		}
+		if (inDependencies && dependencyMatch) {
+			component.dependencies.push(dependencyMatch[1].trim());
+			continue;
+		}
+		if (filesMatch) {
+			inDependencies = false;
+			inFiles = filesMatch[1].trim() === "";
+			continue;
+		}
+		if (
+			timestampMatch ||
+			nestedIgnoredMatch ||
+			(inFiles && /^ {4,}.+$/.test(line))
+		) {
+			inDependencies = false;
+			continue;
+		}
+
+		throw new Error(
+			`Invalid installed component metadata near line ${index + 1}`,
+		);
+	}
+
+	validateInstalledComponentMetadata(components);
+	return components;
+}
+
+function validateInstalledComponentMetadata(components) {
+	if (
+		!components ||
+		typeof components !== "object" ||
+		Array.isArray(components)
+	) {
+		throw new Error("Invalid components block in nazare.lock.yml");
+	}
+
+	for (const [id, component] of Object.entries(components)) {
+		if (!isValidComponentId(id)) {
+			throw new Error(`Invalid installed component ID: ${id}`);
+		}
+		if (
+			!component ||
+			typeof component !== "object" ||
+			Array.isArray(component)
+		) {
+			throw new Error(`Invalid installed component metadata: ${id}`);
+		}
+		if (
+			typeof component.version !== "string" ||
+			!SEMVER_PATTERN.test(component.version)
+		) {
+			throw new Error(`Invalid installed component version: ${id}`);
+		}
+		if (!COMPONENT_TYPES.has(component.type)) {
+			throw new Error(`Invalid installed component type: ${id}`);
+		}
+		if (component.type === "section" && !id.startsWith("s-")) {
+			throw new Error(`Invalid installed section component ID: ${id}`);
+		}
+		if (component.type === "snippet" && !id.startsWith("c-")) {
+			throw new Error(`Invalid installed snippet component ID: ${id}`);
+		}
+		if (!Array.isArray(component.dependencies)) {
+			throw new Error(`Invalid installed component dependencies: ${id}`);
+		}
+		const seenDependencies = new Set();
+		for (const dependency of component.dependencies) {
+			if (!isValidComponentId(dependency)) {
+				throw new Error(`Invalid installed component dependency: ${id}`);
+			}
+			if (dependency === id) {
+				throw new Error(`Installed component cannot depend on itself: ${id}`);
+			}
+			if (seenDependencies.has(dependency)) {
+				throw new Error(`Duplicate installed component dependency: ${id}`);
+			}
+			if (!components[dependency]) {
+				throw new Error(
+					`Missing installed component dependency: ${dependency}`,
+				);
+			}
+			seenDependencies.add(dependency);
+		}
+	}
+
+	const visiting = new Set();
+	const visited = new Set();
+	function visit(id, trail = []) {
+		if (visited.has(id)) return;
+		if (visiting.has(id)) {
+			throw new Error(
+				`Circular installed component dependency: ${[...trail, id].join(" -> ")}`,
+			);
+		}
+		visiting.add(id);
+		for (const dependency of components[id].dependencies) {
+			visit(dependency, [...trail, id]);
+		}
+		visiting.delete(id);
+		visited.add(id);
+	}
+	for (const id of Object.keys(components)) visit(id);
+}
+
+function renderTable(headers, rows) {
+	const widths = headers.map((header, index) =>
+		Math.max(header.length, ...rows.map((row) => row[index].length)),
+	);
+	return [headers, ...rows]
+		.map((row) =>
+			row
+				.map((cell, index) => cell.padEnd(widths[index]))
+				.join("  ")
+				.trimEnd(),
+		)
+		.join("\n");
+}
+
+function renderAvailableComponents(components, installedComponents) {
+	const ids = Object.keys(components).sort((a, b) => a.localeCompare(b));
+	if (ids.length === 0) {
+		return "No components available in registry.\n";
+	}
+
+	const rows = ids.map((id) => [
+		id,
+		components[id].type,
+		components[id].version,
+		installedComponents[id] ? "installed" : "not installed",
+	]);
+
+	return `Available components:\n\n${renderTable(["ID", "Type", "Version", "Status"], rows)}\n`;
+}
+
+function renderInstalledComponents(components) {
+	const ids = Object.keys(components).sort((a, b) => a.localeCompare(b));
+	if (ids.length === 0) {
+		return "No components installed.\n";
+	}
+
+	const rows = ids.map((id) => [
+		id,
+		components[id].type,
+		components[id].version,
+	]);
+
+	return `Installed components:\n\n${renderTable(["ID", "Type", "Version"], rows)}\n`;
+}
+
+function parseListArgs(args) {
+	const options = { installed: false };
+	for (const arg of args) {
+		if (arg === "--installed") {
+			if (options.installed) {
+				throw new Error("Duplicate list option: --installed");
+			}
+			options.installed = true;
+			continue;
+		}
+		throw new Error(`Unknown list option: ${arg}`);
+	}
+	return options;
+}
+
+async function readCurrentComponents(registry) {
+	const registryRoot = resolveRegistryRoot();
+	const manifest = await readRegistryFile(
+		registry,
+		registryRoot,
+		registry.manifest,
+	);
+	return parseComponentManifest(manifest.toString("utf8"));
+}
+
+async function listComponents(args) {
+	try {
+		const options = parseListArgs(args);
+		const { lockSource, registry } = readProjectState(process.cwd());
+		const installedComponents = parseInstalledComponents(lockSource);
+
+		if (options.installed) {
+			process.stdout.write(renderInstalledComponents(installedComponents));
+			return 0;
+		}
+
+		const components = await readCurrentComponents(registry);
+		process.stdout.write(
+			renderAvailableComponents(components, installedComponents),
+		);
+		return 0;
+	} catch (error) {
+		process.stderr.write(`nazare list error: ${error.message}\n`);
+		return 1;
+	}
 }
 
 function parseThemeManifest(source) {
@@ -1338,6 +1610,10 @@ async function main(argv) {
 		return initTheme(argv.slice(1));
 	}
 
+	if (command === "list") {
+		return listComponents(argv.slice(1));
+	}
+
 	if (command === "theme" && subcommand === "pull") {
 		return themePull(rest);
 	}
@@ -1366,5 +1642,7 @@ if (require.main === module) {
 module.exports = {
 	isValidComponentId,
 	parseComponentManifest,
+	parseInstalledComponents,
 	validateComponentMetadata,
+	validateInstalledComponentMetadata,
 };
