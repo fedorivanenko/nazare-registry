@@ -152,5 +152,4 @@ Validate discovery metadata only. Do not read or checksum component files; insta
 
 ## Open questions
 
-- Add descriptions once registry metadata supports them?
-- Add `nazare list --available` alias later?
+None. Descriptions and `nazare list --available` are out of scope for v1.
