@@ -5,6 +5,9 @@ import { nazareThemePlugin } from "./nazare/vite-plugin.js";
 export default defineConfig({
 	plugins: [nazareThemePlugin(), tailwindcss()],
 	build: {
+		watch: {
+			exclude: ["assets/**"],
+		},
 		outDir: "assets",
 		emptyOutDir: false,
 		copyPublicDir: false,
