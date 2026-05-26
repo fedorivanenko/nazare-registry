@@ -6,7 +6,10 @@
 		"nazare": "./bin/nazare.js"
 	},
 	"scripts": {
-		"test": "vitest run"
+		"test": "npm run test:unit",
+		"test:build": "vitest run test/integration/theme-build.test.js",
+		"test:build:slow": "NAZARE_RUN_SLOW_TESTS=1 vitest run test/integration/theme-build.test.js",
+		"test:unit": "vitest run test/*.test.js"
 	},
 	"license": "UNLICENSED",
 	"private": true,
