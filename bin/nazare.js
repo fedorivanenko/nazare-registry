@@ -1430,7 +1430,20 @@ function renderThemeFileEntry(file) {
 	return `    - path: ${file.path}\n      source: ${file.source}${checksum}`;
 }
 
-function renderThemeLockYaml(registry, theme, files, timestamps = {}) {
+function extractComponentsBlock(lockSource) {
+	const match = lockSource.match(
+		/(?:^|\n)(components:[\s\S]*?)(?=\n[a-zA-Z][\w-]*:|$)/,
+	);
+	return match ? match[1].trimEnd() : "components: {}";
+}
+
+function renderThemeLockYaml(
+	registry,
+	theme,
+	files,
+	timestamps = {},
+	componentsBlock = "components: {}",
+) {
 	const renderedFiles = [...files]
 		.sort((a, b) => a.path.localeCompare(b.path))
 		.map(renderThemeFileEntry)
@@ -1440,7 +1453,7 @@ function renderThemeLockYaml(registry, theme, files, timestamps = {}) {
 		: "";
 
 	return `${renderRegistryYaml(registry)}
-components: {}
+${componentsBlock}
 
 theme:
   version: ${theme.version}
@@ -1558,7 +1571,13 @@ async function themePull(args) {
 			}
 			fs.writeFileSync(
 				lockPath,
-				renderThemeLockYaml(registry, theme, [...merged.values()]),
+				renderThemeLockYaml(
+					registry,
+					theme,
+					[...merged.values()],
+					{},
+					extractComponentsBlock(lockSource),
+				),
 			);
 		}
 
@@ -1862,10 +1881,16 @@ async function themeUpdate(args) {
 
 		fs.writeFileSync(
 			lockPath,
-			renderThemeLockYaml(registry, theme, [...nextFiles.values()], {
-				installedAt: lockTheme.installedAt ?? new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			}),
+			renderThemeLockYaml(
+				registry,
+				theme,
+				[...nextFiles.values()],
+				{
+					installedAt: lockTheme.installedAt ?? new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
+				},
+				extractComponentsBlock(lockSource),
+			),
 		);
 
 		return 0;

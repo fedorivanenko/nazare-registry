@@ -26,6 +26,7 @@ invariants:
   - Theme files are user-owned after copy
   - Manifest theme.version is required and identifies the registry scaffold version, not the user theme version
   - Lockfile theme metadata must change only when at least one theme file is written
+  - Existing lockfile component metadata must be preserved when theme metadata is written
   - Failed theme pull must not partially mutate lockfile metadata when avoidable
 
 nonGoals:
@@ -82,6 +83,7 @@ Included:
 - file copy from registry paths to local theme paths
 - interactive conflict handling for existing target files
 - lockfile `theme` metadata updates
+- preservation of existing lockfile `components` metadata
 - README theme pull instructions
 - Vitest coverage for theme pull success and failure behavior
 
@@ -248,6 +250,7 @@ Result: implementation present; final feature-doc checklist still needs reconcil
   - Verify skipped files are not added to `theme.files`.
 - [ ] repeated pulls keep `theme.files` cumulative
   - Verify previously tracked files are not removed after later skips.
+- [x] successful pull preserves existing `components:` lockfile metadata
 
 ---
 
