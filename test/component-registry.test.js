@@ -12,7 +12,7 @@ const {
 const checksum = "a".repeat(64);
 const manifestPath = new URL("../nazare.registry.yml", import.meta.url);
 const announcementPath = new URL(
-	"../components/s-announcement/sections/s-announcement.liquid",
+	"../components/s-announcement/s-announcement.liquid",
 	import.meta.url,
 );
 
@@ -27,7 +27,7 @@ function component(overrides = {}) {
 		dependencies: [],
 		files: [
 			{
-				from: "components/c-button/snippets/c-button.liquid",
+				from: "components/c-button/c-button.liquid",
 				to: "snippets/c-button.liquid",
 				checksum: {
 					algorithm: "sha256",
@@ -58,7 +58,7 @@ describe("component registry metadata", () => {
 					type: "package",
 					files: [
 						{
-							from: "components/core/snippets/core.liquid",
+							from: "components/core/core.liquid",
 							to: "snippets/core.liquid",
 							checksum: { algorithm: "sha256", value: checksum },
 						},
@@ -69,7 +69,7 @@ describe("component registry metadata", () => {
 					dependencies: ["core"],
 					files: [
 						{
-							from: "components/s-hero/sections/s-hero.liquid",
+							from: "components/s-hero/s-hero.liquid",
 							to: "sections/s-hero.liquid",
 							checksum: { algorithm: "sha256", value: checksum },
 						},
@@ -91,7 +91,7 @@ describe("component registry metadata", () => {
 			dependencies: [],
 			files: [
 				{
-					from: "components/s-announcement/sections/s-announcement.liquid",
+					from: "components/s-announcement/s-announcement.liquid",
 					to: "sections/s-announcement.liquid",
 					checksum: {
 						algorithm: "sha256",
@@ -118,7 +118,7 @@ components:
     type: snippet
     dependencies: []
     files:
-      - from: components/c-button/snippets/c-button.liquid
+      - from: components/c-button/c-button.liquid
         to: snippets/c-button.liquid
         checksum:
           algorithm: sha256
@@ -157,7 +157,7 @@ components:
 					files: [
 						{
 							...component().files[0],
-							from: "components/core/snippets/core.liquid",
+							from: "components/core/core.liquid",
 							to: "snippets/core.liquid",
 						},
 					],
@@ -176,7 +176,7 @@ components:
 					files: [
 						{
 							...component().files[0],
-							from: "components/c-a/snippets/c-a.liquid",
+							from: "components/c-a/c-a.liquid",
 							to: "snippets/c-a.liquid",
 						},
 					],
@@ -186,7 +186,7 @@ components:
 					files: [
 						{
 							...component().files[0],
-							from: "components/c-b/snippets/c-b.liquid",
+							from: "components/c-b/c-b.liquid",
 							to: "snippets/c-b.liquid",
 						},
 					],
@@ -211,7 +211,7 @@ components:
 					files: [
 						{
 							...component().files[0],
-							from: "components/other/snippets/c-button.liquid",
+							from: "components/other/c-button.liquid",
 						},
 					],
 				}),
@@ -236,7 +236,7 @@ components:
 					files: [
 						{
 							...component().files[0],
-							from: "components/c-link/snippets/c-link.liquid",
+							from: "components/c-link/c-link.liquid",
 						},
 					],
 				}),

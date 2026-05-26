@@ -57,7 +57,7 @@ function componentSource(id, type, to, dependencies = "[]") {
     type: ${type}
     dependencies: ${dependencies}
     files:
-      - from: components/${id}/${to}
+      - from: components/${id}/${to.split("/").at(-1)}
         to: ${to}
         checksum:
           algorithm: sha256
@@ -113,7 +113,7 @@ describe("nazare list", () => {
     dependencies: []
     files:
       - path: sections/s-hero.liquid
-        source: components/s-hero/sections/s-hero.liquid
+        source: components/s-hero/s-hero.liquid
         checksum:
           algorithm: sha256
           value: ${checksum}`,

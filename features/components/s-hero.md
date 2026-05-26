@@ -62,7 +62,7 @@ The section gives merchants a flexible landing-page hero with heading, text, opt
 
 Included:
 
-- `components/s-hero/sections/s-hero.liquid`
+- `components/s-hero/s-hero.liquid`
 - `nazare.registry.yml` component metadata for `s-hero`
 - checksum validation coverage for committed component source files
 - smoke coverage that `nazare add s-hero` installs the section from the local registry
@@ -86,7 +86,7 @@ components:
     type: section
     dependencies: []
     files:
-      - from: components/s-hero/sections/s-hero.liquid
+      - from: components/s-hero/s-hero.liquid
         to: sections/s-hero.liquid
         checksum:
           algorithm: sha256

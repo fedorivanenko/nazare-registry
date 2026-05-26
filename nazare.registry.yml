@@ -64,7 +64,7 @@ components:
     type: section
     dependencies: []
     files:
-      - from: components/s-announcement/sections/s-announcement.liquid
+      - from: components/s-announcement/s-announcement.liquid
         to: sections/s-announcement.liquid
         checksum:
           algorithm: sha256

@@ -90,7 +90,7 @@ function componentSource({
     type: ${type}
     dependencies: ${renderedDependencies}
     files:
-      - from: components/${id}/${to}
+      - from: components/${id}/${to.split("/").at(-1)}
         to: ${to}
         checksum:
           algorithm: sha256
@@ -135,7 +135,7 @@ describe("nazare add", () => {
 		const registry = await makeTempDir("nazare-registry-test-");
 		await initProject(cwd);
 		await writeRegistry(registry, componentSource(), {
-			"components/c-button/snippets/c-button.liquid": "button\n",
+			"components/c-button/c-button.liquid": "button\n",
 		});
 
 		const result = await runCli(["add", "c-button"], {
@@ -163,8 +163,8 @@ describe("nazare add", () => {
 			registry,
 			`${componentSource({ id: "core", type: "package", to: "snippets/core.liquid", content: "core\n" })}${componentSource({ id: "c-card", to: "snippets/c-card.liquid", content: "card\n", dependencies: ["core"] })}`,
 			{
-				"components/core/snippets/core.liquid": "core\n",
-				"components/c-card/snippets/c-card.liquid": "card\n",
+				"components/core/core.liquid": "core\n",
+				"components/c-card/c-card.liquid": "card\n",
 			},
 		);
 
@@ -184,7 +184,7 @@ describe("nazare add", () => {
 		const registry = await makeTempDir("nazare-registry-test-");
 		await initProject(cwd);
 		await writeRegistry(registry, componentSource(), {
-			"components/c-button/snippets/c-button.liquid": "button\n",
+			"components/c-button/c-button.liquid": "button\n",
 		});
 		await runCli(["add", "c-button"], {
 			cwd,
@@ -227,7 +227,7 @@ describe("nazare add", () => {
 		await writeRegistry(
 			registry,
 			componentSource({ to: "layout/theme.liquid" }),
-			{ "components/c-button/layout/theme.liquid": "button\n" },
+			{ "components/c-button/theme.liquid": "button\n" },
 		);
 		const lockBefore = await readLock(cwd);
 
@@ -248,7 +248,7 @@ describe("nazare add", () => {
 		await writeRegistry(
 			registry,
 			componentSource({ checksum: sha256("expected\n") }),
-			{ "components/c-button/snippets/c-button.liquid": "actual\n" },
+			{ "components/c-button/c-button.liquid": "actual\n" },
 		);
 		const lockBefore = await readLock(cwd);
 
@@ -270,8 +270,8 @@ describe("nazare add", () => {
 			registry,
 			`${componentSource({ id: "c-a", to: "snippets/c-a.liquid", content: "a\n", dependencies: ["c-b"] })}${componentSource({ id: "c-b", to: "snippets/c-b.liquid", content: "b\n", dependencies: ["c-a"] })}`,
 			{
-				"components/c-a/snippets/c-a.liquid": "a\n",
-				"components/c-b/snippets/c-b.liquid": "b\n",
+				"components/c-a/c-a.liquid": "a\n",
+				"components/c-b/c-b.liquid": "b\n",
 			},
 		);
 		const lockBefore = await readLock(cwd);
@@ -294,8 +294,8 @@ describe("nazare add", () => {
 			registry,
 			`${componentSource({ id: "c-a", to: "snippets/shared.liquid", content: "a\n" })}${componentSource({ id: "c-b", to: "snippets/shared.liquid", content: "b\n" })}`,
 			{
-				"components/c-a/snippets/shared.liquid": "a\n",
-				"components/c-b/snippets/shared.liquid": "b\n",
+				"components/c-a/shared.liquid": "a\n",
+				"components/c-b/shared.liquid": "b\n",
 			},
 		);
 		const lockBefore = await readLock(cwd);
@@ -317,7 +317,7 @@ describe("nazare add", () => {
 		await mkdir(join(cwd, "snippets"));
 		await writeFile(join(cwd, "snippets", "c-button.liquid"), "local\n");
 		await writeRegistry(registry, componentSource(), {
-			"components/c-button/snippets/c-button.liquid": "button\n",
+			"components/c-button/c-button.liquid": "button\n",
 		});
 		const lockBefore = await readLock(cwd);
 
@@ -339,7 +339,7 @@ describe("nazare add", () => {
 		const registry = await makeTempDir("nazare-registry-test-");
 		await initProject(cwd);
 		await writeRegistry(registry, componentSource(), {
-			"components/c-button/snippets/c-button.liquid": "button\n",
+			"components/c-button/c-button.liquid": "button\n",
 		});
 		await runCli(["add", "c-button"], {
 			cwd,
@@ -361,7 +361,7 @@ describe("nazare add", () => {
 		const registry = await makeTempDir("nazare-registry-test-");
 		await initProject(cwd);
 		await writeRegistry(registry, componentSource(), {
-			"components/c-button/snippets/c-button.liquid": "button\n",
+			"components/c-button/c-button.liquid": "button\n",
 		});
 		await runCli(["add", "c-button"], {
 			cwd,
@@ -383,14 +383,14 @@ describe("nazare add", () => {
 		const registry = await makeTempDir("nazare-registry-test-");
 		await initProject(cwd);
 		await writeRegistry(registry, componentSource(), {
-			"components/c-button/snippets/c-button.liquid": "button\n",
+			"components/c-button/c-button.liquid": "button\n",
 		});
 		await runCli(["add", "c-button"], {
 			cwd,
 			env: { NAZARE_REGISTRY_DIR: registry },
 		});
 		await writeRegistry(registry, componentSource({ content: "new\n" }), {
-			"components/c-button/snippets/c-button.liquid": "new\n",
+			"components/c-button/c-button.liquid": "new\n",
 		});
 
 		const result = await runCli(["add", "c-button"], {

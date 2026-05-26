@@ -58,7 +58,7 @@ The section gives the registry a concrete component for `nazare list` and `nazar
 
 Included:
 
-- `components/s-announcement/sections/s-announcement.liquid`
+- `components/s-announcement/s-announcement.liquid`
 - `nazare.registry.yml` component metadata for `s-announcement`
 - checksum validation coverage for committed component source files
 - simple configurable section settings:
@@ -75,7 +75,7 @@ components:
     type: section
     dependencies: []
     files:
-      - from: components/s-announcement/sections/s-announcement.liquid
+      - from: components/s-announcement/s-announcement.liquid
         to: sections/s-announcement.liquid
         checksum:
           algorithm: sha256

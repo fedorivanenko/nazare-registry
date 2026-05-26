@@ -110,7 +110,7 @@ components:
     type: snippet
     dependencies: []
     files:
-      - from: components/c-button/snippets/c-button.liquid
+      - from: components/c-button/c-button.liquid
         to: snippets/c-button.liquid
         checksum:
           algorithm: sha256
