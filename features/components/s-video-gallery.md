@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: s-video-gallery
 title: Video Gallery Section
-status: ready
+status: done
 
 dependencies:
   - component-registry
@@ -142,19 +142,19 @@ Section render contract:
 
 ## Verification
 
-Result: ready for implementation.
+Result: done.
 
-- [ ] component source exists at registry path
-- [ ] registry contains `s-video-gallery` metadata
-- [ ] registry declares dependencies on `c-video` and `c-button`
-- [ ] registry checksum matches component source bytes
-- [ ] component metadata validates with component registry parser
-- [ ] section schema contains title, description, CTA label, CTA URL, CTA scheme, layout density, and video block settings
-- [ ] section uses Tailwind utilities
-- [ ] CTA render is gated by URL and label and uses `c-button`
-- [ ] each valid video block renders `c-video`
-- [ ] invalid/empty video blocks render no broken media markup
-- [ ] `nazare add s-video-gallery` smoke installs section and dependencies from local registry
+- [x] component source exists at registry path
+- [x] registry contains `s-video-gallery` metadata
+- [x] registry declares dependencies on `c-video` and `c-button`
+- [x] registry checksum matches component source bytes
+- [x] component metadata validates with component registry parser
+- [x] section schema contains title, description, CTA label, CTA URL, CTA scheme, layout density, and video block settings
+- [x] section uses Tailwind utilities
+- [x] CTA render is gated by URL and label and uses `c-button`
+- [x] each valid video block renders `c-video`
+- [x] invalid/empty video blocks render no broken media markup
+- [x] `nazare add s-video-gallery` smoke installs section and dependencies from local registry
 
 ---
 
