@@ -84,6 +84,18 @@ components:
         checksum:
           algorithm: sha256
           value: ba3cde568c7d1d0d3e825a4209383b821f56b11bfff5cccdd0443390b15a3704
+  s-video-gallery:
+    version: 1.0.0
+    type: section
+    dependencies:
+      - c-video
+      - c-button
+    files:
+      - from: components/s-video-gallery/s-video-gallery.liquid
+        to: sections/s-video-gallery.liquid
+        checksum:
+          algorithm: sha256
+          value: a9a2fd65288e00324618336ce16b1a0af04e3369e9e0786a6ea2738b2d1aa049
   s-announcement:
     version: 1.0.1
     type: section

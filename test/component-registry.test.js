@@ -23,6 +23,10 @@ const videoScriptPath = new URL(
 	"../components/c-video/c-video.js",
 	import.meta.url,
 );
+const videoGalleryPath = new URL(
+	"../components/s-video-gallery/s-video-gallery.liquid",
+	import.meta.url,
+);
 const announcementPath = new URL(
 	"../components/s-announcement/s-announcement.liquid",
 	import.meta.url,
@@ -161,6 +165,41 @@ describe("component registry metadata", () => {
 		expect(script).toContain("muteOthers(activeInstance)");
 		expect(script).toContain("export function init(root)");
 		expect(script).toContain("export function destroy(root)");
+	});
+
+	it("declares committed s-video-gallery metadata with matching checksum", async () => {
+		const manifest = await readFile(manifestPath, "utf8");
+		const source = await readFile(videoGalleryPath, "utf8");
+		const components = parseComponentManifest(manifest);
+
+		expect(() => validateComponentMetadata(components)).not.toThrow();
+		expect(components["s-video-gallery"]).toMatchObject({
+			version: "1.0.0",
+			type: "section",
+			dependencies: ["c-video", "c-button"],
+			files: [
+				{
+					from: "components/s-video-gallery/s-video-gallery.liquid",
+					to: "sections/s-video-gallery.liquid",
+					checksum: {
+						algorithm: "sha256",
+						value: sha256(source),
+					},
+				},
+			],
+		});
+		expect(source).toContain(
+			"{% render 'section-css', section_name: 's-video-gallery' %}",
+		);
+		expect(source).toContain("{% render 'c-button'");
+		expect(source).toContain("{% render 'c-video'");
+		expect(source).toContain("block.settings.video != blank");
+		expect(source).toContain('"id": "title"');
+		expect(source).toContain('"id": "description"');
+		expect(source).toContain('"id": "cta_label"');
+		expect(source).toContain('"id": "cta_url"');
+		expect(source).toContain('"id": "cta_scheme"');
+		expect(source).toContain('"id": "columns"');
 	});
 
 	it("declares committed s-announcement metadata with matching checksum", async () => {

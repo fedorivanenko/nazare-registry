@@ -190,6 +190,41 @@ describe("nazare add", () => {
 		expect(lock).toContain("path: scripts/snippets/c-video.js");
 	});
 
+	it("installs committed s-video-gallery and dependencies from local registry", async () => {
+		const cwd = await makeTempDir();
+		await initProject(cwd);
+
+		const result = await runCli(["add", "s-video-gallery"], {
+			cwd,
+			env: { NAZARE_REGISTRY_DIR: registryRoot },
+		});
+
+		expect(result).toMatchObject({ code: 0, stderr: "" });
+		expect(result.stdout).toContain("Wrote snippets/c-video.liquid");
+		expect(result.stdout).toContain("Wrote scripts/snippets/c-video.js");
+		expect(result.stdout).toContain("Wrote snippets/c-button.liquid");
+		expect(result.stdout).toContain("Wrote sections/s-video-gallery.liquid");
+		expect(result.stdout).toContain("s-video-gallery");
+		const section = await readFile(
+			join(cwd, "sections", "s-video-gallery.liquid"),
+			"utf8",
+		);
+		expect(section).toContain(
+			"{% render 'section-css', section_name: 's-video-gallery' %}",
+		);
+		expect(section).toContain("{% render 'c-button'");
+		expect(section).toContain("{% render 'c-video'");
+		expect(section).toContain("block.settings.video != blank");
+		expect(section).toContain('"id": "cta_label"');
+		expect(section).toContain('"id": "cta_url"');
+		expect(section).toContain('"id": "columns"');
+		const lock = await readLock(cwd);
+		expect(lock).toContain("c-video:");
+		expect(lock).toContain("c-button:");
+		expect(lock).toContain("s-video-gallery:");
+		expect(lock).toContain("path: sections/s-video-gallery.liquid");
+	});
+
 	it("installs a component file and lockfile metadata", async () => {
 		const cwd = await makeTempDir();
 		const registry = await makeTempDir("nazare-registry-test-");
