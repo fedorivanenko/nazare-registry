@@ -27,6 +27,7 @@ invariants:
   - Requires initialized repo
   - Reads registry origin from nazare.config.yml
   - Updates only installed components recorded in nazare.lock.yml
+  - Resolves and checks the requested component dependency graph before declaring no-op
   - Uses lockfile file checksums as local modification authority
   - Verifies registry component file checksums before mutation
   - Never overwrites modified installed component files without user consent or --force
@@ -38,6 +39,7 @@ invariants:
 nonGoals:
   - Bare nazare update without component operand
   - Updating all installed components in one command
+  - Installing missing dependencies during update
   - Removing components as a standalone operation
   - Adding or updating theme scaffold files
   - Automatically merging user modifications
@@ -83,6 +85,7 @@ Included:
 - registry resolution from `nazare.config.yml`
 - current manifest `components` block validation
 - installed component lookup in `nazare.lock.yml`
+- requested component dependency graph resolution in install order
 - component ID validation via `docs/policies/naming-policy.md`
 - checksum verification for every new registry component file
 - touched-file detection by comparing current file SHA-256 with lockfile checksum
@@ -141,7 +144,8 @@ Local file state uses lockfile checksum as authority:
 
 - Missing requested component, invalid metadata, unsafe path, duplicate path, missing registry file, or registry checksum mismatch -> fail before mutation.
 - Requested component not installed -> fail and suggest `nazare add <component>`.
-- Installed component already matches current registry and all files are untouched -> no-op.
+- Requested component dependency missing locally -> fail and suggest `nazare add <dependency>`.
+- Requested component and installed dependencies already match current registry and all files are untouched -> no-op.
 - New registry file absent locally -> write and track.
 - New registry file target exists untracked -> fail before mutation.
 - Registry file replacing an existing installed file -> ask before overwrite or manual conflict write, unless `--force` is set.
@@ -231,6 +235,7 @@ Non-interactive terminals must fail before mutation when a prompt would be requi
 ## Success behavior
 
 - Resolves registry, validates component metadata, verifies registry bytes, and plans all operations before mutation.
+- Resolves the requested component dependency graph and checks dependencies with the same standard update procedure before checking the requested component.
 - Detects touched files by hashing local file bytes and comparing with lockfile checksum.
 - Prompts before overwriting existing installed files with current registry files.
 - Writes new registry files that have no local target.
@@ -264,6 +269,7 @@ Overwrite with registry version? [y/N/m]
 
 If all required operations complete:
 
+- dependency components with registry changes are updated before the requested component.
 - `components.<id>.version`, `type`, `dependencies`, and file metadata come from current registry manifest.
 - `installedAt` is preserved.
 - `updatedAt` is refreshed to current RFC 3339 timestamp.
@@ -292,6 +298,7 @@ Exit non-zero before mutation when:
 - repo lacks `nazare.config.yml` or `nazare.lock.yml`
 - config, lockfile, registry origin, manifest, or `components` block is invalid
 - requested component ID is missing, invalid, absent from registry, or not installed
+- requested component dependency is missing from the registry or not installed locally
 - component metadata, paths, files, or checksums are invalid
 - target path exists untracked
 - target path has incompatible component ownership
@@ -309,6 +316,7 @@ Result: done.
 
 - [x] installed component prompts before overwriting existing files and updates lockfile metadata after confirmation
 - [x] installed current component is no-op
+- [x] stale installed dependency is updated through the standard prompt/write/lockfile procedure before requested component no-op
 - [x] existing file prompts before overwrite
 - [x] prompt `N` leaves file unchanged and does not bump component version
 - [x] prompt `m` writes conflict markers and leaves lockfile unchanged
@@ -332,13 +340,13 @@ Result: done.
 
 Reuse `component-add` and `theme-pull` primitives for config, lockfile, registry fetch, manifest parsing, safe paths, checksum calculation, conflict-marker writes, and lockfile writes.
 
-Plan: validate args/init -> resolve registry -> validate installed component -> validate current registry component -> verify registry checksums -> compute local file states from lockfile checksums -> collect prompt decisions -> either write manual conflict files or build normal write/delete plan -> apply mutations -> write lockfile only for full normal updates.
+Plan: validate args/init -> resolve registry -> validate installed component -> resolve requested component dependency graph -> validate every installed dependency -> verify registry checksums for graph files -> compute local file states from lockfile checksums -> collect prompt decisions -> either write manual conflict files or build normal write/delete plan -> apply mutations -> write lockfile entries only for graph components that changed.
 
 Prefer collecting all prompts before any mutation. If any prompt answer is `N`, mutate nothing. If any prompt answer is `m`, write only manual conflict-marker files and leave lockfile unchanged. This avoids partial normal updates and keeps the lockfile simple.
 
 Do not compare local files to current registry to detect edits. Lockfile checksum is modification authority.
 
-This additive CLI command should be a minor release per `docs/policies/release-policy.md`.
+Dependency-aware update behavior is a CLI patch change because it fixes stale dependency detection for the existing command.
 
 ---
 

@@ -1405,125 +1405,142 @@ async function updateComponent(args) {
 		}
 
 		const registryComponents = await readCurrentComponents(registry);
-		if (!registryComponents[options.component]) {
-			throw new Error(`Component not found in registry: ${options.component}`);
-		}
-		const { components, sources } = await readCurrentComponentsWithSources(
-			registry,
-			[options.component],
+		const updateOrder = componentInstallOrder(
+			registryComponents,
+			options.component,
 		);
-		const manifestComponent = components[options.component];
-		for (const dependency of manifestComponent.dependencies) {
-			if (!installedComponents[dependency]) {
+		for (const id of updateOrder) {
+			if (!installedComponents[id]) {
 				throw new Error(
-					`Missing installed component dependency: ${dependency}; run nazare add ${dependency}`,
+					`Missing installed component dependency: ${id}; run nazare add ${id}`,
 				);
 			}
 		}
+		const { components, sources } = await readCurrentComponentsWithSources(
+			registry,
+			updateOrder,
+		);
 		const ownership = buildComponentOwnership(installedComponents);
-		const installedByPath = new Map(
-			(installedComponent.files ?? []).map((file) => [file.path, file]),
-		);
-		const manifestByPath = new Map(
-			manifestComponent.files.map((file) => [file.to, file]),
-		);
 		const writes = [];
 		const deletes = [];
 		const prompts = [];
 		const manualWrites = [];
+		const touchedComponents = new Set();
 
-		for (const manifestFile of manifestComponent.files) {
-			const targetPath = path.join(cwd, manifestFile.to);
-			const owner = ownership.get(manifestFile.to);
-			if (owner && owner.id !== options.component) {
-				throw new Error(
-					`Component file target already owned: ${manifestFile.to}`,
-				);
-			}
-			const installedFile = installedByPath.get(manifestFile.to);
-			const registryContent = sources.get(manifestFile.from);
-			const write = {
-				kind: "write",
-				path: manifestFile.to,
-				targetPath,
-				source: manifestFile.from,
-				content: registryContent,
-				checksum: manifestFile.checksum,
-			};
+		for (const id of updateOrder) {
+			const manifestComponent = components[id];
+			const installed = installedComponents[id];
+			const installedByPath = new Map(
+				(installed.files ?? []).map((file) => [file.path, file]),
+			);
+			const manifestByPath = new Map(
+				manifestComponent.files.map((file) => [file.to, file]),
+			);
 
-			if (!installedFile) {
-				if (fs.existsSync(targetPath)) {
+			for (const manifestFile of manifestComponent.files) {
+				const targetPath = path.join(cwd, manifestFile.to);
+				const owner = ownership.get(manifestFile.to);
+				if (owner && owner.id !== id) {
 					throw new Error(
-						`Component file target exists untracked: ${manifestFile.to}`,
+						`Component file target already owned: ${manifestFile.to}`,
 					);
 				}
-				writes.push(write);
-				continue;
-			}
+				const installedFile = installedByPath.get(manifestFile.to);
+				const registryContent = sources.get(manifestFile.from);
+				const write = {
+					id,
+					kind: "write",
+					path: manifestFile.to,
+					targetPath,
+					source: manifestFile.from,
+					content: registryContent,
+					checksum: manifestFile.checksum,
+				};
 
-			if (!fs.existsSync(targetPath)) {
-				prompts.push({ kind: "recreate", ...write });
-				continue;
-			}
-
-			const localContent = fs.readFileSync(targetPath);
-			const localChecksum = sha256(localContent);
-			if (localChecksum !== manifestFile.checksum.value) {
-				if (options.force) {
+				if (!installedFile) {
+					if (fs.existsSync(targetPath)) {
+						throw new Error(
+							`Component file target exists untracked: ${manifestFile.to}`,
+						);
+					}
 					writes.push(write);
-				} else {
-					prompts.push({
-						kind: "write",
-						localContent,
-						localChecksum,
-						installedChecksum: installedFile.checksum.value,
-						...write,
-					});
+					touchedComponents.add(id);
+					continue;
+				}
+
+				if (!fs.existsSync(targetPath)) {
+					prompts.push({ kind: "recreate", ...write });
+					touchedComponents.add(id);
+					continue;
+				}
+
+				const localContent = fs.readFileSync(targetPath);
+				const localChecksum = sha256(localContent);
+				if (localChecksum !== manifestFile.checksum.value) {
+					touchedComponents.add(id);
+					if (options.force) {
+						writes.push(write);
+					} else {
+						prompts.push({
+							kind: "write",
+							localContent,
+							localChecksum,
+							installedChecksum: installedFile.checksum.value,
+							...write,
+						});
+					}
 				}
 			}
-		}
 
-		for (const installedFile of installedComponent.files ?? []) {
-			if (manifestByPath.has(installedFile.path)) continue;
-			const targetPath = path.join(cwd, installedFile.path);
-			if (!fs.existsSync(targetPath)) {
-				deletes.push({ kind: "untrack", path: installedFile.path, targetPath });
-				continue;
+			for (const installedFile of installed.files ?? []) {
+				if (manifestByPath.has(installedFile.path)) continue;
+				const targetPath = path.join(cwd, installedFile.path);
+				touchedComponents.add(id);
+				if (!fs.existsSync(targetPath)) {
+					deletes.push({
+						id,
+						kind: "untrack",
+						path: installedFile.path,
+						targetPath,
+					});
+					continue;
+				}
+				const localContent = fs.readFileSync(targetPath);
+				const localChecksum = sha256(localContent);
+				const operation = {
+					id,
+					kind: "delete",
+					path: installedFile.path,
+					targetPath,
+					localContent,
+					content: Buffer.alloc(0),
+				};
+				if (localChecksum !== installedFile.checksum.value && !options.force) {
+					prompts.push(operation);
+					continue;
+				}
+				deletes.push(operation);
 			}
-			const localContent = fs.readFileSync(targetPath);
-			const localChecksum = sha256(localContent);
-			const operation = {
-				kind: "delete",
-				path: installedFile.path,
-				targetPath,
-				localContent,
-				content: Buffer.alloc(0),
-			};
-			if (localChecksum !== installedFile.checksum.value && !options.force) {
-				prompts.push(operation);
-				continue;
-			}
-			deletes.push(operation);
 		}
 
 		const plannedCount = writes.length + deletes.length + prompts.length;
-		if (
-			plannedCount === 0 &&
-			componentMatchesLock(manifestComponent, installedComponent)
-		) {
+		const componentsToUpdate = updateOrder.filter(
+			(id) =>
+				touchedComponents.has(id) ||
+				!componentMatchesLock(components[id], installedComponents[id]),
+		);
+		if (plannedCount === 0 && componentsToUpdate.length === 0) {
 			process.stdout.write(
 				`Component already up to date: ${options.component}\n`,
 			);
 			return 0;
 		}
 
-		process.stdout.write(
-			renderUpdateHeader(
-				options.component,
-				installedComponent,
-				manifestComponent,
-			),
-		);
+		for (const id of componentsToUpdate) {
+			process.stdout.write(
+				renderUpdateHeader(id, installedComponents[id], components[id]),
+			);
+		}
 		if (options.dryRun) {
 			for (const write of writes)
 				process.stdout.write(`Would write ${write.path}\n`);
@@ -1587,8 +1604,8 @@ async function updateComponent(args) {
 					markerContent(
 						file.localContent,
 						file.content,
-						options.component,
-						manifestComponent.version,
+						file.id,
+						components[file.id].version,
 						file.kind === "delete",
 					),
 				);
@@ -1617,11 +1634,14 @@ async function updateComponent(args) {
 		}
 
 		const nextComponents = { ...installedComponents };
-		nextComponents[options.component] = componentUpdatedLockEntry(
-			manifestComponent,
-			installedComponent,
-			new Date().toISOString(),
-		);
+		const timestamp = new Date().toISOString();
+		for (const id of componentsToUpdate) {
+			nextComponents[id] = componentUpdatedLockEntry(
+				components[id],
+				installedComponents[id],
+				timestamp,
+			);
+		}
 		fs.writeFileSync(
 			lockPath,
 			renderComponentLockYaml(

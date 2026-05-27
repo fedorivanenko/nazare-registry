@@ -178,6 +178,52 @@ describe("nazare update", () => {
 		expect(lock).toContain(`value: ${sha256("new\n")}`);
 	});
 
+	it("updates stale dependencies before requested component", async () => {
+		const cwd = await makeTempDir();
+		const registry = await makeTempDir("nazare-registry-test-");
+		await initProject(cwd);
+		await writeRegistry(
+			registry,
+			`${componentSource({ id: "c-core", to: "snippets/c-core.liquid", content: "core old\n" })}${componentSource({ id: "c-card", to: "snippets/c-card.liquid", content: "card\n", dependencies: ["c-core"] })}`,
+			{
+				"components/c-core/c-core.liquid": "core old\n",
+				"components/c-card/c-card.liquid": "card\n",
+			},
+		);
+		await expect(
+			runCli(["add", "c-card"], {
+				cwd,
+				env: { NAZARE_REGISTRY_DIR: registry },
+			}),
+		).resolves.toMatchObject({ code: 0, stderr: "" });
+		await writeRegistry(
+			registry,
+			`${componentSource({ id: "c-core", version: "1.1.0", to: "snippets/c-core.liquid", content: "core new\n" })}${componentSource({ id: "c-card", to: "snippets/c-card.liquid", content: "card\n", dependencies: ["c-core"] })}`,
+			{
+				"components/c-core/c-core.liquid": "core new\n",
+				"components/c-card/c-card.liquid": "card\n",
+			},
+		);
+
+		const result = await runCliInteractive(["update", "c-card"], "y\n", {
+			cwd,
+			env: { NAZARE_REGISTRY_DIR: registry, NAZARE_TEST_INTERACTIVE: "1" },
+		});
+
+		expect(result).toMatchObject({ code: 0, stderr: "" });
+		expect(result.stdout).toContain("c-core 1.0.0 -> 1.1.0");
+		expect(result.stdout).toContain("snippets/c-core.liquid exists locally.");
+		expect(result.stdout).toContain("Overwrite with registry version? [y/N/m]");
+		expect(result.stdout).toContain("Wrote snippets/c-core.liquid");
+		expect(result.stdout).toContain("Done.");
+		expect(await readFile(join(cwd, "snippets", "c-core.liquid"), "utf8")).toBe(
+			"core new\n",
+		);
+		const lock = await readLock(cwd);
+		expect(lock).toMatch(/c-core:\n {4}version: 1\.1\.0/);
+		expect(lock).toMatch(/c-card:\n {4}version: 1\.0\.0/);
+	});
+
 	it("is a no-op for current untouched component", async () => {
 		const cwd = await makeTempDir();
 		const registry = await makeTempDir("nazare-registry-test-");
