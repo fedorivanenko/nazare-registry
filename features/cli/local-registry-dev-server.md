@@ -30,7 +30,7 @@ invariants:
 
 nonGoals:
   - Full Git smart HTTP protocol support
-  - Git object, commit, branch, or tag emulation
+  - Git object, commit, branch, or tag emulation in the initial local-server version
   - Publishing, pushing, or mutating a registry
   - Authentication, TLS termination, or public network hardening
   - Watch mode, live reload, or browser UI
@@ -80,14 +80,14 @@ Included:
 
 ```sh
 nazare-dev registry serve
-nazare-dev registry serve --port 7331
+nazare-dev registry serve --port 0
 nazare-dev registry serve --host 127.0.0.1 --port 7331 --root /path/to/nazare
 ```
 
 Defaults:
 
 - `--host`: `127.0.0.1`
-- `--port`: `0` (pick a free port)
+- `--port`: `7331`
 - `--root`: current working directory
 
 On start, command prints:
@@ -197,7 +197,7 @@ Keep raw-file resolution centralized so existing registry consumers call one hel
 
 `nazare init --repo` validation must accept `http://127.0.0.1:<port>`, `http://localhost:<port>`, and `https://...` HTTP registry origins while preserving existing GitHub repo validation.
 
-The server intentionally serves working tree files and ignores the semantic meaning of `ref`. This keeps v1 useful for local authoring and avoids implementing Git protocol behavior.
+The server intentionally serves working tree files and ignores the semantic meaning of `ref` in v1. This keeps v1 useful for local authoring and avoids implementing Git protocol behavior. Git-ref-aware local serving is scoped separately in `dev-release-channels`.
 
 This adds a separate dev-tool package plus HTTP registry consumer support. The `nazare` consumer CLI change should be a minor release per `docs/policies/release-policy.md`.
 

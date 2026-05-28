@@ -4,7 +4,7 @@
 
 `packages/nazare/package.json.version` is the consumer CLI version source of truth.
 
-Use SemVer: `MAJOR.MINOR.PATCH`. Prerelease syntax is allowed when needed.
+Use SemVer: `MAJOR.MINOR.PATCH`. Prerelease syntax is allowed for dev builds, using `MAJOR.MINOR.PATCH-dev.N`.
 
 Only CLI/install behavior changes require a new package version and Git tag.
 
@@ -20,9 +20,9 @@ Create a CLI release for registry content only if the installed CLI or installer
 
 ## Release source
 
-Development installs use `refs/heads/main`.
+Development installs may use `refs/heads/main` while work is untagged.
 
-Stable releases use Git tags.
+Stable releases use stable Git tags. Dev releases use prerelease Git tags.
 
 `nazare self update` updates from the originally installed ref/source recorded in install metadata.
 
@@ -30,7 +30,9 @@ Stable releases use Git tags.
 
 Stable release tags are required.
 
-Tag format: `vMAJOR.MINOR.PATCH`.
+Stable tag format: `vMAJOR.MINOR.PATCH`.
+
+Dev tag format: `vMAJOR.MINOR.PATCH-dev.N`.
 
 The tag version must match `packages/nazare/package.json.version` without the leading `v`.
 
