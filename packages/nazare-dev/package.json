@@ -1,0 +1,10 @@
+{
+	"name": "nazare-dev",
+	"version": "0.1.0",
+	"description": "Development tools for Nazare registry authors.",
+	"bin": {
+		"nazare-dev": "./bin/nazare-dev.js"
+	},
+	"license": "UNLICENSED",
+	"private": true
+}

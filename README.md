@@ -147,6 +147,22 @@ nazare update c-button
 
 `nazare update` compares local files with the checksums recorded in `nazare.lock.yml`. Existing files require an interactive choice before overwrite: overwrite, skip, or write manual conflict markers. Use `--dry-run` to preview the plan, or `--force` to overwrite/recreate/delete files without prompting.
 
+## Local registry development
+
+Registry authors can serve a local checkout without pushing to GitHub:
+
+```sh
+nazare-dev registry serve
+```
+
+The server prints a `Registry URL` and matching consumer init command. In a separate theme repo, initialize against it:
+
+```sh
+nazare init --repo http://127.0.0.1:<chosen-port> --ref refs/heads/main
+```
+
+Then normal consumer commands (`nazare list`, `nazare add <component>`, `nazare theme pull`) download registry files from the local server and keep SHA-256 validation.
+
 ## CLI update
 
 Update a Nazare-owned CLI install from its originally installed source:

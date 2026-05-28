@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const http = require("node:http");
 const https = require("node:https");
 const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
@@ -124,7 +125,8 @@ function shellQuote(value) {
 
 function fetchUrlBuffer(url) {
 	return new Promise((resolve, reject) => {
-		const request = https.get(
+		const client = url.startsWith("http://") ? http : https;
+		const request = client.get(
 			url,
 			{
 				headers: {
@@ -281,8 +283,28 @@ function sourceMetadata(metadata, installedRef) {
 	};
 }
 
+function isHttpRegistryRepo(repo) {
+	if (typeof repo !== "string") return false;
+	try {
+		const url = new URL(repo);
+		return (
+			(url.protocol === "http:" || url.protocol === "https:") &&
+			url.username === "" &&
+			url.password === "" &&
+			url.search === "" &&
+			url.hash === "" &&
+			url.pathname.replace(/\/$/, "") === ""
+		);
+	} catch {
+		return false;
+	}
+}
+
 function isValidRegistryRepo(repo) {
-	return typeof repo === "string" && GITHUB_REPO_PATTERN.test(repo);
+	return (
+		typeof repo === "string" &&
+		(GITHUB_REPO_PATTERN.test(repo) || isHttpRegistryRepo(repo))
+	);
 }
 
 function parseInitArgs(args) {
@@ -1775,7 +1797,15 @@ function githubRepoSlug(repo) {
 	return match[1];
 }
 
+function encodeRegistryPath(filePath) {
+	return filePath.split("/").map(encodeURIComponent).join("/");
+}
+
 function registryRawUrl(registry, filePath) {
+	if (isHttpRegistryRepo(registry.repo)) {
+		return `${registry.repo.replace(/\/$/, "")}/raw/${encodeRegistryPath(filePath)}?ref=${encodeURIComponent(registry.ref)}`;
+	}
+
 	return `https://raw.githubusercontent.com/${githubRepoSlug(registry.repo)}/${registry.ref}/${filePath}`;
 }
 
@@ -1788,6 +1818,10 @@ function resolveRegistryRoot() {
 }
 
 async function readRegistryFile(registry, registryRoot, filePath) {
+	if (isHttpRegistryRepo(registry.repo)) {
+		return fetchUrlBuffer(registryRawUrl(registry, filePath));
+	}
+
 	const localPath = path.join(registryRoot, filePath);
 	if (fs.existsSync(localPath)) {
 		return fs.readFileSync(localPath);

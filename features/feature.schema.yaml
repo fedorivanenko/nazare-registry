@@ -46,11 +46,13 @@ frontmatter:
       type: object
       allowedFields:
         - cli
+        - devCli
         - storefront
       rules:
         - "Include only surface types used by the feature."
         - "Use storefront for Shopify theme user-facing Liquid/templates/sections/snippets/assets behavior."
-        - "Use cli for Nazare commands and command output."
+        - "Use cli for consumer Nazare commands and command output."
+        - "Use devCli for registry authoring and local development commands that are intentionally outside the consumer Nazare CLI."
         - "Do not include files here; use codebaseOwnership for file/path boundaries."
     invariants:
       required: true
