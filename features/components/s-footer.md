@@ -1,0 +1,165 @@
+---
+schemaVersion: 1
+
+id: s-footer
+title: Footer Section
+status: planned
+
+dependencies:
+  - component-registry
+  - component-list
+  - component-add
+  - c-email-signup-klaviyo
+  - c-social-links
+
+surfaces:
+  storefront:
+    - sections/s-footer.liquid
+
+invariants:
+  - Component ID is s-footer
+  - Installs through nazare add s-footer
+  - Registry metadata includes checksum for every component file
+  - Uses Tailwind utilities for all styling
+  - Does not require JavaScript beyond what the email signup provider provides
+  - Brand tagline is always rendered
+  - Nav columns, email signup zone, and social links are each optional
+  - Nav column renders only when its linked menu has at least one link
+  - Email signup zone renders only when the email provider setting is configured
+  - Does not mutate theme scaffold source
+
+nonGoals:
+  - Image gallery (use s-image-gallery above the footer)
+  - Cookie consent bar
+  - Back-to-top button
+  - Custom CSS files
+
+codebaseOwnership:
+  owns:
+    repo:
+      - components/s-footer/**
+      - nazare.registry.yml s-footer metadata
+      - test/ registry component validation for s-footer
+
+  mustNotModify:
+    - theme/default/ scaffold source content
+    - bin/nazare.js command behavior
+    - install metadata
+    - existing component source files
+---
+
+# Footer Section
+
+## Goal
+
+Add an installable Shopify section for the site footer — navigation link columns, email newsletter signup, and a full-width brand tagline.
+
+The section covers everything below the image gallery: nav menus, email capture (provider-configurable via the `c-email-signup-*` pattern), and the oversized brand tagline at the bottom. The image gallery and social bar above are separate sections.
+
+---
+
+## Scope
+
+Included:
+
+- `components/s-footer/s-footer.liquid`
+- `nazare.registry.yml` component metadata for `s-footer`
+- checksum validation coverage for committed component source files
+- smoke coverage that `nazare add s-footer` installs the section from the local registry
+- configurable section settings:
+  - brand tagline text (required display; plain text)
+  - email provider: `klaviyo` or `none`, default `none`
+  - Klaviyo list ID (active when provider is `klaviyo`)
+  - email zone heading (optional)
+  - email zone description (optional)
+  - email input placeholder, default `Email Address`
+  - email button label, default `Sign Up`
+  - social links: instagram, facebook, youtube, tiktok, twitter, pinterest URLs (all optional; forwarded to `c-social-links`)
+- section blocks (type: `nav_column`):
+  - column heading (plain text)
+  - menu (Shopify linklist handle)
+
+Layout contract:
+
+- Section is divided into two horizontal zones stacked vertically.
+- **Main zone**: left side holds nav columns (up to 4 blocks rendered as equal-width columns); right side holds email signup zone (heading, description, `c-email-signup-*` form) when email provider is configured.
+- **Tagline zone**: full-width, oversized display text spanning the section width at the bottom. Font size scales to fill the full width.
+- Nav column block renders its heading above a list of links from `linklists[block.settings.menu].links`.
+- Nav column is absent when its linked menu has no links or when menu setting is blank.
+- Email signup renders via the appropriate provider snippet (`c-email-signup-klaviyo` when provider is `klaviyo`).
+- Email zone is absent when provider is `none`.
+- `c-social-links` is not rendered in the footer itself — social links belong to the `s-social-gallery` section above. Social link settings are present for themes that use the footer without `s-social-gallery`.
+
+Component metadata:
+
+```yaml
+components:
+  s-footer:
+    version: 1.0.0
+    type: section
+    dependencies:
+      - c-email-signup-klaviyo
+      - c-social-links
+    files:
+      - from: components/s-footer/s-footer.liquid
+        to: sections/s-footer.liquid
+        checksum:
+          algorithm: sha256
+          value: ""
+```
+
+---
+
+## Success behavior
+
+- `nazare list` shows `s-footer` as available after registry update.
+- `nazare add s-footer` installs `sections/s-footer.liquid` and transitively installs `c-email-signup-klaviyo`, `c-email-signup`, and `c-social-links`.
+- Brand tagline always renders full-width at the bottom.
+- Each nav column block renders its heading and menu links when the menu has links.
+- Nav column is absent when its menu is blank or empty.
+- Email zone renders with Klaviyo form when provider is `klaviyo` and list ID is set.
+- Email zone is absent when provider is `none`.
+- Component source checksum matches registry metadata.
+
+---
+
+## Failure behavior
+
+- Invalid registry metadata or checksum mismatch fails existing component validation/tests.
+- Missing component source file fails registry component tests.
+- Blank menu handle renders no nav column without Liquid errors.
+- Provider `none` renders no email zone without broken markup.
+- Missing dependency snippets do not crash section render — registry resolves transitively.
+
+---
+
+## Verification
+
+- [ ] component source exists at registry path
+- [ ] registry contains `s-footer` metadata with c-email-signup-klaviyo and c-social-links dependencies
+- [ ] registry checksum matches component source bytes
+- [ ] component metadata validates with component registry parser
+- [ ] brand tagline always renders
+- [ ] nav column renders heading and links when menu is populated
+- [ ] nav column absent when menu blank or empty
+- [ ] email zone renders Klaviyo form when provider is klaviyo
+- [ ] email zone absent when provider is none
+- [ ] section uses Tailwind utilities only
+- [ ] `nazare add s-footer` smoke installs section and all transitive dependencies
+
+---
+
+## Architecture notes
+
+The brand tagline uses fluid typography to fill the full section width — `clamp()` or a viewport-unit font-size so the text scales from small screens to wide desktops without a fixed breakpoint. This matches the design where the tagline spans edge to edge.
+
+Nav columns use Shopify `linklists` (theme navigation menus) rather than manual link settings on blocks. This lets merchants manage footer navigation in the Shopify admin navigation editor rather than the theme customizer.
+
+The email provider setting is a select with `klaviyo` and `none`. Additional providers (Mailchimp, Omnisend, etc.) are added by installing their `c-email-signup-*` snippet and extending this setting — the section conditionally renders the matching provider snippet based on the setting value.
+
+---
+
+## Open questions
+
+- Should social links render in the footer main zone (below nav columns) in addition to `s-social-gallery`, or only when `s-social-gallery` is not present?
+- Should the tagline font size use a fixed `clamp()` or be a configurable setting?
