@@ -2,7 +2,10 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const manifestPath = new URL("../../../nazare.registry.yml", import.meta.url);
-const packagePath = new URL("../../../theme/default/package.json", import.meta.url);
+const packagePath = new URL(
+	"../../../theme/default/package.json",
+	import.meta.url,
+);
 const viteConfigPath = new URL(
 	"../../../theme/default/vite.config.js",
 	import.meta.url,
@@ -11,7 +14,10 @@ const baseCssPath = new URL(
 	"../../../theme/default/styles/base.css",
 	import.meta.url,
 );
-const gitignorePath = new URL("../../../theme/default/.gitignore", import.meta.url);
+const gitignorePath = new URL(
+	"../../../theme/default/.gitignore",
+	import.meta.url,
+);
 const shopifyThemeConfigPath = new URL(
 	"../../../theme/default/shopify.theme.toml",
 	import.meta.url,

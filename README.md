@@ -4,9 +4,9 @@ Opinionated Shopify Liquid theme and component registry built for speed.
 
 ## Versioning
 
-Nazare CLI version source of truth is `package.json.version`.
+Nazare consumer CLI version source of truth is `packages/nazare/package.json.version`.
 
-Versions use SemVer. Stable release tags must use `vMAJOR.MINOR.PATCH` and match `package.json.version` without the leading `v`.
+Versions use SemVer. Stable release tags must use `vMAJOR.MINOR.PATCH` and match `packages/nazare/package.json.version` without the leading `v`.
 
 See [`docs/policies/release-policy.md`](docs/policies/release-policy.md), [`docs/policies/cli-command-policy.md`](docs/policies/cli-command-policy.md), [`docs/policies/naming-policy.md`](docs/policies/naming-policy.md), [`docs/policies/generated-files-policy.md`](docs/policies/generated-files-policy.md), and [`docs/backlog.md`](docs/backlog.md).
 

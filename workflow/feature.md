@@ -62,7 +62,7 @@ Use the feature doc ID for `<feature-id>`, for example `feat/component-list`.
 
 ```sh
 npx vitest run
-biome check bin/nazare.js test README.md install.sh
+biome check packages/nazare/bin/nazare.js packages/nazare-dev/bin/nazare-dev.js test README.md install.sh
 ```
 
 For docs-only feature design, run at least:
@@ -79,7 +79,7 @@ git diff --stat
 - Update policies only when the rule should apply beyond this feature.
 - If CLI/install behavior changed, follow `docs/policies/release-policy.md` and `workflow/release.md` before PR merge:
   - choose SemVer impact from compatibility rules
-  - bump `package.json.version`
+  - bump `packages/nazare/package.json.version`
   - update lockfile package metadata when present
   - include the version bump in the implementation PR
 - If only registry content changed, do not bump the CLI package version unless the installed CLI or installer must change to consume it.
@@ -115,12 +115,12 @@ git branch -d feat/<feature-id>
 git push origin --delete feat/<feature-id>
 ```
 
-If the merged PR changed CLI/install behavior and bumped `package.json.version`, create and publish the matching stable release from updated `main`:
+If the merged PR changed CLI/install behavior and bumped `packages/nazare/package.json.version`, create and publish the matching stable release from updated `main`:
 
 ```sh
 git checkout main
 git pull --ff-only
-VERSION=$(node -p "require('./package.json').version")
+VERSION=$(node -p "require('./packages/nazare/package.json').version")
 git tag "v$VERSION"
 git push origin "v$VERSION"
 cat > "/tmp/nazare-v$VERSION-notes.md" <<'EOF'
@@ -136,7 +136,7 @@ Release requirements:
 - Git tag must exist and be pushed.
 - GitHub Release must exist for the tag.
 - GitHub Release must be marked latest for stable release flow.
-- Tag version must match `package.json.version` without the leading `v`.
+- Tag version must match `packages/nazare/package.json.version` without the leading `v`.
 - Verify latest resolves to the new release before announcing:
 
 ```sh

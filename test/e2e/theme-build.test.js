@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const execFileAsync = promisify(execFile);
-const cliPath = new URL("../../bin/nazare.js", import.meta.url);
+const cliPath = new URL("../../packages/nazare/bin/nazare.js", import.meta.url);
 const packageManager = process.env.NAZARE_TEST_PACKAGE_MANAGER ?? "pnpm";
 
 async function timedStep(name, callback) {

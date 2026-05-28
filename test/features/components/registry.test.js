@@ -7,7 +7,7 @@ const require = createRequire(import.meta.url);
 const {
 	parseComponentManifest,
 	validateComponentMetadata,
-} = require("../../../bin/nazare.js");
+} = require("../../../packages/nazare/bin/nazare.js");
 
 const checksum = "a".repeat(64);
 const manifestPath = new URL("../../../nazare.registry.yml", import.meta.url);

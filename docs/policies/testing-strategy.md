@@ -68,7 +68,7 @@ Before a CLI release, run:
 ```bash
 pnpm exec vitest run test/features/**/*.test.js --testTimeout=300000
 pnpm exec vitest run test/e2e/*.test.js --testTimeout=300000
-biome check bin/nazare.js test README.md install.sh docs theme components
+biome check packages/nazare/bin/nazare.js packages/nazare-dev/bin/nazare-dev.js test README.md install.sh docs theme components
 ```
 
 Registry/theme/docs/test-only changes usually do not require a CLI release. See `docs/policies/release-policy.md`.

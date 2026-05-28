@@ -41,8 +41,8 @@ codebaseOwnership:
   owns:
     repo:
       - packages/nazare-dev/ registry serve package and binary
-      - package.json and package-lock.json release metadata
-      - bin/nazare.js HTTP registry repo parsing and raw-file resolution
+      - packages/nazare/ HTTP registry repo parsing and raw-file resolution
+      - package.json, package-lock.json, and workspace release metadata
       - README.md local registry development instructions
       - test/ CLI local registry server tests
 
@@ -188,7 +188,7 @@ Result: done.
 
 ## Architecture notes
 
-Add a small Node `http` server in a separate dev-tool package, exposed as `nazare-dev`. Keep consumer workflows in `bin/nazare.js` and do not add dev-server commands to the `nazare` binary.
+Add a small Node `http` server in a separate dev-tool package, exposed as `nazare-dev`. Keep consumer workflows in `packages/nazare/bin/nazare.js` and do not add dev-server commands to the `nazare` binary.
 
 Keep raw-file resolution centralized so existing registry consumers call one helper. The helper should branch on registry origin type:
 

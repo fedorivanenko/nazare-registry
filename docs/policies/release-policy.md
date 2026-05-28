@@ -2,7 +2,7 @@
 
 ## Versioning
 
-`package.json.version` is the CLI version source of truth.
+`packages/nazare/package.json.version` is the consumer CLI version source of truth.
 
 Use SemVer: `MAJOR.MINOR.PATCH`. Prerelease syntax is allowed when needed.
 
@@ -32,7 +32,7 @@ Stable release tags are required.
 
 Tag format: `vMAJOR.MINOR.PATCH`.
 
-The tag version must match `package.json.version` without the leading `v`.
+The tag version must match `packages/nazare/package.json.version` without the leading `v`.
 
 ## Workflow
 

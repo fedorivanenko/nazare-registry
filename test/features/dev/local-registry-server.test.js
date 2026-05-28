@@ -8,7 +8,10 @@ import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 
 const execFileAsync = promisify(execFile);
-const cliPath = new URL("../../../bin/nazare.js", import.meta.url);
+const cliPath = new URL(
+	"../../../packages/nazare/bin/nazare.js",
+	import.meta.url,
+);
 const devCliPath = new URL(
 	"../../../packages/nazare-dev/bin/nazare-dev.js",
 	import.meta.url,

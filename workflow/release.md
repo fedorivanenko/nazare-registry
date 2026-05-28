@@ -11,14 +11,14 @@ Version: patch = bug fix, minor = additive command/flag, major = breaking behavi
 git status --short
 pnpm exec vitest run test/features/**/*.test.js --testTimeout=300000
 pnpm exec vitest run test/e2e/*.test.js --testTimeout=300000
-biome check bin/nazare.js test README.md install.sh docs theme components
+biome check packages/nazare/bin/nazare.js packages/nazare-dev/bin/nazare-dev.js test README.md install.sh docs theme components
 
 # bump
-npm version <new-version> --no-git-tag-version
-git diff -- package.json package-lock.json
+npm version <new-version> --workspace packages/nazare --no-git-tag-version
+git diff -- packages/nazare/package.json package-lock.json
 
 # commit + tag + push
-git add package.json package-lock.json
+git add packages/nazare/package.json package-lock.json
 git commit -m "chore: release v<new-version>"
 git tag v<new-version>
 git push origin main

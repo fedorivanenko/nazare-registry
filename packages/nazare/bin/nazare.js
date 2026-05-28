@@ -278,8 +278,8 @@ function sourceMetadata(metadata, installedRef) {
 		...metadata,
 		installedRef,
 		installScriptUrl: `https://raw.githubusercontent.com/fedorivanenko/nazare/${installedRef}/install.sh`,
-		cliUrl: `https://raw.githubusercontent.com/fedorivanenko/nazare/${installedRef}/bin/nazare.js`,
-		packageUrl: `https://raw.githubusercontent.com/fedorivanenko/nazare/${installedRef}/package.json`,
+		cliUrl: `https://raw.githubusercontent.com/fedorivanenko/nazare/${installedRef}/packages/nazare/bin/nazare.js`,
+		packageUrl: `https://raw.githubusercontent.com/fedorivanenko/nazare/${installedRef}/packages/nazare/package.json`,
 	};
 }
 
