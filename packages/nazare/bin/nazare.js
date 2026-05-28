@@ -1924,6 +1924,29 @@ function parseThemePullArgs(args) {
 	return options;
 }
 
+async function promptThemePullConflict(file, rl) {
+	while (true) {
+		const answer = (
+			await rl.question(
+				`Theme file exists: ${file.to}. Choose skip, overwrite, all, or none [skip]: `,
+			)
+		)
+			.trim()
+			.toLowerCase();
+		const choice = answer || "skip";
+		if (["skip", "overwrite", "all", "none"].includes(choice)) {
+			return choice;
+		}
+		process.stdout.write("Choose skip, overwrite, all, or none.\n");
+	}
+}
+
+function canPromptThemePull() {
+	return (
+		process.stdin.isTTY || process.env.NAZARE_THEME_PULL_INTERACTIVE === "1"
+	);
+}
+
 function parseRegistryUseArgs(args) {
 	const options = {
 		latest: false,
@@ -2186,25 +2209,51 @@ async function themePull(args) {
 		const conflicts = theme.files.filter((file) =>
 			fs.existsSync(path.join(cwd, file.to)),
 		);
-		if (conflicts.length > 0 && !options.yes) {
+		if (conflicts.length > 0 && !options.yes && !canPromptThemePull()) {
 			throw new Error(
 				`Theme file conflicts require --yes: ${conflicts.map((file) => file.to).join(", ")}`,
 			);
 		}
 
 		const writtenFiles = [];
-		for (const file of theme.files) {
-			const targetPath = path.join(cwd, file.to);
-			if (fs.existsSync(targetPath) && !options.yes) continue;
-			const content = sources.get(file.from);
-			fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-			fs.writeFileSync(targetPath, content);
-			writtenFiles.push({
-				path: file.to,
-				source: file.from,
-				checksum: file.checksum,
-			});
-			process.stdout.write(`Wrote ${file.to}\n`);
+		let conflictMode;
+		let rl;
+		try {
+			if (conflicts.length > 0 && !options.yes) {
+				rl = readline.createInterface({
+					input: process.stdin,
+					output: process.stdout,
+				});
+			}
+
+			for (const file of theme.files) {
+				const targetPath = path.join(cwd, file.to);
+				const exists = fs.existsSync(targetPath);
+				if (exists && !options.yes) {
+					let choice = conflictMode;
+					if (!choice) {
+						choice = await promptThemePullConflict(file, rl);
+						if (choice === "all") conflictMode = "overwrite";
+						if (choice === "none") conflictMode = "skip";
+					}
+					if (choice === "skip" || choice === "none") {
+						process.stdout.write(`Skipped ${file.to}\n`);
+						continue;
+					}
+				}
+
+				const content = sources.get(file.from);
+				fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+				fs.writeFileSync(targetPath, content);
+				writtenFiles.push({
+					path: file.to,
+					source: file.from,
+					checksum: file.checksum,
+				});
+				process.stdout.write(`Wrote ${file.to}\n`);
+			}
+		} finally {
+			if (rl) rl.close();
 		}
 
 		if (writtenFiles.length > 0) {
