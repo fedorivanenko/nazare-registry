@@ -95,7 +95,7 @@ Component metadata:
 ```yaml
 components:
   s-video-gallery:
-    version: 1.1.0
+    version: 1.1.1-dev.0
     type: section
     dependencies:
       - c-video

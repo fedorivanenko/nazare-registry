@@ -101,7 +101,7 @@ Component metadata:
 ```yaml
 components:
   c-carousel:
-    version: 1.0.1
+    version: 1.0.7-dev.0
     type: snippet
     dependencies: []
     files:
@@ -116,7 +116,7 @@ components:
           algorithm: sha256
           value: <sha256>
   s-video-gallery:
-    version: 1.1.0
+    version: 1.1.1-dev.0
     type: section
     dependencies:
       - c-video

@@ -1,3 +1,5 @@
+import { attachDrag } from "./c-drag-scroll.js";
+
 const mounts = new WeakMap();
 
 const SPEEDS = {
@@ -39,6 +41,14 @@ function applyTransform(instance) {
 	instance.track.style.transform = `translate3d(${instance.offset}px, 0, 0)`;
 }
 
+function moveItem(item, fn) {
+	const playing = [...item.querySelectorAll("video")].filter((v) => !v.paused);
+	fn();
+	for (const v of playing) {
+		if (v.paused) v.play().catch(() => {});
+	}
+}
+
 function recycleLeft(instance) {
 	let guard = instance.items.length;
 	while (guard > 0) {
@@ -48,7 +58,7 @@ function recycleLeft(instance) {
 		if (itemRect.right > viewportRect.left) break;
 
 		const span = itemSpan(first, instance.gap);
-		instance.track.appendChild(first);
+		moveItem(first, () => instance.track.appendChild(first));
 		instance.items.push(instance.items.shift());
 		instance.offset += span;
 		applyTransform(instance);
@@ -65,7 +75,9 @@ function recycleRight(instance) {
 		if (itemRect.left < viewportRect.right) break;
 
 		const span = itemSpan(last, instance.gap);
-		instance.track.insertBefore(last, instance.track.firstElementChild);
+		moveItem(last, () =>
+			instance.track.insertBefore(last, instance.track.firstElementChild),
+		);
 		instance.items.unshift(instance.items.pop());
 		instance.offset -= span;
 		applyTransform(instance);
@@ -117,14 +129,7 @@ function setPaused(instance, paused) {
 	instance.lastTimestamp = null;
 }
 
-export function init(root) {
-	if (mounts.has(root)) return;
-	if (root.dataset.cCarouselMode !== "marquee") return;
-
-	const viewport = root.querySelector("[data-c-carousel-viewport]");
-	const track = root.querySelector("[data-c-carousel-track]");
-	if (!viewport || !track) return;
-
+function initMarquee(root, viewport, track) {
 	const instance = {
 		root,
 		viewport,
@@ -139,6 +144,7 @@ export function init(root) {
 		direction: root.dataset.cCarouselDirection === "right" ? "right" : "left",
 		speed: SPEEDS[root.dataset.cCarouselSpeed] ?? SPEEDS.normal,
 		listeners: [],
+		destroyDrag: null,
 	};
 
 	function listen(node, eventName, handler) {
@@ -157,10 +163,60 @@ export function init(root) {
 
 	listen(window, "resize", () => measure(instance));
 
+	let prevDragDx = 0;
+	instance.destroyDrag = attachDrag(viewport, {
+		onStart(initialDx) {
+			setPaused(instance, true);
+			prevDragDx = initialDx;
+		},
+		onDelta(dx) {
+			instance.offset += dx - prevDragDx;
+			prevDragDx = dx;
+			applyTransform(instance);
+			recycleLeft(instance);
+			recycleRight(instance);
+		},
+		onEnd() {
+			setPaused(instance, false);
+		},
+	});
+
 	mounts.set(root, instance);
 	instance.frame = requestAnimationFrame((timestamp) =>
 		tick(instance, timestamp),
 	);
+}
+
+function initStatic(root, viewport) {
+	let startScrollLeft = 0;
+
+	const instance = {
+		listeners: [],
+		destroyDrag: attachDrag(viewport, {
+			onStart() {
+				startScrollLeft = viewport.scrollLeft;
+			},
+			onDelta(dx) {
+				viewport.scrollLeft = startScrollLeft - dx;
+			},
+		}),
+	};
+
+	mounts.set(root, instance);
+}
+
+export function init(root) {
+	if (mounts.has(root)) return;
+
+	const viewport = root.querySelector("[data-c-carousel-viewport]");
+	const track = root.querySelector("[data-c-carousel-track]");
+	if (!viewport || !track) return;
+
+	if (root.dataset.cCarouselMode === "marquee") {
+		initMarquee(root, viewport, track);
+	} else {
+		initStatic(root, viewport);
+	}
 }
 
 export function destroy(root) {
@@ -171,6 +227,7 @@ export function destroy(root) {
 	for (const [node, eventName, handler] of instance.listeners) {
 		node.removeEventListener(eventName, handler);
 	}
-	instance.track.style.transform = "";
+	instance.destroyDrag?.();
+	if (instance.track) instance.track.style.transform = "";
 	mounts.delete(root);
 }

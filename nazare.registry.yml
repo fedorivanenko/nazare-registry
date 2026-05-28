@@ -96,22 +96,33 @@ components:
         to: sections/s-video-gallery.liquid
         checksum:
           algorithm: sha256
-          value: f62536358dd2842745ae9d923330096a318cecde9abb3d6068ac8f04dc5d9195
-  c-carousel:
-    version: 1.0.1
+          value: 172452c06ccc39525a4cdc0e1f6386d87e0b544e1883eb1cb1d40022d28da055
+  c-drag-scroll:
+    version: 1.0.1-dev.0
     type: snippet
     dependencies: []
+    files:
+      - from: components/c-drag-scroll/c-drag-scroll.js
+        to: scripts/snippets/c-drag-scroll.js
+        checksum:
+          algorithm: sha256
+          value: 3ee270db4f7eb0facec7529d8ce76c4a26975ce137c2a9b352f5d2180ae4f208
+  c-carousel:
+    version: 1.0.7-dev.0
+    type: snippet
+    dependencies:
+      - c-drag-scroll
     files:
       - from: components/c-carousel/c-carousel.liquid
         to: snippets/c-carousel.liquid
         checksum:
           algorithm: sha256
-          value: 59c047ab74b364b537dd85e88fd0406afb7bdb9b45bd2410a58273a83238166c
+          value: e79b73a91c21ee1eafe27a6accb65448f303939fd8f24827ac9df9794cf94529
       - from: components/c-carousel/c-carousel.js
         to: scripts/snippets/c-carousel.js
         checksum:
           algorithm: sha256
-          value: e5beeaa84bd71abba3b43ff51c7191d7a91a09a6ee4860508f447719833324eb
+          value: b1b7065580dce53f81a2ac3a627dc36061fdd607536699e989551ff69bdbc6d2
   s-announcement:
     version: 1.0.2-dev.0
     type: section

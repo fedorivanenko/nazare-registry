@@ -50,8 +50,8 @@
         {% for block in section.blocks %}
           {% if block.settings.video != blank %}
             {% assign rendered_videos = rendered_videos | plus: 1 %}
-            <div data-c-carousel-item {{ block.shopify_attributes }} class="w-80 shrink-0 sm:w-96">
-              {% render 'c-video', video: block.settings.video, thumbnail: block.settings.thumbnail, thumbnail_alt: block.settings.thumbnail_alt, id: block.id %}
+            <div data-c-carousel-item {{ block.shopify_attributes }} class="h-full shrink-0">
+              {% render 'c-video', video: block.settings.video, thumbnail: block.settings.thumbnail, thumbnail_alt: block.settings.thumbnail_alt, id: block.id, class: 'h-full' %}
             </div>
           {% endif %}
         {% endfor %}
