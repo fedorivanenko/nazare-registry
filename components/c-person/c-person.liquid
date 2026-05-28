@@ -1,0 +1,31 @@
+{% liquid
+  assign person_image = image
+  assign person_image_alt = image_alt | default: ''
+  assign person_name = name
+  assign person_role = role
+  assign person_class = class
+%}
+
+{% if person_name != blank or person_image != blank %}
+  <div class="flex items-center gap-3{% if person_class != blank %} {{ person_class }}{% endif %}">
+    {% if person_image != blank %}
+      <div class="size-10 shrink-0 overflow-hidden rounded-full">
+        {{
+          person_image
+          | image_url: width: 80
+          | image_tag: alt: person_image_alt, class: 'size-full object-cover', loading: 'lazy'
+        }}
+      </div>
+    {% endif %}
+    {% if person_name != blank or person_role != blank %}
+      <div>
+        {% if person_name != blank %}
+          <p class="text-sm font-semibold leading-snug">{{ person_name }}</p>
+        {% endif %}
+        {% if person_role != blank %}
+          <p class="text-sm leading-snug text-foreground/60">{{ person_role }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

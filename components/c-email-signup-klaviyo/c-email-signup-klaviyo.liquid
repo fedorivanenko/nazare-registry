@@ -1,0 +1,15 @@
+{% liquid
+  assign esk_list_id = list_id
+  assign esk_placeholder = placeholder | default: 'Email Address'
+  assign esk_button_label = button_label | default: 'Sign up'
+  assign esk_class = class
+%}
+
+{% capture esk_attrs %}data-nazare-use="snippets/c-email-signup-klaviyo" data-list-id="{{ esk_list_id | escape }}"{% endcapture %}
+
+{% render 'c-email-signup',
+  placeholder: esk_placeholder,
+  button_label: esk_button_label,
+  attrs: esk_attrs,
+  class: esk_class
+%}

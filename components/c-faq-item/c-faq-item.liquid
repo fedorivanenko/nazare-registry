@@ -1,0 +1,18 @@
+{% liquid
+  assign faq_question = question
+  assign faq_answer = answer
+  assign faq_class = class
+%}
+
+{% if faq_question != blank %}
+  <div class="{% if faq_class != blank %}{{ faq_class }}{% endif %}">
+    <div class="inline-block rounded-full bg-neutral-800 px-7 py-5 text-base font-bold text-white">
+      {{ faq_question }}
+    </div>
+    {% if faq_answer != blank %}
+      <div class="ml-[40%] mt-6 text-base leading-relaxed text-foreground/70">
+        {{ faq_answer }}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

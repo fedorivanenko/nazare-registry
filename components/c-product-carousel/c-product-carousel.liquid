@@ -1,0 +1,49 @@
+{% liquid
+  assign pc_products = products
+  assign pc_mode = mode | default: 'static'
+  assign pc_direction = direction | default: 'left'
+  assign pc_speed = speed | default: 'normal'
+  assign pc_pause_on_hover = pause_on_hover
+  assign pc_gap = gap | default: 'md'
+  assign pc_badge_tags = badge_tags
+  assign pc_show_ratings = show_ratings
+  assign pc_show_swatches = show_swatches
+  assign pc_color_option = color_option_name | default: 'Color'
+  assign pc_class = class
+
+  if pc_pause_on_hover == nil
+    assign pc_pause_on_hover = true
+  endif
+  if pc_show_ratings == nil
+    assign pc_show_ratings = true
+  endif
+  if pc_show_swatches == nil
+    assign pc_show_swatches = true
+  endif
+%}
+
+{% if pc_products != blank and pc_products.size > 0 %}
+  {% capture carousel_items %}
+    {% for pc_product in pc_products %}
+      <div data-c-carousel-item class="w-80 shrink-0">
+        {% render 'c-product-card',
+          product: pc_product,
+          badge_tags: pc_badge_tags,
+          show_ratings: pc_show_ratings,
+          show_swatches: pc_show_swatches,
+          color_option_name: pc_color_option
+        %}
+      </div>
+    {% endfor %}
+  {% endcapture %}
+
+  {% render 'c-carousel',
+    content: carousel_items,
+    mode: pc_mode,
+    direction: pc_direction,
+    speed: pc_speed,
+    pause_on_hover: pc_pause_on_hover,
+    gap: pc_gap,
+    class: pc_class
+  %}
+{% endif %}

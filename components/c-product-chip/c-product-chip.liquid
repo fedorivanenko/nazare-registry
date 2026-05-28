@@ -1,0 +1,30 @@
+{% liquid
+  assign pc_product = product
+  assign pc_badge_label = badge_label
+  assign pc_badge_style = badge_style | default: 'filled'
+  assign pc_cta_label = cta_label | default: 'Shop now'
+  assign pc_class = class
+%}
+
+{% if pc_product != blank %}
+  <div class="flex items-center gap-4 rounded-2xl bg-background p-4 shadow-lg{% if pc_class != blank %} {{ pc_class }}{% endif %}">
+    {% if pc_product.featured_image != blank %}
+      <div class="size-20 shrink-0 overflow-hidden rounded-xl">
+        {{
+          pc_product.featured_image
+          | image_url: width: 160
+          | image_tag: alt: pc_product.featured_image.alt, class: 'size-full object-cover', loading: 'lazy'
+        }}
+      </div>
+    {% endif %}
+
+    <div class="flex min-w-0 flex-col gap-1">
+      {% if pc_badge_label != blank %}
+        {% render 'c-badge', label: pc_badge_label, style: pc_badge_style %}
+      {% endif %}
+      <p class="text-sm font-semibold leading-snug">{{ pc_product.title }}</p>
+      <p class="text-sm text-foreground/60">{{ pc_product.price | money }}</p>
+      <a href="{{ pc_product.url }}" class="text-xs font-semibold underline underline-offset-2 hover:no-underline">{{ pc_cta_label }}</a>
+    </div>
+  </div>
+{% endif %}

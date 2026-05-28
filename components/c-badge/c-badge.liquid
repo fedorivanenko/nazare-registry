@@ -1,0 +1,16 @@
+{% liquid
+  assign badge_label = label
+  assign badge_style = style | default: 'outline'
+  assign badge_color = color
+  assign badge_class = class
+
+  unless badge_style == 'filled' or badge_style == 'outline'
+    assign badge_style = 'outline'
+  endunless
+%}
+
+{% if badge_label != blank %}
+  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide {% if badge_style == 'filled' %}{% if badge_color != blank %}{{ badge_color }} text-white{% else %}bg-foreground text-background{% endif %}{% else %}border border-current bg-transparent{% endif %}{% if badge_class != blank %} {{ badge_class }}{% endif %}">
+    {{ badge_label }}
+  </span>
+{% endif %}

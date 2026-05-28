@@ -1,0 +1,77 @@
+{% liquid
+  assign card_product = product
+  assign card_selected_variant = selected_variant | default: product.selected_or_first_available_variant
+  assign card_badge_tags = badge_tags
+  assign card_show_ratings = show_ratings
+  assign card_show_swatches = show_swatches
+  assign card_color_option = color_option_name | default: 'Color'
+  assign card_class = class
+
+  if card_show_ratings == nil
+    assign card_show_ratings = true
+  endif
+  if card_show_swatches == nil
+    assign card_show_swatches = true
+  endif
+%}
+
+{% if card_product != blank %}
+  <div class="flex flex-col gap-3{% if card_class != blank %} {{ card_class }}{% endif %}">
+
+    {% comment %} Badges {% endcomment %}
+    {% if card_badge_tags != blank or card_product.tags.size > 0 %}
+      <div class="flex flex-wrap gap-1">
+        {% if card_badge_tags != blank %}
+          {% assign badge_tag_list = card_badge_tags | split: ',' %}
+          {% for badge_tag in badge_tag_list %}
+            {% assign badge_tag_trimmed = badge_tag | strip %}
+            {% if card_product.tags contains badge_tag_trimmed %}
+              {% render 'c-badge', label: badge_tag_trimmed, style: 'filled' %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {% for tag in card_product.tags %}
+          {% unless card_badge_tags contains tag %}
+            {% render 'c-badge', label: tag, style: 'outline' %}
+          {% endunless %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% comment %} Image {% endcomment %}
+    <a href="{{ card_product.url }}" class="block aspect-square overflow-hidden rounded-xl bg-foreground/5">
+      {% if card_product.featured_image != blank %}
+        {{
+          card_product.featured_image
+          | image_url: width: 600
+          | image_tag:
+            alt: card_product.featured_image.alt,
+            class: 'size-full object-cover',
+            loading: 'lazy',
+            data-c-swatch-image: ''
+        }}
+      {% endif %}
+    </a>
+
+    {% comment %} Ratings {% endcomment %}
+    {% if card_show_ratings %}
+      {% render 'c-ratings', product: card_product %}
+    {% endif %}
+
+    {% comment %} Title + price {% endcomment %}
+    <div class="flex items-baseline justify-between gap-2">
+      <p class="text-sm font-semibold">{{ card_product.title }}</p>
+      <p class="shrink-0 text-sm font-semibold">{{ card_selected_variant.price | money }}</p>
+    </div>
+
+    {% comment %} Swatches {% endcomment %}
+    {% if card_show_swatches %}
+      {% render 'c-swatch',
+        product: card_product,
+        option_name: card_color_option,
+        selected_variant: card_selected_variant
+      %}
+    {% endif %}
+
+  </div>
+{% endif %}

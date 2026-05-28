@@ -1,0 +1,42 @@
+{% liquid
+  assign bi_product = product
+  assign bi_name = name
+  assign bi_benefits = benefits
+  assign bi_class = class
+
+  if bi_name == blank and bi_product != blank
+    assign bi_name = bi_product.title
+  endif
+%}
+
+{% if bi_name != blank or bi_product != blank %}
+  <div class="flex flex-col gap-3{% if bi_class != blank %} {{ bi_class }}{% endif %}">
+    {% if bi_product != blank and bi_product.featured_image != blank %}
+      <div class="aspect-square w-full overflow-hidden">
+        {{
+          bi_product.featured_image
+          | image_url: width: 300
+          | image_tag: alt: bi_product.featured_image.alt, class: 'size-full object-contain', loading: 'lazy'
+        }}
+      </div>
+    {% endif %}
+
+    {% if bi_name != blank %}
+      <p class="text-sm font-bold">{{ bi_name }}</p>
+    {% endif %}
+
+    {% if bi_benefits != blank %}
+      {% assign benefit_lines = bi_benefits | split: '\n' %}
+      <ul class="flex flex-col gap-1">
+        {% for benefit in benefit_lines %}
+          {% unless benefit == blank %}
+            <li class="flex items-start gap-2 text-sm text-foreground/70">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 shrink-0" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              {{ benefit }}
+            </li>
+          {% endunless %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+{% endif %}

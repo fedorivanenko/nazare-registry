@@ -1,0 +1,39 @@
+{% liquid
+  assign stat_value = value
+  assign stat_label = label
+  assign stat_description = description
+  assign stat_class = class
+
+  assign stat_numeric = stat_value | remove: '%' | remove: '+' | remove: 'x' | remove: 'X' | strip
+  assign stat_suffix = ''
+
+  if stat_value contains '%'
+    assign stat_suffix = '%'
+  elsif stat_value contains '+'
+    assign stat_suffix = '+'
+  elsif stat_value contains 'x'
+    assign stat_suffix = 'x'
+  elsif stat_value contains 'X'
+    assign stat_suffix = 'X'
+  endif
+%}
+
+{% if stat_value != blank %}
+  <div class="flex flex-col gap-2{% if stat_class != blank %} {{ stat_class }}{% endif %}">
+    {% if stat_label != blank %}
+      <p class="text-xs font-semibold uppercase tracking-widest text-foreground/50">{{ stat_label }}</p>
+    {% endif %}
+
+    <p
+      data-nazare-use="snippets/c-stat"
+      data-c-stat-target="{{ stat_numeric }}"
+      data-c-stat-suffix="{{ stat_suffix }}"
+      aria-label="{{ stat_value }}"
+      class="text-7xl font-black leading-none tracking-tight"
+    >0{{ stat_suffix }}</p>
+
+    {% if stat_description != blank %}
+      <p class="text-sm text-foreground/70">{{ stat_description }}</p>
+    {% endif %}
+  </div>
+{% endif %}

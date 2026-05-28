@@ -1,0 +1,61 @@
+{% liquid
+  assign sw_product = product
+  assign sw_option_name = option_name | default: 'Color'
+  assign sw_selected_variant = selected_variant | default: sw_product.selected_or_first_available_variant
+  assign sw_class = class
+
+  assign sw_option_index = nil
+  assign sw_option_values = nil
+
+  for opt in sw_product.options_with_values
+    if opt.name == sw_option_name
+      assign sw_option_index = forloop.index0
+      assign sw_option_values = opt.values
+      break
+    endif
+  endfor
+%}
+
+{% if sw_option_values != nil %}
+  {% liquid
+    assign sw_selected_value = sw_selected_variant.options[sw_option_index]
+  %}
+
+  <div
+    data-nazare-use="snippets/c-swatch"
+    class="flex flex-col gap-2{% if sw_class != blank %} {{ sw_class }}{% endif %}"
+  >
+    <div class="flex flex-wrap gap-2" role="group" aria-label="{{ sw_option_name }}">
+      {% for value in sw_option_values %}
+        {% liquid
+          assign sw_variant_for_value = nil
+          for variant in sw_product.variants
+            if variant.options[sw_option_index] == value
+              assign sw_variant_for_value = variant
+              break
+            endif
+          endfor
+          assign sw_variant_image = ''
+          if sw_variant_for_value != nil and sw_variant_for_value.featured_image != blank
+            assign sw_variant_image = sw_variant_for_value.featured_image | image_url: width: 800
+          endif
+          assign sw_is_active = false
+          if value == sw_selected_value
+            assign sw_is_active = true
+          endif
+        %}
+        <button
+          type="button"
+          data-c-swatch-value="{{ value | escape }}"
+          data-variant-image="{{ sw_variant_image }}"
+          aria-label="{{ value }}"
+          aria-pressed="{{ sw_is_active }}"
+          class="size-7 rounded-full border-2 transition focus:outline-none focus:ring-2 focus:ring-foreground focus:ring-offset-2 {% if sw_is_active %}border-foreground{% else %}border-transparent hover:border-foreground/40{% endif %}"
+          style="background-color: {{ value | downcase | replace: ' ', '' }};"
+        ></button>
+      {% endfor %}
+    </div>
+
+    <span data-c-swatch-label class="text-sm text-foreground/60">{{ sw_selected_value }}</span>
+  </div>
+{% endif %}

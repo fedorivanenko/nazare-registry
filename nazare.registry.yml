@@ -207,3 +207,145 @@ components:
         checksum:
           algorithm: sha256
           value: 8addbeb2258dea586a263c88df59e8a58aea1d37895dabac8210ff0dcf4a2e0c
+  c-badge:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-badge/c-badge.liquid
+        to: snippets/c-badge.liquid
+        checksum:
+          algorithm: sha256
+          value: e8f08523a0e3689aacd31b316680c4fecde51538d4b79ad2f2e7325b1270b48d
+  c-person:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-person/c-person.liquid
+        to: snippets/c-person.liquid
+        checksum:
+          algorithm: sha256
+          value: 2efec0bf2673906ea0fb5d78a9c1bf5d5fa232a134dcbe4ea8939437a5732b32
+  c-social-links:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-social-links/c-social-links.liquid
+        to: snippets/c-social-links.liquid
+        checksum:
+          algorithm: sha256
+          value: f3b903087b0507a8e72f9ca4506bd5c04b7cec8d7ae9dfbfd335d1e0b6b6f3de
+  c-faq-item:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-faq-item/c-faq-item.liquid
+        to: snippets/c-faq-item.liquid
+        checksum:
+          algorithm: sha256
+          value: ce57edfcb0e04efc2c3b089d788cfa25f4fccaee0b809fe13d5dc9b5c79d034c
+  c-bundle-item:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-bundle-item/c-bundle-item.liquid
+        to: snippets/c-bundle-item.liquid
+        checksum:
+          algorithm: sha256
+          value: 0b0f054b76f3e37a608a2a1a8434df5e1f95b2119bd798a239d8a637ffd11266
+  c-email-signup:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-email-signup/c-email-signup.liquid
+        to: snippets/c-email-signup.liquid
+        checksum:
+          algorithm: sha256
+          value: b3199159406a45db90386c82c85501e0da3ab8896ed3a2c155b3494d7d934b6f
+  c-stat:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-stat/c-stat.liquid
+        to: snippets/c-stat.liquid
+        checksum:
+          algorithm: sha256
+          value: dd720cc331a1949d6fb236d50100cda22a4e6abcbc079ff54a9f4341d1fae319
+      - from: components/c-stat/c-stat.js
+        to: assets/c-stat.js
+        checksum:
+          algorithm: sha256
+          value: df00c5cf682b718cae0e29255f73333f6c9bafbeafd1e1fc8ce058bbd73fc85d
+  c-swatch:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-swatch/c-swatch.liquid
+        to: snippets/c-swatch.liquid
+        checksum:
+          algorithm: sha256
+          value: fff591f74caac4302d8a1c39bc89c926310fe9110acf1ebed7a81a731ce2a05b
+      - from: components/c-swatch/c-swatch.js
+        to: assets/c-swatch.js
+        checksum:
+          algorithm: sha256
+          value: 2897a05c0112a58e2379d2fe24bb3e43de0aa4c2d9673bd4179f8ef83c24f317
+  c-product-chip:
+    version: 1.0.0
+    type: snippet
+    dependencies:
+      - c-badge
+    files:
+      - from: components/c-product-chip/c-product-chip.liquid
+        to: snippets/c-product-chip.liquid
+        checksum:
+          algorithm: sha256
+          value: d2771e0ebd2bfcbc9c181d5db12c04246ff5e29a10ed3cd665fa2c0f966cfcd0
+  c-product-card:
+    version: 1.0.0
+    type: snippet
+    dependencies:
+      - c-badge
+      - c-ratings
+      - c-swatch
+    files:
+      - from: components/c-product-card/c-product-card.liquid
+        to: snippets/c-product-card.liquid
+        checksum:
+          algorithm: sha256
+          value: b351e151a65371e05d32b1b2efc858712152cd549b591fe1badac659cefa3c60
+  c-product-carousel:
+    version: 1.0.0
+    type: snippet
+    dependencies:
+      - c-carousel
+      - c-product-card
+    files:
+      - from: components/c-product-carousel/c-product-carousel.liquid
+        to: snippets/c-product-carousel.liquid
+        checksum:
+          algorithm: sha256
+          value: 13e86551f840c1df1cbd11330aa0251f172b341ef30049a2b1bc83dbb847f405
+  c-email-signup-klaviyo:
+    version: 1.0.0
+    type: snippet
+    dependencies:
+      - c-email-signup
+    files:
+      - from: components/c-email-signup-klaviyo/c-email-signup-klaviyo.liquid
+        to: snippets/c-email-signup-klaviyo.liquid
+        checksum:
+          algorithm: sha256
+          value: 4a4340b5636f561ac596a683a8857bbca5b825a5bf46e41896962f186f2e4390
+      - from: components/c-email-signup-klaviyo/c-email-signup-klaviyo.js
+        to: assets/c-email-signup-klaviyo.js
+        checksum:
+          algorithm: sha256
+          value: ca8b37369849a70092021c1cf407aceb9a06c394a0c5649aea861e0393b99359
