@@ -95,7 +95,7 @@ function startServer(root) {
 	return new Promise((resolve, reject) => {
 		const child = spawn(
 			process.execPath,
-			[devCliPath.pathname, "registry", "serve", "--root", root],
+			[devCliPath.pathname, "registry", "serve", "--root", root, "--port", "0"],
 			{ encoding: "utf8" },
 		);
 		children.push(child);
@@ -112,7 +112,7 @@ function startServer(root) {
 		child.stdout.on("data", (chunk) => {
 			stdout += chunk;
 			const match = stdout.match(/Registry URL: (http:\/\/127\.0\.0\.1:\d+)/);
-			if (match) {
+			if (match && stdout.includes("Consumer init:")) {
 				clearTimeout(timeout);
 				resolve({
 					child,
@@ -270,7 +270,7 @@ describe("nazare-dev registry serve", () => {
 		expect(
 			await readFile(join(consumer, "layout", "theme.liquid"), "utf8"),
 		).toBe("layout\n");
-	});
+	}, 15_000);
 
 	it("exits cleanly on SIGTERM", async () => {
 		const registry = await makeTempDir();

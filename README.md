@@ -155,10 +155,10 @@ Registry authors can serve a local checkout without pushing to GitHub:
 nazare-dev registry serve
 ```
 
-The server prints a `Registry URL` and matching consumer init command. In a separate theme repo, initialize against it:
+The server uses `http://127.0.0.1:7331` by default, then prints a `Registry URL` and matching consumer init command. In a separate theme repo, initialize against it:
 
 ```sh
-nazare init --repo http://127.0.0.1:<chosen-port> --ref refs/heads/main
+nazare init --repo http://127.0.0.1:7331 --ref refs/heads/main
 ```
 
 Then normal consumer commands (`nazare list`, `nazare add <component>`, `nazare theme pull`) download registry files from the local server and keep SHA-256 validation.

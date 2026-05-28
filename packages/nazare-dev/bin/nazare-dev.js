@@ -4,6 +4,8 @@ const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
 
+const DEFAULT_REGISTRY_PORT = 7331;
+
 const HELP = `Nazare Dev CLI
 
 Usage:
@@ -16,14 +18,14 @@ Commands:
 Options:
   -h, --help         Show this help
   --host <host>      Bind host (default: 127.0.0.1)
-  --port <port>      Bind port, 0 picks a free port (default: 0)
+  --port <port>      Bind port, 0 picks a free port (default: 7331)
   --root <path>      Registry root directory (default: current directory)
 `;
 
 function parseServeArgs(args) {
 	const options = {
 		host: "127.0.0.1",
-		port: 0,
+		port: DEFAULT_REGISTRY_PORT,
 		root: process.cwd(),
 	};
 
