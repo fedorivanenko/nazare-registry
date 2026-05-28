@@ -147,6 +147,43 @@ nazare update c-button
 
 `nazare update` compares local files with the checksums recorded in `nazare.lock.yml`. Existing files require an interactive choice before overwrite: overwrite, skip, or write manual conflict markers. Use `--dry-run` to preview the plan, or `--force` to overwrite/recreate/delete files without prompting.
 
+## Available components
+
+### Snippets
+
+| ID | Description | Dependencies |
+|---|---|---|
+| `c-button` | Link button with solid, outline, and ghost styles | — |
+| `c-video` | Interactive video with play/pause, mute/unmute, and cross-instance mute coordination | — |
+| `c-bg-video` | Ambient autoplay background video; pauses on reduced-motion and off-screen | — |
+| `c-carousel` | Scrollable or endless-marquee carousel; drag-to-scroll in static mode | `c-drag-scroll` |
+| `c-drag-scroll` | Drag-to-scroll primitive used by c-carousel | — |
+| `c-ratings` | Star rating display; renders immediately from data attrs or waits for a provider adapter | — |
+| `c-ratings-judgeme` | Judge.me ratings adapter; fetches via public widget API using `window.Shopify.shop` | `c-ratings` |
+| `c-ratings-yotpo` | Yotpo ratings adapter; app key from `shop.metafields.integrations.yotpo_app_key` | `c-ratings` |
+
+### Sections
+
+| ID | Description | Dependencies |
+|---|---|---|
+| `s-announcement` | Announcement bar | — |
+| `s-hero` | Full-bleed hero with optional background video, image, overlay, and CTA | `c-bg-video`, `c-button` |
+| `s-video-gallery` | Video gallery with grid, carousel, and marquee layouts | `c-video`, `c-button`, `c-carousel` |
+
+Install any component — dependencies are resolved automatically:
+
+```sh
+nazare add s-hero
+nazare add c-ratings-yotpo
+```
+
+For `c-ratings-yotpo`, also set the app key once in Shopify admin:
+**Custom data → Shops → add `integrations.yotpo_app_key`** (single line text), then add to your layout:
+
+```liquid
+{% render 'c-ratings-yotpo' %}
+```
+
 ## Local registry development
 
 Registry authors can serve a local checkout without pushing to GitHub:
