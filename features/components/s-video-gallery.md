@@ -124,6 +124,7 @@ Section render contract:
 - Carousel layout captures each valid video block once and renders `c-carousel` with `mode: static`.
 - Marquee layout captures each valid video block once and renders `c-carousel` with `mode: marquee`.
 - Carousel and marquee item markup uses `data-c-carousel-item` and must not duplicate Shopify blocks.
+- In carousel and marquee layouts, items use `h-full` so they fill the carousel's clamped height; `c-video` is rendered with `class: 'h-full'` so aspect-ratio drives width rather than width driving height.
 
 ---
 

@@ -25,14 +25,17 @@ invariants:
   - Accepts caller-rendered item markup instead of owning Shopify section blocks
   - s-video-gallery is first consuming section and remains owner of its video block markup
   - Endless marquee moves existing item elements through the track instead of cloning or duplicating them
-  - JavaScript is limited to carousel scrolling, marquee motion, item reordering, pause state, and resize handling
+  - JavaScript handles carousel scrolling, marquee motion, item reordering, pause state, resize handling, and pointer drag
+  - Drag is provided by c-drag-scroll; c-carousel owns only the callbacks that translate drag delta into scroll or transform
+  - Static mode drag updates viewport scrollLeft using absolute delta from drag origin
+  - Marquee mode drag pauses animation on drag start and resumes on release; uses incremental delta so recycle offset adjustments are not clobbered
+  - Marquee recycle preserves video playback state: playing videos inside a recycled item are resumed after the DOM move
   - Does not mutate theme scaffold source
 
 nonGoals:
   - Shopify section schema beyond s-video-gallery carousel settings
   - Owning video, product, collection, or card markup
   - Duplicating slide markup for seamless looping
-  - Drag or swipe gestures
   - Pagination dots
   - Previous and next buttons
   - Scroll snapping controls
@@ -103,7 +106,8 @@ components:
   c-carousel:
     version: 1.0.7-dev.0
     type: snippet
-    dependencies: []
+    dependencies:
+      - c-drag-scroll
     files:
       - from: components/c-carousel/c-carousel.liquid
         to: snippets/c-carousel.liquid
@@ -147,12 +151,12 @@ Snippet render contract:
 - Root element uses `data-nazare-use="snippets/c-carousel"` so existing Nazare runtime loads `scripts/snippets/c-carousel.js`.
 - Root element uses Tailwind utility classes only.
 - The snippet renders a viewport and one track containing `content` exactly once.
-- Root and viewport constrain vertical height with `max-height: clamp(420px, 60dvh, 680px)`.
+- Root uses an explicit `h-[clamp(420px,60dvh,680px)]` so items and viewport can resolve `h-full` against it.
 - Caller is responsible for wrapping each carousel item with `data-c-carousel-item`.
 - Blank `content` renders nothing.
 - Missing or unknown `mode` falls back to `static`.
-- `static` mode renders a horizontally scrollable ribbon without automatic movement.
-- `marquee` mode starts automatic horizontal motion when at least two item elements exist.
+- `static` mode renders a horizontally scrollable ribbon without automatic movement; pointer drag scrolls the viewport.
+- `marquee` mode starts automatic horizontal motion when at least two item elements exist; pointer drag pauses motion, applies an offset delta, and resumes on release.
 - `direction` controls marquee travel direction and defaults to `left` when blank or unknown.
 - `speed` maps to fixed pixels-per-second values and defaults to `normal` when blank or unknown.
 - `gap` maps to Tailwind gap utilities and defaults to `md` when blank or unknown.
@@ -175,6 +179,8 @@ JavaScript behavior contract:
 - Marquee never calls `cloneNode`, never appends copied HTML, and never creates duplicate `data-c-carousel-item` elements.
 - When an item fully exits the viewport, JavaScript moves that same existing item element to the opposite end of the track with `appendChild` or `insertBefore`.
 - After moving an item, JavaScript adjusts the accumulated transform offset by the moved item width plus gap so visual motion does not jump.
+- Before moving an item, JavaScript records which videos inside it are playing; after the move it calls `.play()` on any that were paused by the re-parent.
+- Drag delta is applied incrementally (`offset += dx - prevDx`) rather than absolutely so that recycle offset adjustments made mid-drag are not overwritten.
 - Resize handling remeasures item widths and gap without duplicating items.
 - If there is not enough measurable item width to animate safely, marquee stays static rather than duplicating content.
 - Shopify theme editor section load/unload works through existing Nazare runtime lifecycle.
