@@ -164,7 +164,7 @@ components:
           algorithm: sha256
           value: 420f8eb0e32ea9d5fcf07523580b62d3f9097fc87225249aca6e4cdf6d5385d3
   s-video-gallery:
-    version: 1.1.3
+    version: 1.1.4
     type: section
     dependencies:
       - c-video
@@ -175,7 +175,7 @@ components:
         to: sections/s-video-gallery.liquid
         checksum:
           algorithm: sha256
-          value: d84b5da0d34a027bcef84b34d899ec8f8ba64b5474406d289a4a02bd33635941
+          value: bda96adf4b6c0d5e2c68e8bd1220cbd7ded2d493b26c9c2957e032b8d60d8add
   c-drag-scroll:
     version: 1.0.2-dev.0
     type: snippet

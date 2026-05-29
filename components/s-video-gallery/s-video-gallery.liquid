@@ -26,12 +26,12 @@
   endif
 %}
 
-<section class="bg-background text-foreground">
-  <div class="px-15 py-16 lg:py-24">
-    <div class="mb-10 flex flex-col gap-6 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
+<section class="bg-background text-foreground py-16 lg:py-24">
+  <div class="px-15">
+    <div class="mb-10 flex flex-col gap-6 lg:mb-14 lg:flex-row lg:items-center lg:justify-between">
       <div class="max-w-3xl">
         {% if gallery_title != blank %}
-          <h2 class="font-heading text-4xl font-bold uppercase lg:text-5xl">{{ gallery_title | newline_to_br }}</h2>
+          <h2 class="font-heading text-[52px]/[42px] font-bold uppercase lg:text-[66px]/[52px]">{{ gallery_title | newline_to_br }}</h2>
         {% endif %}
 
         {% if gallery_description != blank %}
@@ -42,7 +42,7 @@
       </div>
 
       {% if has_cta %}
-        <div class="shrink-0">
+        <div class="mt-8 sm:mt-0 flex flex-col items-stretch sm:flex-row sm:items-center">
           {% render 'c-button', label: cta_label, url: cta_url, scheme: cta_scheme %}
         </div>
       {% endif %}
