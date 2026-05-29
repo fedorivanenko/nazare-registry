@@ -61,13 +61,15 @@
   <section class="bg-background text-foreground">
 
     {% if sg_has_header %}
-      <div class="page-width flex items-center justify-between py-8">
+      <div class="page-width px-4 lg:px-15 flex items-center justify-between py-8">
         {% if sg_handle != blank %}
+        <div class="text-[52px]/[41px] uppercase lg:text-[66px]/[52px] font-heading font-bold tracking-tight">
           {% if sg_handle_url != blank %}
-            <a href="{{ sg_handle_url }}" class="text-xl font-bold tracking-tight hover:opacity-75 transition">{{ sg_handle | escape }}</a>
+            <a href="{{ sg_handle_url }}" class="hover:opacity-75 transition">{{ sg_handle | escape }}</a>
           {% else %}
-            <p class="text-xl font-bold tracking-tight">{{ sg_handle | escape }}</p>
+            <p>{{ sg_handle | escape }}</p>
           {% endif %}
+        </div>
         {% else %}
           <div></div>
         {% endif %}
