@@ -503,7 +503,7 @@ components:
           algorithm: sha256
           value: 5c61a1e504294db9ec681f9b9c8f4bf79eb2c53f4925c1276aac4ed7b785af3b
   s-footer:
-    version: 1.1.0
+    version: 1.2.0
     type: section
     dependencies:
       - c-email-signup-klaviyo
@@ -512,4 +512,4 @@ components:
         to: sections/s-footer.liquid
         checksum:
           algorithm: sha256
-          value: e971e4c494248315a453ae560b18de853fddeb95da8bbc039b08eae7d6cd1497
+          value: d148b808604c4ae6e14b47a1d3aa7f4fb4491676b0211310fcc2f56ab9cd06f9
