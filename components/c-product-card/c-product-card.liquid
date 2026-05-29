@@ -6,6 +6,8 @@
   assign card_show_swatches = show_swatches
   assign card_color_option = color_option_name | default: 'Color'
   assign card_class = class
+  assign card_custom_tag = custom_tag
+  assign card_custom_tag_color = custom_tag_color
 
   if card_show_ratings == nil
     assign card_show_ratings = true
@@ -19,8 +21,15 @@
   <div class="flex flex-col gap-3{% if card_class != blank %} {{ card_class }}{% endif %}">
 
     {% comment %} Badges {% endcomment %}
-    {% if card_badge_tags != blank or card_product.tags.size > 0 %}
+    {% if card_custom_tag != blank or card_badge_tags != blank or card_product.tags.size > 0 %}
       <div class="flex flex-wrap gap-1">
+        {% if card_custom_tag != blank %}
+          {% if card_custom_tag_color != blank %}
+            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide text-white" style="background-color: {{ card_custom_tag_color }}">{{ card_custom_tag }}</span>
+          {% else %}
+            {% render 'c-badge', label: card_custom_tag, style: 'filled' %}
+          {% endif %}
+        {% endif %}
         {% if card_badge_tags != blank %}
           {% assign badge_tag_list = card_badge_tags | split: ',' %}
           {% for badge_tag in badge_tag_list %}

@@ -16,12 +16,12 @@
 %}
 
 <section class="bg-background text-foreground">
-  <div class="page-width py-16 lg:py-24">
+  <div class="page-width py-16 lg:py-24 overflow-hidden">
 
-    <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+    <div class="grid grid-cols-1 px-4 lg:px-15 gap-10 lg:grid-cols-2 lg:gap-16">
       {% if ed_heading != blank %}
         <div>
-          <h2 class="text-4xl font-bold uppercase leading-tight tracking-tight lg:text-6xl">{{ ed_heading | escape }}</h2>
+          <h2 class="text-[90px]/[72px] font-bold font-heading uppercase tracking-tight lg:text-[120px]/[96px]">{{ ed_heading | escape }}</h2>
         </div>
       {% endif %}
 
@@ -37,33 +37,41 @@
     </div>
 
     {% if has_conditions %}
-      <div class="mt-16 border-t border-foreground/10 pt-12">
+      <div class="mt-16 pt-12 px-4 lg:px-15">
         {% if conditions_label != blank %}
           <p class="mb-8 text-xs font-semibold uppercase tracking-widest text-foreground/50">{{ conditions_label | escape }}</p>
         {% endif %}
 
-        <ul class="flex flex-wrap justify-between gap-8">
-          {% for block in section.blocks %}
-            {% if block.type == 'condition' and block.settings.label != blank %}
-              <li class="flex flex-col items-center gap-3 text-center" {{ block.shopify_attributes }}>
-                {% if block.settings.icon != blank %}
-                  <div class="size-12 overflow-hidden">
-                    {{
-                      block.settings.icon
-                      | image_url: width: 96
-                      | image_tag:
-                        alt: block.settings.icon_alt,
-                        class: 'size-full object-contain',
-                        loading: 'lazy'
-                    }}
-                  </div>
-                {% endif %}
-                <span class="text-sm font-medium">{{ block.settings.label }}</span>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
+        <div
+            class="-mx-4 lg:-mx-15"
+            data-nazare-use="snippets/c-carousel"
+            data-c-carousel-mode="static"
+        >
+            <div data-c-carousel-viewport class="overflow-x-auto [scrollbar-width:none]">
+            <ul data-c-carousel-track class="mx-4 lg:mx-15 flex justify-between">
+                {% for block in section.blocks %}
+                    {% if block.type == 'condition' and block.settings.label != blank %}
+                    <li class="flex flex-col items-center pr-16 gap-3 text-center" {{ block.shopify_attributes }}>
+                        {% if block.settings.icon != blank %}
+                        <div class="size-12 overflow-hidden">
+                            {{
+                            block.settings.icon
+                            | image_url: width: 96
+                            | image_tag:
+                                alt: block.settings.icon_alt,
+                                class: 'size-full object-contain',
+                                loading: 'lazy'
+                            }}
+                        </div>
+                        {% endif %}
+                        <span class="text-sm font-medium">{{ block.settings.label }}</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                <div class='w-4 lg:w-15'></div>
+                </ul>
+            </div>
+        </div>
     {% endif %}
 
   </div>

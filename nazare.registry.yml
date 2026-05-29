@@ -319,7 +319,7 @@ components:
           algorithm: sha256
           value: d2771e0ebd2bfcbc9c181d5db12c04246ff5e29a10ed3cd665fa2c0f966cfcd0
   c-product-card:
-    version: 1.0.0
+    version: 1.0.1
     type: snippet
     dependencies:
       - c-badge
@@ -330,7 +330,7 @@ components:
         to: snippets/c-product-card.liquid
         checksum:
           algorithm: sha256
-          value: b351e151a65371e05d32b1b2efc858712152cd549b591fe1badac659cefa3c60
+          value: f41596c80d2faf53f52f4861e70dc7dc635521ba3aaf1d11682d4b2a96c18e4e
   c-product-carousel:
     version: 1.0.0
     type: snippet
@@ -386,7 +386,7 @@ components:
           algorithm: sha256
           value: bd1707d6b872a5831b4006387e1aa7a8345cc8757ddfeb0ae5e653fd92365a07
   s-editorial:
-    version: 1.0.0
+    version: 1.1.0
     type: section
     dependencies:
       - c-button
@@ -395,7 +395,7 @@ components:
         to: sections/s-editorial.liquid
         checksum:
           algorithm: sha256
-          value: 6167e5ed3c559f12529df9dbcc178cfe8aa084a693fa259848a5dd6a69442c57
+          value: f1b5b1a94017b9368465d22502ec332832189995785281a6ef05139e6211d66a
   s-statistics:
     version: 1.0.0
     type: section
@@ -496,7 +496,7 @@ components:
           algorithm: sha256
           value: cf451fc67211142c8428af9cd5755930f53263233fa9e298f07f76af59653fbb
   s-product-gallery:
-    version: 1.0.0
+    version: 1.1.0
     type: section
     dependencies:
       - c-button
@@ -506,7 +506,7 @@ components:
         to: sections/s-product-gallery.liquid
         checksum:
           algorithm: sha256
-          value: 8a79a23d1fe0bda16bf8e5372e47917cfe39f6098f0b385dfd1f48e097c2df4b
+          value: 4aff28ebe1124726f976fbb621bac705a44978e8aaa954810e64520f27dce388
   s-footer:
     version: 1.2.0
     type: section

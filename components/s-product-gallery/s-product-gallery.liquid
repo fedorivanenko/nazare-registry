@@ -29,8 +29,6 @@
   assign pc_products = nil
   if pc_source == 'collection' and pc_collection != blank
     assign pc_products = pc_collection.products | limit: pc_limit
-  elsif pc_source == 'manual'
-    assign pc_products = section.blocks | map: 'settings' | map: 'product' | compact
   endif
 %}
 
@@ -54,7 +52,33 @@
       {% endif %}
     </div>
 
-    {% if pc_products != blank and pc_products.size > 0 %}
+    {% if pc_source == 'manual' and section.blocks.size > 0 %}
+      {% capture pc_carousel_items %}
+        {% for block in section.blocks %}
+          {% assign block_product = block.settings.product %}
+          {% if block_product != blank %}
+            <div data-c-carousel-item class="w-80 shrink-0">
+              {% render 'c-product-card',
+                product: block_product,
+                badge_tags: pc_badge_tags,
+                show_ratings: pc_show_ratings,
+                show_swatches: pc_show_swatches,
+                color_option_name: pc_color_option,
+                custom_tag: block.settings.tag_label,
+                custom_tag_color: block.settings.tag_color
+              %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endcapture %}
+      {% render 'c-carousel',
+        content: pc_carousel_items,
+        mode: pc_mode,
+        direction: pc_direction,
+        speed: pc_speed,
+        pause_on_hover: pc_pause_on_hover
+      %}
+    {% elsif pc_products != blank and pc_products.size > 0 %}
       {% render 'c-product-carousel',
         products: pc_products,
         mode: pc_mode,
@@ -218,6 +242,16 @@
           "type": "product",
           "id": "product",
           "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "tag_label",
+          "label": "Tag label"
+        },
+        {
+          "type": "color",
+          "id": "tag_color",
+          "label": "Tag color"
         }
       ]
     }
