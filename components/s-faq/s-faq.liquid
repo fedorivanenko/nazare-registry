@@ -23,11 +23,11 @@
     <div class="mx-auto max-w-3xl">
 
       {% if faq_heading != blank %}
-        <h2 class="text-center text-3xl font-bold tracking-tight lg:text-4xl">{{ faq_heading | escape }}</h2>
+        <h2 class="px-[15%] text-center text-[70px]/[56px] font-heading uppercase font-bold tracking-tight lg:text-[90px]/[72px]">{{ faq_heading | escape }}</h2>
       {% endif %}
 
       {% if cta_label != blank and cta_url != blank %}
-        <div class="mt-6 flex justify-center">
+        <div class="flex justify-center mt-10">
           {% render 'c-button', label: cta_label, url: cta_url, scheme: cta_scheme %}
         </div>
       {% endif %}

@@ -233,7 +233,7 @@ components:
           algorithm: sha256
           value: 2efec0bf2673906ea0fb5d78a9c1bf5d5fa232a134dcbe4ea8939437a5732b32
   c-social-links:
-    version: 1.0.2
+    version: 1.0.3
     type: snippet
     dependencies: []
     files:
@@ -241,7 +241,7 @@ components:
         to: snippets/c-social-links.liquid
         checksum:
           algorithm: sha256
-          value: 0224714a6fd3a79d5243e080c8652814761019d4c90859fc943c7b6046277319
+          value: 48e02342864fdc75dc8a044dd740dc021546b6b6fc746c83342abeaeba4fd38d
       - from: components/c-social-links/c-social-links.settings.json
         to: config/c-social-links.settings.json
         checksum:
@@ -375,7 +375,7 @@ components:
           algorithm: sha256
           value: 0043e79d053a446b58cac067fdc6c7caf30ff1ec49accf21d0f542f90e609171
   s-banner:
-    version: 1.0.0
+    version: 1.0.1
     type: section
     dependencies:
       - c-button
@@ -384,7 +384,7 @@ components:
         to: sections/s-banner.liquid
         checksum:
           algorithm: sha256
-          value: bd1707d6b872a5831b4006387e1aa7a8345cc8757ddfeb0ae5e653fd92365a07
+          value: 0f0ce8982c977163afaf07b4186748ab11e267766962101e537061731b897247
   s-editorial:
     version: 1.1.0
     type: section
@@ -408,7 +408,7 @@ components:
           algorithm: sha256
           value: 52c9b2fba852c863bb2ed0a06dfd58b4b02b01de44487f29e9e07c83326b879f
   s-faq:
-    version: 1.1.0
+    version: 1.1.1
     type: section
     dependencies:
       - c-button
@@ -418,7 +418,7 @@ components:
         to: sections/s-faq.liquid
         checksum:
           algorithm: sha256
-          value: 68c36fd3f7886b22f97862dc18749a1bcc3ada3b633997f019382e264ec42fc8
+          value: 16735ed599210b78f1e6897e07ebd4f81328d425ec99ba0ec5fc011e7bd6386d
       - from: components/s-faq/s-faq.js
         to: scripts/sections/s-faq.js
         checksum:
@@ -447,7 +447,7 @@ components:
           algorithm: sha256
           value: 58b528acc9ee2f894a0ea62f65790f9594763207a44085ef0bb44b50dd932ae1
   s-social-gallery:
-    version: 1.0.6
+    version: 1.0.7
     type: section
     dependencies:
       - c-carousel
@@ -457,7 +457,7 @@ components:
         to: sections/s-social-gallery.liquid
         checksum:
           algorithm: sha256
-          value: 7aa7bed006c61831bb87d30c29f45e473cae0c3642712974cb27c6a24cd2d95e
+          value: 506d460af33bd51baf8b3816dac415434a759970ff13420b614e23ec67f4759c
   s-feature-product:
     version: 1.0.0
     type: section
