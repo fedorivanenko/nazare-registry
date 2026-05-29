@@ -87,7 +87,7 @@ Component metadata:
 ```yaml
 components:
   s-hero:
-    version: 1.0.0
+    version: 1.1.0
     type: section
     dependencies:
       - c-bg-video
