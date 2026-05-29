@@ -46,7 +46,7 @@ theme:
       to: styles/base.css
       checksum:
         algorithm: sha256
-        value: 4b627994a61604670cfd8ad649d1e496e9f00389e5001c69a96bbbf8f6ca9078
+        value: 8fad4e258449246591fca156e328c3fe829c84d4f74fd8733643f28f4b53bfd1
     - from: theme/default/.gitignore
       to: .gitignore
       checksum:
