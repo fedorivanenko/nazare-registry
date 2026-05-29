@@ -27,6 +27,7 @@ invariants:
   - Nav column renders only when its linked menu has at least one link
   - Email signup zone renders only when the email provider setting is configured
   - Does not mutate theme scaffold source
+  - Section source includes nazare:layout footer directive so the Vite plugin injects it into layout/theme.liquid automatically
 
 nonGoals:
   - Image gallery (use s-image-gallery above the footer)
@@ -75,20 +76,22 @@ Included:
   - email input placeholder, default `Email Address`
   - email button label, default `Sign Up`
   - social links: instagram, facebook, youtube, tiktok, twitter, pinterest URLs (all optional; forwarded to `c-social-links`)
-- section blocks (type: `nav_column`):
-  - column heading (plain text)
-  - menu (Shopify linklist handle)
+- navigation menu: single `link_list` setting (`nav_menu`); top-level links become column headings, their child links become the column items
 
 Layout contract:
 
 - Section is divided into two horizontal zones stacked vertically.
-- **Main zone**: left side holds nav columns (up to 4 blocks rendered as equal-width columns); right side holds email signup zone (heading, description, `c-email-signup-*` form) when email provider is configured.
+- **Main zone**: left side holds nav columns derived from the `nav_menu` linklist; right side holds email signup zone (heading, description, `c-email-signup-*` form) when email provider is configured.
 - **Tagline zone**: full-width, oversized display text spanning the section width at the bottom. Font size scales to fill the full width.
-- Nav column block renders its heading above a list of links from `linklists[block.settings.menu].links`.
-- Nav column is absent when its linked menu has no links or when menu setting is blank.
+- Nav columns are parsed from `linklists[nav_menu].links`: each top-level link title is a column heading; its `link.links` are the items listed below it.
+- A column is absent when its top-level link has no children.
 - Email signup renders via the appropriate provider snippet (`c-email-signup-klaviyo` when provider is `klaviyo`).
 - Email zone is absent when provider is `none`.
 - `c-social-links` is not rendered in the footer itself — social links belong to the `s-social-gallery` section above. Social link settings are present for themes that use the footer without `s-social-gallery`.
+
+Layout injection:
+
+`s-footer.liquid` includes `{% comment %}nazare:layout footer{% endcomment %}` before its first rendered output. The Nazare Vite plugin reads this directive and injects `{% section 's-footer' %}` into the generated `layout/theme.liquid` at the footer position. No manual edits to `layout/theme.liquid` are needed after `nazare add s-footer`.
 
 Component metadata:
 
@@ -115,8 +118,8 @@ components:
 - `nazare list` shows `s-footer` as available after registry update.
 - `nazare add s-footer` installs `sections/s-footer.liquid` and transitively installs `c-email-signup-klaviyo`, `c-email-signup`, and `c-social-links`.
 - Brand tagline always renders full-width at the bottom.
-- Each nav column block renders its heading and menu links when the menu has links.
-- Nav column is absent when its menu is blank or empty.
+- Nav columns render from `nav_menu`: each top-level link becomes a column heading, its children become the link list.
+- Nav zone is absent when `nav_menu` is blank or the menu has no top-level links with children.
 - Email zone renders with Klaviyo form when provider is `klaviyo` and list ID is set.
 - Email zone is absent when provider is `none`.
 - Component source checksum matches registry metadata.
@@ -127,7 +130,7 @@ components:
 
 - Invalid registry metadata or checksum mismatch fails existing component validation/tests.
 - Missing component source file fails registry component tests.
-- Blank menu handle renders no nav column without Liquid errors.
+- Blank `nav_menu` handle renders no nav columns without Liquid errors.
 - Provider `none` renders no email zone without broken markup.
 - Missing dependency snippets do not crash section render — registry resolves transitively.
 
@@ -140,8 +143,8 @@ components:
 - [ ] registry checksum matches component source bytes
 - [ ] component metadata validates with component registry parser
 - [ ] brand tagline always renders
-- [ ] nav column renders heading and links when menu is populated
-- [ ] nav column absent when menu blank or empty
+- [ ] nav columns render from `nav_menu`: top-level links → headings, children → items
+- [ ] nav zone absent when `nav_menu` blank or top-level links have no children
 - [ ] email zone renders Klaviyo form when provider is klaviyo
 - [ ] email zone absent when provider is none
 - [ ] section uses Tailwind utilities only
@@ -153,7 +156,7 @@ components:
 
 The brand tagline uses fluid typography to fill the full section width — `clamp()` or a viewport-unit font-size so the text scales from small screens to wide desktops without a fixed breakpoint. This matches the design where the tagline spans edge to edge.
 
-Nav columns use Shopify `linklists` (theme navigation menus) rather than manual link settings on blocks. This lets merchants manage footer navigation in the Shopify admin navigation editor rather than the theme customizer.
+Nav columns are derived from a single `link_list` setting (`nav_menu`) rather than per-column blocks. The linklist hierarchy drives the layout: top-level links are column headings, their children are the listed links. Merchants manage the entire footer nav structure in the Shopify admin navigation editor; no theme customizer blocks needed.
 
 The email provider setting is a select with `klaviyo` and `none`. Additional providers (Mailchimp, Omnisend, etc.) are added by installing their `c-email-signup-*` snippet and extending this setting — the section conditionally renders the matching provider snippet based on the setting value.
 

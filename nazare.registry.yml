@@ -4,14 +4,14 @@ registry:
   name: nazare
 
 theme:
-  version: 1.1.3-dev.0
+  version: 1.2.0
   source: theme/default
   files:
-    - from: theme/default/layout/theme.liquid
-      to: layout/theme.liquid
+    - from: theme/default/layout/theme.source.liquid
+      to: layout/theme.source.liquid
       checksum:
         algorithm: sha256
-        value: f91a4a48831eabbe47004047a6492cc21a6f40b12c30c3e3a059042508ae13ca
+        value: 1c6dd6e2035759a6a74f9742a804313ded7510ea9c2c619c0d26705bc1ec4c79
     - from: theme/default/templates/index.json
       to: templates/index.json
       checksum:
@@ -31,7 +31,7 @@ theme:
       to: nazare/vite-plugin.js
       checksum:
         algorithm: sha256
-        value: f2ac7556055b0e158f0aafa67aa3a61304e73798f2b92a6de6a326a7fda87ace
+        value: cd528dc3e142520f443d92508edb056e7f86f39a9e7dcd19d9167bae50a4e196
     - from: theme/default/package.json
       to: package.json
       checksum:
@@ -60,7 +60,7 @@ theme:
 
 components:
   c-button:
-    version: 1.0.0
+    version: 1.0.1
     type: snippet
     dependencies: []
     files:
@@ -68,7 +68,7 @@ components:
         to: snippets/c-button.liquid
         checksum:
           algorithm: sha256
-          value: 0defa021164f79723fe8318dfed250f6e0113cb00d7829f381ce09eccfdc84d6
+          value: 1c6c4909c50979021ab76df938da37c86491f0f872ae80b2309aa927ebc9bdab
   c-video:
     version: 1.0.1
     type: snippet
@@ -152,7 +152,7 @@ components:
           algorithm: sha256
           value: dd263c8fc35251cf8c72b1f622d112a8bc51fe166c6d1a06727604658887e8e0
   s-hero:
-    version: 1.0.0
+    version: 1.1.0
     type: section
     dependencies:
       - c-bg-video
@@ -162,7 +162,7 @@ components:
         to: sections/s-hero.liquid
         checksum:
           algorithm: sha256
-          value: a527366a55654a5d643832781b0ae564ad4d040898f7ce5cb86b88f9641426e6
+          value: b1a2a626dfd05c06887c4ae5748df8b016a0213d5936d878dd4942d7d329441a
   s-video-gallery:
     version: 1.1.2-dev.0
     type: section
@@ -344,7 +344,7 @@ components:
           algorithm: sha256
           value: 13e86551f840c1df1cbd11330aa0251f172b341ef30049a2b1bc83dbb847f405
   c-email-signup-klaviyo:
-    version: 1.0.1
+    version: 1.0.2
     type: snippet
     dependencies:
       - c-email-signup
@@ -358,7 +358,7 @@ components:
         to: scripts/snippets/c-email-signup-klaviyo.js
         checksum:
           algorithm: sha256
-          value: 9b7bcb79ed08e7e3e1225362bd28bcf0e98af9c8cd6d8877e14c0468fcdf20ba
+          value: beb7e5ebeee468bab9e93143906a120f1310aafe8b60f3ff051da84563630c28
       - from: components/c-email-signup-klaviyo/c-email-signup-klaviyo.settings.json
         to: config/c-email-signup-klaviyo.settings.json
         checksum:
@@ -503,7 +503,7 @@ components:
           algorithm: sha256
           value: 5c61a1e504294db9ec681f9b9c8f4bf79eb2c53f4925c1276aac4ed7b785af3b
   s-footer:
-    version: 1.0.0
+    version: 1.0.1
     type: section
     dependencies:
       - c-email-signup-klaviyo
@@ -513,4 +513,4 @@ components:
         to: sections/s-footer.liquid
         checksum:
           algorithm: sha256
-          value: a9e96010ebcdbaa1ff32b4f02b47b00b13269122fcf2f3943a2c553572a3f22e
+          value: 2425af3eb00cc44d5d802004a86ca875c86eb2b5d6ca6ab1a484ccf9cf5f5996

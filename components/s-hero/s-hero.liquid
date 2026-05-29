@@ -8,9 +8,12 @@
   assign cta_label = section.settings.cta_label
   assign cta_url = section.settings.cta_url
   assign cta_scheme = section.settings.cta_scheme
-  assign hero_alignment = section.settings.alignment | default: 'left'
-  assign hero_overlay = section.settings.overlay | default: 'none'
+  assign cta2_label = section.settings.cta2_label
+  assign cta2_url = section.settings.cta2_url
+  assign hero_badge = section.settings.badge
+  assign hero_overlay = section.settings.overlay | default: 'medium'
   assign hero_scheme = section.settings.color_scheme | default: 'dark'
+  assign hero_alignment = section.settings.alignment | default: 'left'
 
   if hero_image_alt == blank and hero_image.alt != blank
     assign hero_image_alt = hero_image.alt
@@ -21,73 +24,77 @@
     assign text_color_class = 'text-foreground'
   endif
 
-  assign content_align_class = 'text-left'
-  if hero_alignment == 'center'
-    assign content_align_class = 'mx-auto text-center'
-  endif
-
-  assign overlay_value = nil
-  unless hero_overlay == 'none' or hero_overlay == blank
-    assign overlay_value = hero_overlay
-  endunless
-
-  assign overlay_class = nil
-  if overlay_value == 'light'
-    assign overlay_class = 'bg-black/20'
-  elsif overlay_value == 'medium'
-    assign overlay_class = 'bg-black/40'
-  elsif overlay_value == 'dark'
-    assign overlay_class = 'bg-black/60'
+  assign overlay_from = nil
+  if hero_overlay == 'light'
+    assign overlay_from = 'from-black/30'
+  elsif hero_overlay == 'medium'
+    assign overlay_from = 'from-black/55'
+  elsif hero_overlay == 'dark'
+    assign overlay_from = 'from-black/75'
   endif
 %}
 
-{% capture hero_inner %}
-  <div class="flex min-h-[70dvh] flex-col justify-center py-20">
-    <div class="page-width {{ content_align_class }} {{ text_color_class }}">
-      {% if hero_eyebrow != blank %}
-        <p class="mb-4 text-sm font-semibold uppercase tracking-widest opacity-75">{{ hero_eyebrow | escape }}</p>
+<section class="relative overflow-hidden bg-black" style="min-height: clamp(560px, 48vw, 700px)">
+
+  {% if hero_video != blank %}
+    <div class="absolute inset-0">
+      {% render 'c-bg-video', video: hero_video, poster: hero_image, poster_alt: hero_image_alt, class: 'h-full w-full' %}
+    </div>
+  {% elsif hero_image != blank %}
+    {{ hero_image | image_url: width: 2400 | image_tag: alt: hero_image_alt, loading: 'eager', class: 'absolute inset-0 h-full w-full object-cover' }}
+  {% endif %}
+
+  {% if overlay_from != nil %}
+    <div class="absolute inset-0 bg-gradient-to-t {{ overlay_from }} to-transparent lg:bg-gradient-to-r"></div>
+  {% endif %}
+
+  <div class="relative z-10 flex flex-col justify-end" style="min-height: clamp(560px, 48vw, 700px)">
+    <div class="page-width py-[60px]">
+      {% if hero_alignment == 'center' %}
+        <div class="{{ text_color_class }} mx-auto max-w-[540px] text-center">
+      {% else %}
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+          <div class="{{ text_color_class }}">
       {% endif %}
 
-      {% if hero_heading != blank %}
-        <h1 class="text-4xl font-bold leading-tight lg:text-6xl">{{ hero_heading | escape }}</h1>
-      {% endif %}
+        {% if hero_eyebrow != blank %}
+          <p class="mb-4 text-xs font-semibold uppercase tracking-widest opacity-75">{{ hero_eyebrow | escape }}</p>
+        {% endif %}
 
-      {% if hero_body != blank %}
-        <div class="mt-6 text-lg opacity-90 [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
-      {% endif %}
+        {% if hero_heading != blank %}
+          <h1 class="text-4xl font-bold leading-tight lg:text-5xl">{{ hero_heading | escape }}</h1>
+        {% endif %}
 
-      {% if cta_label != blank and cta_url != blank %}
-        <div class="mt-8">
-          {% render 'c-button', label: cta_label, url: cta_url, scheme: cta_scheme %}
+        {% if hero_body != blank %}
+          <div class="mt-4 text-base opacity-90 [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
+        {% endif %}
+
+        {% if cta_label != blank and cta_url != blank or cta2_label != blank and cta2_url != blank %}
+          <div class="mt-8 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+            {% if cta_label != blank and cta_url != blank %}
+              {% render 'c-button', label: cta_label, url: cta_url, scheme: cta_scheme %}
+            {% endif %}
+            {% if cta2_label != blank and cta2_url != blank %}
+              <a href="{{ cta2_url }}" class="self-center text-sm font-semibold uppercase tracking-widest underline-offset-4 hover:underline sm:self-auto">{{ cta2_label | escape }}</a>
+            {% endif %}
+          </div>
+        {% endif %}
+
+      {% if hero_alignment == 'center' %}
+        </div>
+      {% else %}
+          </div>
         </div>
       {% endif %}
     </div>
   </div>
-{% endcapture %}
 
-<section>
-  {% if hero_video != blank %}
-    {% render 'c-bg-video',
-      video: hero_video,
-      poster: hero_image,
-      poster_alt: hero_image_alt,
-      overlay: overlay_value,
-      content: hero_inner,
-      class: 'min-h-[70dvh]'
-    %}
-  {% else %}
-    <div class="relative min-h-[70dvh] overflow-hidden">
-      {% if hero_image != blank %}
-        {{ hero_image | image_url: width: 2400 | image_tag: alt: hero_image_alt, loading: 'eager', class: 'absolute inset-0 h-full w-full object-cover' }}
-      {% endif %}
-      {% if overlay_class != blank %}
-        <div class="absolute inset-0 {{ overlay_class }}"></div>
-      {% endif %}
-      <div class="relative z-10">
-        {{ hero_inner }}
-      </div>
+  {% if hero_badge != blank %}
+    <div class="absolute bottom-[60px] right-[60px] z-10 w-40 max-w-[18vw] max-sm:bottom-8 max-sm:right-5 max-sm:w-28 max-sm:max-w-[30vw]">
+      {{ hero_badge | image_url: width: 320 | image_tag: alt: '', class: 'block h-auto w-full' }}
     </div>
   {% endif %}
+
 </section>
 
 {% schema %}
@@ -118,7 +125,7 @@
       "type": "select",
       "id": "overlay",
       "label": "Overlay",
-      "default": "none",
+      "default": "medium",
       "options": [
         { "value": "none", "label": "None" },
         { "value": "light", "label": "Light" },
@@ -148,7 +155,7 @@
     },
     {
       "type": "header",
-      "content": "Call to action"
+      "content": "Primary CTA"
     },
     {
       "type": "url",
@@ -170,6 +177,30 @@
         { "value": "outline", "label": "Outline" },
         { "value": "ghost", "label": "Ghost" }
       ]
+    },
+    {
+      "type": "header",
+      "content": "Secondary CTA"
+    },
+    {
+      "type": "url",
+      "id": "cta2_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "text",
+      "id": "cta2_label",
+      "label": "Link label"
+    },
+    {
+      "type": "header",
+      "content": "Badge"
+    },
+    {
+      "type": "image_picker",
+      "id": "badge",
+      "label": "Badge image",
+      "info": "Displayed bottom-right. Recommended size: 320×320px."
     },
     {
       "type": "header",
