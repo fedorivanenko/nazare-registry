@@ -115,34 +115,34 @@
       "type": "text",
       "id": "klaviyo_list_id",
       "label": "Klaviyo list ID",
-      "visible_if": "{{- section.settings.email_provider == 'klaviyo' -}}"
+      "visible_if": "{{ section.settings.email_provider == 'klaviyo' }}"
     },
     {
       "type": "text",
       "id": "email_heading",
       "label": "Email zone heading",
       "default": "Join the newsletter",
-      "visible_if": "{{- section.settings.email_provider != 'none' -}}"
+      "visible_if": "{{ section.settings.email_provider != 'none' }}"
     },
     {
       "type": "text",
       "id": "email_description",
       "label": "Email zone description",
-      "visible_if": "{{- section.settings.email_provider != 'none' -}}"
+      "visible_if": "{{ section.settings.email_provider != 'none' }}"
     },
     {
       "type": "text",
       "id": "email_placeholder",
       "label": "Email input placeholder",
       "default": "Email Address",
-      "visible_if": "{{- section.settings.email_provider != 'none' -}}"
+      "visible_if": "{{ section.settings.email_provider != 'none' }}"
     },
     {
       "type": "text",
       "id": "email_button_label",
       "label": "Email button label",
       "default": "Sign Up",
-      "visible_if": "{{- section.settings.email_provider != 'none' -}}"
+      "visible_if": "{{ section.settings.email_provider != 'none' }}"
     }
   ],
   "presets": [
