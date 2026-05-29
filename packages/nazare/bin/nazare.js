@@ -288,9 +288,21 @@ function normalizeSourceRef(source) {
 	return `refs/heads/${source}`;
 }
 
-function sourceMetadata(metadata, installedRef) {
+function sourceMetadata(metadata, installedRef, registryRepo) {
 	if (!installedRef) {
 		return metadata;
+	}
+
+	if (registryRepo !== undefined && isHttpRegistryRepo(registryRepo)) {
+		const base = registryRepo.replace(/\/$/, "");
+		const ref = encodeURIComponent(installedRef);
+		return {
+			...metadata,
+			installedRef,
+			installScriptUrl: `${base}/raw/install.sh?ref=${ref}`,
+			cliUrl: `${base}/raw/packages/nazare/bin/nazare.js?ref=${ref}`,
+			packageUrl: `${base}/raw/packages/nazare/package.json?ref=${ref}`,
+		};
 	}
 
 	return {
@@ -2678,10 +2690,10 @@ function initTheme(args) {
 	return 0;
 }
 
-async function selfUpdate(_options, selectedRef) {
+async function selfUpdate(_options, selectedRef, registryRepo) {
 	let metadata;
 	try {
-		metadata = sourceMetadata(readInstallMetadata(), selectedRef);
+		metadata = sourceMetadata(readInstallMetadata(), selectedRef, registryRepo);
 		await verifyPackageVersionForTag(metadata);
 	} catch (error) {
 		process.stderr.write(`nazare update error: ${error.message}\n`);
@@ -2721,11 +2733,15 @@ async function update(args) {
 	}
 
 	let selectedRef;
+	let registryRepo;
 	try {
-		let registryRepo;
-		if (options.target !== "self" && options.latest) {
-			const { registry } = readProjectState(process.cwd());
-			registryRepo = registry.repo;
+		if (options.latest) {
+			try {
+				const { registry } = readProjectState(process.cwd());
+				registryRepo = registry.repo;
+			} catch {
+				// not in a project directory — fall back to GitHub for tag resolution
+			}
 		}
 		selectedRef = await resolveUpdateRef(options, registryRepo);
 	} catch (error) {
@@ -2733,7 +2749,7 @@ async function update(args) {
 		return 1;
 	}
 
-	if (options.target === "self") return selfUpdate(options, selectedRef);
+	if (options.target === "self") return selfUpdate(options, selectedRef, registryRepo);
 	if (options.target === "theme") return themeUpdate(options, selectedRef);
 	return updateComponent(options, selectedRef);
 }
