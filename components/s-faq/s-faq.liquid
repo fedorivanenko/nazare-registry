@@ -5,7 +5,20 @@
   assign cta_scheme = section.settings.cta_scheme | default: 'outline'
 %}
 
-<section class="bg-background text-foreground">
+<style>
+  [data-faq-ready] [data-faq-item] {
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  [data-faq-ready] [data-faq-item][data-faq-visible] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<section class="bg-background text-foreground" data-nazare-use="sections/s-faq">
   <div class="page-width py-16 lg:py-24">
     <div class="mx-auto max-w-3xl">
 
@@ -22,10 +35,12 @@
       {% if section.blocks.size > 0 %}
         <div class="mt-12 flex flex-col gap-10">
           {% for block in section.blocks %}
-            {% render 'c-faq-item',
-              question: block.settings.question,
-              answer: block.settings.answer
-            %}
+            <div data-faq-item>
+              {% render 'c-faq-item',
+                question: block.settings.question,
+                answer: block.settings.answer
+              %}
+            </div>
           {% endfor %}
         </div>
       {% endif %}
