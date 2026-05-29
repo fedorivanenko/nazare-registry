@@ -14,6 +14,9 @@ const ANY_RENDER_PATTERN = /{%\s*render\s+([^%]+)%}/g;
 const DATA_NAZARE_USE_PATTERN = /\bdata-nazare-use\s*=\s*(['"])(.*?)\1/g;
 const CSS_DIRECTIVE_PATTERN =
 	/{%\s*comment\s*%}\s*nazare:css\s+([^\s]+)\s*{%\s*endcomment\s*%}/g;
+const LAYOUT_DIRECTIVE_PATTERN =
+	/{%-?\s*comment\s*-?%}\s*nazare:layout\s+([^\s]+)\s*{%-?\s*endcomment\s*-?%}/g;
+const LAYOUT_POSITIONS = new Set(["header", "footer"]);
 
 function slash(value) {
 	return value.split(path.sep).join("/");
@@ -58,6 +61,31 @@ function renderedOutputIndex(source) {
 	return candidates.length === 0
 		? Number.POSITIVE_INFINITY
 		: Math.min(...candidates);
+}
+
+function parseLayoutDirective(source, relativePath, kind) {
+	const matches = [...source.matchAll(LAYOUT_DIRECTIVE_PATTERN)];
+
+	if (matches.length === 0) return null;
+	if (kind !== "section") {
+		throw new Error(`Layout directive is only valid in sections: ${relativePath}`);
+	}
+	if (matches.length > 1) {
+		throw new Error(`Duplicate layout directive in ${relativePath}`);
+	}
+
+	const match = matches[0];
+	const position = match[1];
+	if (!LAYOUT_POSITIONS.has(position)) {
+		throw new Error(`Invalid layout directive value in ${relativePath}: ${position}`);
+	}
+	if (match.index > renderedOutputIndex(source)) {
+		throw new Error(
+			`Layout directive must appear before rendered output in ${relativePath}`,
+		);
+	}
+
+	return position;
 }
 
 function parseCssDirective(source, relativePath, kind) {
@@ -167,6 +195,7 @@ export function scanTheme(root = process.cwd()) {
 		const relativePath = slash(path.relative(root, filePath));
 		const source = readText(filePath);
 		const cssMode = parseCssDirective(source, relativePath, "section");
+		const layoutPosition = parseLayoutDirective(source, relativePath, "section");
 		if (hasDynamicRender(source)) {
 			warnings.push(`Dynamic render not followed in ${relativePath}`);
 		}
@@ -181,7 +210,7 @@ export function scanTheme(root = process.cwd()) {
 			for (const key of scan.moduleKeys) moduleKeys.add(key);
 		}
 
-		sections.push({ name: sectionName, cssMode, sources: [...sources].sort() });
+		sections.push({ name: sectionName, cssMode, layoutPosition, sources: [...sources].sort() });
 	}
 
 	for (const key of moduleKeys) {
@@ -317,6 +346,33 @@ function settingsSchemaContent(groups) {
 	return `${JSON.stringify(groups, null, 2)}\n`;
 }
 
+function generateThemeLayout(root, sections) {
+	const sourcePath = path.join(root, "layout", "theme.source.liquid");
+	if (!pathExists(sourcePath)) return;
+
+	const byPosition = new Map();
+	for (const section of sections) {
+		if (!section.layoutPosition) continue;
+		if (byPosition.has(section.layoutPosition)) {
+			throw new Error(
+				`Multiple sections declare layout position "${section.layoutPosition}": ${byPosition.get(section.layoutPosition)} and ${section.name}`,
+			);
+		}
+		byPosition.set(section.layoutPosition, section.name);
+	}
+
+	let content = readText(sourcePath).replace(
+		LAYOUT_DIRECTIVE_PATTERN,
+		(_, position) => {
+			const sectionName = byPosition.get(position);
+			return sectionName ? `{% section '${sectionName}' %}` : "";
+		},
+	);
+
+	const marker = `{%- comment -%}\n  ${GENERATED_MARKER}\n{%- endcomment -%}\n`;
+	writeText(path.join(root, "layout", "theme.liquid"), marker + content);
+}
+
 function removeStaleGeneratedSectionCss(root, sectionNames) {
 	const stylesDir = path.join(root, "styles");
 	if (!pathExists(stylesDir)) return;
@@ -361,6 +417,8 @@ export function generateThemeBuildFiles(root = process.cwd()) {
 		settingsSchemaContent(settingsGroups),
 	);
 
+	generateThemeLayout(root, graph.sections);
+
 	return graph;
 }
 
@@ -398,6 +456,9 @@ export function nazareThemePlugin() {
 			this.addWatchFile(path.join(root, "sections"));
 			this.addWatchFile(path.join(root, "snippets"));
 			this.addWatchFile(path.join(root, "config"));
+
+			const layoutSource = path.join(root, "layout", "theme.source.liquid");
+			if (pathExists(layoutSource)) this.addWatchFile(layoutSource);
 
 			for (const dir of ["sections", "snippets"]) {
 				for (const file of listLiquidFiles(path.join(root, dir))) {

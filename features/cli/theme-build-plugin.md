@@ -17,6 +17,7 @@ surfaces:
     - generated CSS bridge snippets
     - generated section CSS entries
     - generated theme settings schema
+    - generated layout/theme.liquid from layout/theme.source.liquid
 
 invariants:
   - Plugin code is vendored into the theme scaffold and imported by relative path
@@ -30,6 +31,8 @@ invariants:
   - Plugin must pick up newly added section/snippet files in watch mode without restarting the build process
   - Plugin must pick up newly added config/*.settings.json files in watch mode without restarting the build process
   - settings_schema.json is fully generated and must never be hand-edited
+  - layout/theme.liquid is fully generated from layout/theme.source.liquid and must never be hand-edited
+  - nazare:layout directive is valid only in section files and only one section per position (header or footer) is allowed
 
 nonGoals:
   - Implementing nazare theme pull
@@ -129,6 +132,7 @@ The plugin generates:
 - `snippets/section-css.liquid`
 - `snippets/section-css-preloads.liquid`
 - `config/settings_schema.json`
+- `layout/theme.liquid`
 
 Each generated text file must include a generated marker near the top containing:
 
@@ -148,13 +152,14 @@ For each `sections/*.liquid` file, the plugin:
 1. reads section source
 2. extracts section CSS mode from `{% comment %} nazare:css <mode> {% endcomment %}` if present
 3. defaults missing section CSS mode to `normal`
-4. extracts all `data-nazare-use` module keys from the section file
-5. extracts static `{% render 'snippet-name' %}` and `{% render "snippet-name" %}` references
-6. recursively scans referenced snippets in `snippets/<snippet-name>.liquid`
-7. extracts `data-nazare-use` module keys from referenced snippets
-8. adds section file and static snippet dependencies as Tailwind scan sources for that section CSS entry
-9. detects missing snippets and render cycles
-10. warns on dynamic render usage that cannot be followed
+4. extracts layout position from `{% comment %}nazare:layout <position>{% endcomment %}` if present
+5. extracts all `data-nazare-use` module keys from the section file
+6. extracts static `{% render 'snippet-name' %}` and `{% render "snippet-name" %}` references
+7. recursively scans referenced snippets in `snippets/<snippet-name>.liquid`
+8. extracts `data-nazare-use` module keys from referenced snippets
+9. adds section file and static snippet dependencies as Tailwind scan sources for that section CSS entry
+10. detects missing snippets and render cycles
+11. warns on dynamic render usage that cannot be followed
 
 ## CSS directive rules
 
@@ -208,6 +213,53 @@ For section `s-hero`, generated `styles/s-hero.css` should look like:
 @source "../sections/s-hero.liquid";
 @source "../snippets/c-button.liquid";
 ```
+
+## Layout directive rules
+
+Supported directive:
+
+```liquid
+{% comment %}nazare:layout header{% endcomment %}
+{% comment %}nazare:layout footer{% endcomment %}
+```
+
+Rules:
+
+- directive is valid only in `sections/*.liquid`
+- one directive maximum per section file
+- directive must appear before first rendered output
+- only one section per layout position (`header` or `footer`) across the whole theme — duplicate positions are build errors
+- invalid values are build errors
+- missing directive means the section is not a layout section
+
+When `layout/theme.source.liquid` is present, the plugin reads it and replaces each `{%- comment -%}nazare:layout <position>{%- endcomment -%}` placeholder with the matching `{% section 'name' %}` tag, or with nothing if no installed section declares that position. The result is written to `layout/theme.liquid` with a generated-file marker prepended.
+
+## Generated layout
+
+`layout/theme.liquid` is generated from `layout/theme.source.liquid`.
+
+`layout/theme.source.liquid` uses comment placeholders to mark injection points:
+
+```liquid
+<body>
+  {%- comment -%}nazare:layout header{%- endcomment -%}
+  {{ content_for_layout }}
+  {%- comment -%}nazare:layout footer{%- endcomment -%}
+  <script type="module" src="{{ 'theme.js' | asset_url }}"></script>
+</body>
+```
+
+With `s-footer` installed, the generated `layout/theme.liquid` body becomes:
+
+```liquid
+<body>
+  {{ content_for_layout }}
+  {% section 's-footer' %}
+  <script type="module" src="{{ 'theme.js' | asset_url }}"></script>
+</body>
+```
+
+If no section declares a position, the placeholder is replaced with an empty string.
 
 ## Generated settings schema
 
@@ -309,13 +361,15 @@ No content hashes in v1 output names.
 - plugin generates runtime entry with lazy module loading
 - plugin generates normal and preload CSS bridge snippets
 - plugin generates `config/settings_schema.json` from `config/theme.settings.json` + `config/*.settings.json`
-- plugin validates CSS directives and JS module keys
+- plugin generates `layout/theme.liquid` from `layout/theme.source.liquid` by injecting layout section tags at placeholder positions
+- plugin validates CSS directives, layout directives, and JS module keys
 - plugin reports missing snippets, render cycles, and missing JS modules as build errors
 - plugin warns on dynamic renders that cannot be followed
 - plugin cleans stale generated files
 - all generated text files include generated markers
 - in watch mode, adding a new section, snippet, or config settings file triggers a rebuild without restarting
 - in watch mode, the new section's CSS entry is included in the next build's Rollup input
+- in watch mode, editing layout/theme.source.liquid triggers a rebuild
 
 ## Failure behavior
 
@@ -323,6 +377,11 @@ No content hashes in v1 output names.
 - duplicate CSS directive fails build
 - CSS directive after rendered output fails build
 - directive in snippet file fails build
+- invalid layout directive value fails build
+- duplicate layout directive in a single section fails build
+- layout directive after rendered output fails build
+- layout directive in snippet file fails build
+- two sections declaring the same layout position fails build
 - missing static snippet fails build
 - static render cycle fails build
 - invalid `data-nazare-use` value fails build
@@ -365,6 +424,17 @@ Result: implementation present; final feature-doc checklist still needs reconcil
 - [ ] errors on settings group with empty settings array
 - [ ] excludes settings_schema.json from input scan
 - [ ] in watch mode, adding a new config/*.settings.json triggers a rebuild
+- [ ] parses missing layout directive as no layout position (section is not a layout section)
+- [ ] parses nazare:layout header and nazare:layout footer
+- [ ] errors on invalid layout directive value
+- [ ] errors on duplicate layout directive in a section
+- [ ] errors on layout directive in snippet file
+- [ ] errors on layout directive after rendered output
+- [ ] errors when two sections declare the same layout position
+- [ ] generates layout/theme.liquid with generated marker from theme.source.liquid
+- [ ] injects {% section 'name' %} at header/footer placeholder positions
+- [ ] replaces placeholder with empty string when no section declares that position
+- [ ] in watch mode, editing layout/theme.source.liquid triggers a rebuild
 - [ ] cleans stale generated files
 - [ ] preserves stable Vite output naming contract
 - [ ] in watch mode, adding a new section file triggers a rebuild

@@ -3,7 +3,7 @@ const mounts = new WeakMap();
 const KLAVIYO_ENDPOINT = 'https://a.klaviyo.com/client/subscriptions/?company_id=';
 
 function getCompanyId(root) {
-	return root.dataset.companyId || window.klaviyoCompanyId ?? window._learnq?.[0]?.[1] ?? null;
+	return root.dataset.companyId || (window.klaviyoCompanyId ?? window._learnq?.[0]?.[1] ?? null);
 }
 
 export async function init(root) {

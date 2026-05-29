@@ -42,7 +42,8 @@ codebaseOwnership:
       - theme/default/styles/base.css
       - theme/default/.gitignore
       - theme/default/shopify.theme.toml
-      - Nazare build hook points in theme/default/layout/theme.liquid
+      - Nazare build hook points in theme/default/layout/theme.source.liquid
+      - layout section placeholder hook points in theme/default/layout/theme.source.liquid
       - section CSS hook point in theme/default/sections/s-main.liquid
       - nazare.registry.yml theme block entries for build pipeline files
       - README.md theme build pipeline notes
@@ -236,6 +237,7 @@ Generated intermediate files owned by the Nazare Vite plugin, not scaffold sourc
 - `scripts/theme.js`: runtime entry generated from discovered `data-nazare-use` module keys.
 - `snippets/section-css.liquid`: generated Liquid bridge for normal section CSS loads.
 - `snippets/section-css-preloads.liquid`: generated Liquid bridge for preloaded section CSS.
+- `layout/theme.liquid`: generated from `layout/theme.source.liquid` with layout section tags injected at placeholder positions.
 
 Vite build outputs into Shopify theme assets:
 
@@ -280,6 +282,7 @@ Generated paths:
 - `styles/<section-name>.css`
 - `snippets/section-css.liquid`
 - `snippets/section-css-preloads.liquid`
+- `layout/theme.liquid`
 
 ---
 
