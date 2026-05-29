@@ -248,7 +248,7 @@ components:
           algorithm: sha256
           value: f663406be1b73e55b96d32664ce65c551f816bd8fa1f6a8fe5ed8ca58ccc22f5
   c-faq-item:
-    version: 1.0.0
+    version: 1.0.1
     type: snippet
     dependencies: []
     files:
@@ -256,7 +256,7 @@ components:
         to: snippets/c-faq-item.liquid
         checksum:
           algorithm: sha256
-          value: ce57edfcb0e04efc2c3b089d788cfa25f4fccaee0b809fe13d5dc9b5c79d034c
+          value: 213265f9eecd192b922438f9e4ba75834a26839baed9d71f6a58ecaa9de167f4
   c-bundle-item:
     version: 1.0.0
     type: snippet
