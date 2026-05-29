@@ -2736,11 +2736,10 @@ async function update(args) {
 	let registryRepo;
 	try {
 		if (options.latest) {
-			try {
+			const configPath = path.join(process.cwd(), "nazare.config.yml");
+			if (fs.existsSync(configPath)) {
 				const { registry } = readProjectState(process.cwd());
 				registryRepo = registry.repo;
-			} catch {
-				// not in a project directory — fall back to GitHub for tag resolution
 			}
 		}
 		selectedRef = await resolveUpdateRef(options, registryRepo);
