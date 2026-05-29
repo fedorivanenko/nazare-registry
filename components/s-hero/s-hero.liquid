@@ -53,20 +53,20 @@
       {% if hero_alignment == 'center' %}
         <div class="{{ text_color_class }} mx-auto max-w-[540px] text-center">
       {% else %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:px-15">
           <div class="{{ text_color_class }}">
       {% endif %}
 
         {% if hero_eyebrow != blank %}
-          <p class="mb-4 text-xs font-semibold uppercase tracking-widest opacity-75">{{ hero_eyebrow | escape }}</p>
+          <p class="text-xs font-semibold uppercase tracking-widest opacity-75">{{ hero_eyebrow | escape }}</p>
         {% endif %}
 
         {% if hero_heading != blank %}
-          <h1 class="text-[70px]/[56px] font-heading font-bold leading-tight lg:text-[90px]/[72px]">{{ hero_heading | escape }}</h1>
+          <h1 class="py-5 text-[70px]/[56px] font-heading uppercase font-bold lg:text-[90px]/[72px]">{{ hero_heading | escape }}</h1>
         {% endif %}
 
         {% if hero_body != blank %}
-          <div class="mt-4 text-[14px]/[20px] lg:text-[16px]/[20px] opacity-90 [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
+          <div class="mb-8 text-[14px]/[20px] lg:text-[16px]/[20px] opacity-90 [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
         {% endif %}
 
         {% if cta_label != blank and cta_url != blank or cta2_label != blank and cta2_url != blank %}
