@@ -18,15 +18,15 @@
   assign footer_terms_url = section.settings.terms_url
 %}
 
-<footer class="bg-background text-foreground">
-  <div class="page-width py-16">
+<footer class="bg-background text-foreground mt-15">
+  <div class="page-width">
 
-    <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+    <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 px-4 lg:px-15">
 
       <!-- Email signup: first on mobile, right column on desktop -->
       <div class="lg:order-2 lg:col-span-1 lg:pl-12">
         {% if footer_email_heading != blank %}
-          <h3 class="text-lg font-semibold">{{ footer_email_heading | escape }}</h3>
+          <h3 class="text-[14px]/[20px] uppercase font-semibold">{{ footer_email_heading | escape }}</h3>
         {% endif %}
 
         {% if footer_email_description != blank %}
@@ -47,14 +47,13 @@
       <!-- Nav columns: second on mobile (accordion), left column on desktop (grid) -->
       {% if nav_columns.size > 0 %}
         <div class="lg:order-1 lg:col-span-1">
-
-          <div class="border-t border-foreground/10 lg:border-0 lg:grid lg:grid-cols-2 lg:gap-8 xl:grid-cols-4">
+          <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:grid-cols-4">
             {% for column in nav_columns %}
               {% if column.links.size > 0 %}
-                <details class="group border-b border-foreground/10 lg:border-0" open>
-                  <summary class="flex cursor-pointer select-none items-center justify-between py-4 text-xs font-semibold uppercase tracking-widest text-foreground/50 [&::-webkit-details-marker]:hidden lg:pointer-events-none lg:cursor-default lg:py-0 lg:mb-4">
+                <details class="group border-t border-foreground lg:border-0" open>
+                  <summary class="flex cursor-pointer select-none items-center justify-between py-4 text-[14px]/[20px] font-semibold uppercase tracking-widest [&::-webkit-details-marker]:hidden lg:pointer-events-none lg:cursor-default lg:py-0 lg:mb-4">
                     {{ column.title | escape }}
-                    <span class="text-xl font-light transition-transform duration-200 group-open:rotate-45 lg:hidden">+</span>
+                    <span class="text-[24px]/[24px] font-light transition-transform duration-200 group-open:rotate-45 lg:hidden">+</span>
                   </summary>
                   <ul class="flex flex-col gap-2 pb-4 lg:pb-0">
                     {% for link in column.links %}
@@ -67,23 +66,20 @@
               {% endif %}
             {% endfor %}
           </div>
-
         </div>
       {% endif %}
-
     </div>
-
   </div>
 
   {% if footer_tagline_image != blank %}
-    <div class="overflow-hidden border-t border-foreground/10 py-8">
+    <div class="overflow-hidden pt-8 px-4 lg:px-15">
       <img
         src="{{ footer_tagline_image | image_url: width: 2000 }}"
         alt="{{ footer_tagline_image.alt | escape }}"
         width="{{ footer_tagline_image.width }}"
         height="{{ footer_tagline_image.height }}"
         loading="lazy"
-        class="mx-auto w-full max-w-none px-8 object-contain"
+        class="mx-auto w-full max-w-none object-contain"
       >
     </div>
   {% endif %}
