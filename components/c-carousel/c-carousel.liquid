@@ -39,15 +39,15 @@
     data-c-carousel-pause-on-hover="{{ carousel_pause_on_hover }}"
     role="region"
     aria-label="{{ carousel_label }}"
-    class="relative h-[clamp(420px,60dvh,680px)]{% if root_class != blank %} {{ root_class }}{% endif %}"
+    class="relative{% if root_class != blank %} {{ root_class }}{% endif %}"
   >
     <div
       data-c-carousel-viewport
-      class="h-full {% if carousel_mode == 'marquee' %}overflow-hidden{% else %}overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden{% endif %}"
+      class="{% if carousel_mode == 'marquee' %}overflow-hidden{% else %}overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden{% endif %}"
     >
       <div
         data-c-carousel-track
-        class="flex h-full {% if carousel_gap == 'sm' %}gap-4{% elsif carousel_gap == 'lg' %}gap-8{% elsif carousel_gap == 'xl' %}gap-16{% else %}gap-6{% endif %}{% if carousel_mode == 'marquee' %} will-change-transform{% endif %}{% if content_track_class != blank %} {{ content_track_class }}{% endif %}"
+        class="flex {% if carousel_gap == 'sm' %}gap-4{% elsif carousel_gap == 'lg' %}gap-8{% elsif carousel_gap == 'xl' %}gap-16{% else %}gap-6{% endif %}{% if carousel_mode == 'marquee' %} will-change-transform{% endif %}{% if content_track_class != blank %} {{ content_track_class }}{% endif %}"
       >
         {{ carousel_content }}
       </div>
