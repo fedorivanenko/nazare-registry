@@ -1,6 +1,14 @@
 snippets:
 
   # — Navigation & Layout —
+  - id: c-product-accordion
+    title: Product Accordion
+    description: Collapsible panels for How To Use, Ingredients, and Quality & Certifications within the product hero.
+    status: not-started
+    sections:
+      - s-product-hero
+
+
   - id: c-social-links
     title: Social Icons
     description: Row of social platform icon links (Instagram, Facebook, YouTube).
@@ -272,8 +280,7 @@ snippets:
     status: planned
     file: components/c-faq-item.md
     sections:
-      - s-product-accordion
-      - s-faq
+      - s-product-hero
       - s-faq
       - s-bundle-certifications
       - s-footer

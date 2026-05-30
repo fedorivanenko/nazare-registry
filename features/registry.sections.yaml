@@ -77,10 +77,6 @@ sections:
     description: Main product section — gallery, title, variants, buy box, and trust badges.
     status: not-started
 
-  - id: s-product-accordion
-    title: Product Accordion
-    description: Collapsible panels for How To Use, Ingredients, and Quality & Certifications.
-    status: not-started
 
   - id: s-statement
     title: Stat Banner
