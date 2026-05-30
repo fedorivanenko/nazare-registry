@@ -216,7 +216,7 @@ components:
         to: snippets/c-carousel.liquid
         checksum:
           algorithm: sha256
-          value: cf13fbb853455e566ef0792032154a5886cf28b708f50ac65a61ed02fcefe93b
+          value: d78f8be9173cb5f447ec38198f5aaa57861cc04156c9ffc8874d5b169e43f3a1
       - from: components/c-carousel/c-carousel.js
         to: scripts/snippets/c-carousel.js
         checksum:

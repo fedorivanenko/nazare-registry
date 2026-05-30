@@ -21,7 +21,7 @@
     assign carousel_speed = 'normal'
   endunless
 
-  unless carousel_gap == 'sm' or carousel_gap == 'md' or carousel_gap == 'lg'
+  unless carousel_gap == 'sm' or carousel_gap == 'md' or carousel_gap == 'lg' or carousel_gap == 'xl'
     assign carousel_gap = 'md'
   endunless
 
@@ -47,7 +47,7 @@
     >
       <div
         data-c-carousel-track
-        class="flex h-full {% if carousel_gap == 'sm' %}gap-4{% elsif carousel_gap == 'lg' %}gap-8{% else %}gap-6{% endif %}{% if carousel_mode == 'marquee' %} will-change-transform{% endif %}{% if content_track_class != blank %} {{ content_track_class }}{% endif %}"
+        class="flex h-full {% if carousel_gap == 'sm' %}gap-4{% elsif carousel_gap == 'lg' %}gap-8{% elsif carousel_gap == 'xl' %}gap-16{% else %}gap-6{% endif %}{% if carousel_mode == 'marquee' %} will-change-transform{% endif %}{% if content_track_class != blank %} {{ content_track_class }}{% endif %}"
       >
         {{ carousel_content }}
       </div>
