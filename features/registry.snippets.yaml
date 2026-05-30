@@ -5,28 +5,17 @@ snippets:
     title: Product Accordion
     description: Collapsible panels for How To Use, Ingredients, and Quality & Certifications within the product hero.
     status: not-started
-    sections:
-      - s-product-hero
-
 
   - id: c-social-links
     title: Social Icons
     description: Row of social platform icon links (Instagram, Facebook, YouTube).
     status: planned
     file: components/c-social-links.md
-    sections:
-      - s-social-gallery
-      - s-article-hero
-      - s-footer
 
   - id: c-pagination
     title: Pagination
     description: Dot or arrow controls for navigating between pages of a list or carousel.
     status: not-started
-    sections:
-      - s-reviews
-      - s-community-carousel
-      - s-article-grid
 
   # — Product —
   - id: c-product-card
@@ -34,101 +23,65 @@ snippets:
     description: Product tile with image, badge, rating, title, price, swatches, and optional CTA.
     status: planned
     file: components/c-product-card.md
-    sections:
-      - s-product-gallery
-      - s-bundle-gallery
 
   - id: c-image-gallery
     title: Image Gallery
     description: Primary product image with thumbnail strip; swipeable carousel on mobile.
     status: not-started
-    sections:
-      - s-product-hero
-      - s-bundle-hero
 
   - id: c-swatch
     title: Variant Swatches
     description: Color or flavor dot selector that updates the displayed variant.
     status: planned
     file: components/c-swatch.md
-    sections:
-      - s-product-hero
-      - s-bundle-hero
-      - s-product-gallery
 
   - id: c-buy-box
     title: Buy Box
     description: Quantity selector, price display, and Add to Cart CTA button.
     status: not-started
-    sections:
-      - s-product-hero
-      - s-bundle-hero
 
   - id: c-subscribe-save
     title: Subscribe & Save Toggle
     description: One-time vs. subscription purchase toggle with discount callout.
     status: not-started
-    sections:
-      - s-product-hero
-      - s-bundle-hero
 
   - id: c-ratings
     title: Star Rating
     description: Star display with numeric rating and review count; supports Judgeme and Yotpo.
     status: done
     file: components/c-ratings.md
-    sections:
-      - s-product-hero
-      - s-bundle-hero
-      - s-reviews
-      - s-product-gallery
 
   - id: c-icon-item
     title: Icon Item
     description: Single icon + label pair used in rows. Covers symptom icons, trust badges, and press logos.
     status: not-started
-    sections:
-      - s-product-hero
-      - s-bundle-hero
-      - s-product-gallery
-      - s-icon-row
 
   - id: c-ingredient-card
     title: Ingredient Card
     description: Single ingredient tile with image, name, and short benefit description.
     status: not-started
-    sections:
-      - s-list
 
   - id: c-stat
     title: Stat Block
     description: Large percentage or number with a short descriptor label below.
     status: planned
     file: components/c-stat.md
-    sections:
-      - s-statistics
 
   - id: c-routine-step
     title: Routine Step Card
     description: Numbered step card with a full-bleed image and short instructional copy.
     status: not-started
-    sections:
-      - s-steps
 
   # — Reviews —
   - id: c-review-card
     title: Review Card
     description: Individual review with reviewer name, star rating, date, body text, and verified badge.
     status: not-started
-    sections:
-      - s-reviews
 
   - id: c-rating-summary
     title: Rating Summary Bar
     description: Aggregate score, histogram breakdown, and Write a Review CTA.
     status: not-started
-    sections:
-      - s-reviews
 
   # — Bundles —
   - id: c-bundle-item
@@ -136,74 +89,43 @@ snippets:
     description: Bundle tile with product image, name, included items summary, and price.
     status: planned
     file: components/c-bundle-item.md
-    sections:
-      - s-bundle-gallery
-      - s-feature-bundle
-      - s-bundle-hero
 
   - id: c-bundle-product-block
     title: Bundle Product Block
     description: Expanded product block within a bundle showing benefits, usage, and key ingredients.
     status: not-started
-    sections:
-      - s-bundle-contents
 
   # — Blog & Editorial —
   - id: c-article-card
     title: Article Card
     description: Article preview tile with cover image, category tag, read time, and title.
     status: not-started
-    sections:
-      - s-article-grid
-      - s-blog-featured-hero
-      - s-related-articles
-      - s-blog-cards
 
   - id: c-badge
     title: Badge
     description: Small pill label for status or category (e.g. Featured, Bestseller, % Off).
     status: planned
     file: components/c-badge.md
-    sections:
-      - s-blog-featured-hero
-      - s-article-hero
-      - s-article-grid
 
   - id: c-category-tag
     title: Category Tag
     description: Outlined pill label identifying the product or content category.
     status: not-started
-    sections:
-      - s-blog-featured-hero
-      - s-article-hero
-      - s-article-grid
-      - s-product-gallery
-      - s-product-hero
 
   - id: c-inline-product-card
     title: Inline Product Card
     description: Mid-article product recommendation with image, rating, price, and Add to Cart.
     status: not-started
-    sections:
-      - s-article-hero
 
   - id: c-pull-quote
     title: Pull Quote Block
     description: Styled large-format quote with attribution name and title.
     status: not-started
-    sections:
-      - s-article-hero
-      - s-split
-      - s-statistics
-      - s-feature-product
 
   - id: c-editorial-card
     title: Editorial / Promo Card
     description: Full-bleed image card with headline overlay and CTA, inserted inline in a grid.
     status: not-started
-    sections:
-      - s-product-gallery
-      - s-article-grid
 
   # — Filtering & Sorting —
   - id: c-filter-sort
@@ -212,7 +134,6 @@ snippets:
     status: not-started
     sections:
       - s-plp-grid
-      - s-blog-filter-sort
 
   - id: c-show-more
     title: Show More
@@ -225,35 +146,23 @@ snippets:
     title: Filter Tab
     description: Tab-style selector for switching between product category sets.
     status: not-started
-    sections:
-      - s-product-gallery
 
   # — Social Proof & Community —
-
   - id: c-person
     title: Person Card
     description: Headshot photo with name, credential, and optional short quote.
     status: planned
     file: components/c-person.md
-    sections:
-      - s-product-hero
-      - s-social-proof-strip
 
   - id: c-ugc-tile
     title: UGC Photo Tile
     description: Single user-generated photo tile linking to the social profile.
     status: not-started
-    sections:
-      - s-social-gallery
-      - s-community-carousel
 
   - id: c-resource-card
     title: Resource Card
     description: Editorial card with full-bleed image, title overlay, and a CTA button.
     status: not-started
-    sections:
-      - s-resources
-
 
   # — FAQ —
   - id: c-faq-item
@@ -261,18 +170,11 @@ snippets:
     description: Expandable row with a question header and collapsible answer body.
     status: planned
     file: components/c-faq-item.md
-    sections:
-      - s-product-hero
-      - s-faq
-      - s-bundle-certifications
-      - s-footer
 
   - id: c-faq-category-nav
     title: FAQ Category Nav
     description: Vertical sidebar (desktop) or horizontal tab strip (mobile) for filtering FAQ by category.
     status: not-started
-    sections:
-      - s-faq
 
   # — Footer —
   - id: c-footer-nav-column

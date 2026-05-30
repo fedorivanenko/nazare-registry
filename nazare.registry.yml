@@ -163,19 +163,6 @@ components:
         checksum:
           algorithm: sha256
           value: 420f8eb0e32ea9d5fcf07523580b62d3f9097fc87225249aca6e4cdf6d5385d3
-  s-video-gallery:
-    version: 1.1.4
-    type: section
-    dependencies:
-      - c-video
-      - c-button
-      - c-carousel
-    files:
-      - from: components/s-video-gallery/s-video-gallery.liquid
-        to: sections/s-video-gallery.liquid
-        checksum:
-          algorithm: sha256
-          value: bda96adf4b6c0d5e2c68e8bd1220cbd7ded2d493b26c9c2957e032b8d60d8add
   c-drag-scroll:
     version: 1.0.2-dev.0
     type: snippet
@@ -364,117 +351,6 @@ components:
         checksum:
           algorithm: sha256
           value: 248c6cafa67dba77539022faaccc82c75d5a4f9ba6172c635041ef34fd8c96f7
-  s-banner:
-    version: 1.0.1
-    type: section
-    dependencies:
-      - c-button
-    files:
-      - from: components/s-banner/s-banner.liquid
-        to: sections/s-banner.liquid
-        checksum:
-          algorithm: sha256
-          value: 0f0ce8982c977163afaf07b4186748ab11e267766962101e537061731b897247
-  s-statistics:
-    version: 1.0.0
-    type: section
-    dependencies:
-      - c-stat
-    files:
-      - from: components/s-statistics/s-statistics.liquid
-        to: sections/s-statistics.liquid
-        checksum:
-          algorithm: sha256
-          value: 52c9b2fba852c863bb2ed0a06dfd58b4b02b01de44487f29e9e07c83326b879f
-  s-faq:
-    version: 1.1.2
-    type: section
-    dependencies:
-      - c-button
-      - c-faq-item
-    files:
-      - from: components/s-faq/s-faq.liquid
-        to: sections/s-faq.liquid
-        checksum:
-          algorithm: sha256
-          value: e4d847f7e1208068c59acef40582e085a61ced435dea487faab7136f9fb48dac
-      - from: components/s-faq/s-faq.js
-        to: scripts/sections/s-faq.js
-        checksum:
-          algorithm: sha256
-          value: aa8f7319c73f2b762b8e51498de3fec159ef521249cf6f6ad1e84e3faa1f03df
-  s-image-gallery:
-    version: 1.0.5
-    type: section
-    dependencies:
-      - c-carousel
-    files:
-      - from: components/s-image-gallery/s-image-gallery.liquid
-        to: sections/s-image-gallery.liquid
-        checksum:
-          algorithm: sha256
-          value: 58b528acc9ee2f894a0ea62f65790f9594763207a44085ef0bb44b50dd932ae1
-  s-social-gallery:
-    version: 1.0.7
-    type: section
-    dependencies:
-      - c-carousel
-      - c-social-links
-    files:
-      - from: components/s-social-gallery/s-social-gallery.liquid
-        to: sections/s-social-gallery.liquid
-        checksum:
-          algorithm: sha256
-          value: 506d460af33bd51baf8b3816dac415434a759970ff13420b614e23ec67f4759c
-  s-feature-product:
-    version: 1.0.0
-    type: section
-    dependencies:
-      - c-button
-      - c-product-chip
-    files:
-      - from: components/s-feature-product/s-feature-product.liquid
-        to: sections/s-feature-product.liquid
-        checksum:
-          algorithm: sha256
-          value: dbaf543024d57054b76a5798cb242e3ce1a5890a08b2439f221bcac6f4fabcd0
-  s-feature-bundle:
-    version: 1.0.0
-    type: section
-    dependencies:
-      - c-badge
-      - c-button
-      - c-bundle-item
-    files:
-      - from: components/s-feature-bundle/s-feature-bundle.liquid
-        to: sections/s-feature-bundle.liquid
-        checksum:
-          algorithm: sha256
-          value: 1182f4c489977effe7dde1a5ed1fea238c8d5d8a91ffa44056a6cbb6ef992d9d
-  s-statement:
-    version: 1.0.0
-    type: section
-    dependencies:
-      - c-button
-      - c-person
-    files:
-      - from: components/s-statement/s-statement.liquid
-        to: sections/s-statement.liquid
-        checksum:
-          algorithm: sha256
-          value: cf451fc67211142c8428af9cd5755930f53263233fa9e298f07f76af59653fbb
-  s-product-gallery:
-    version: 1.1.0
-    type: section
-    dependencies:
-      - c-button
-      - c-product-carousel
-    files:
-      - from: components/s-product-gallery/s-product-gallery.liquid
-        to: sections/s-product-gallery.liquid
-        checksum:
-          algorithm: sha256
-          value: 4aff28ebe1124726f976fbb621bac705a44978e8aaa954810e64520f27dce388
   s-footer:
     version: 1.2.1
     type: section
