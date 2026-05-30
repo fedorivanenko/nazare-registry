@@ -37,15 +37,7 @@ sections:
     status: done
     file: components/s-hero.md
 
-  - id: s-community-strip
-    title: Community Strip
-    description: Horizontally scrollable strip of community member portrait photos.
-    status: not-started
 
-  - id: s-sold-a-lie
-    title: You've Been Sold a Lie
-    description: Bold editorial claim with body copy, CTA, and a symptom icon row.
-    status: not-started
 
   - id: s-feature-product
     title: Featured Products

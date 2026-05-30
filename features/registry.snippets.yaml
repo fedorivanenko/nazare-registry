@@ -265,7 +265,7 @@ snippets:
     description: Small icon with label representing a health symptom or product category.
     status: not-started
     sections:
-      - s-sold-a-lie
+      - s-editorial
       - s-category-strip
 
   # — FAQ —
