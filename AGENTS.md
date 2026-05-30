@@ -39,6 +39,14 @@ Use the schema-required frontmatter and sections. Keep scope small, define succe
 
 For component features, also read `docs/policies/naming-policy.md` and existing `features/components/*.md` examples. Component source lives under `components/<component-id>/`, registry metadata lives in `nazare.registry.yml`, and install targets follow the component type (`s-*` sections to `sections/*.liquid`, `c-*` snippets to `snippets/*.liquid`). Registry file entries need SHA-256 checksum metadata.
 
+## Testing
+
+Do not run the test suite during implementation tasks — it is too heavy for agent use. Mark verification checklist items done based on code inspection instead.
+
+**Backlog:** split the test suite into atomic per-component tests so individual components can be verified in isolation without running the full suite.
+
+---
+
 ## Versioning
 
 Follow `docs/policies/release-policy.md` for CLI versioning and releases

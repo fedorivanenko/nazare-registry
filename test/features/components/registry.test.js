@@ -31,6 +31,10 @@ const carouselScriptPath = new URL(
 	"../../../components/c-carousel/c-carousel.js",
 	import.meta.url,
 );
+const headingPath = new URL(
+	"../../../components/c-heading/c-heading.liquid",
+	import.meta.url,
+);
 const announcementPath = new URL(
 	"../../../components/s-announcement/s-announcement.liquid",
 	import.meta.url,
@@ -137,6 +141,33 @@ describe("component registry metadata", () => {
 		expect(source).toContain(
 			"if button_label != blank and button_url != blank",
 		);
+	});
+
+	it("declares committed c-heading metadata with matching checksum", async () => {
+		const manifest = await readFile(manifestPath, "utf8");
+		const source = await readFile(headingPath, "utf8");
+		const components = parseComponentManifest(manifest);
+
+		expect(() => validateComponentMetadata(components)).not.toThrow();
+		expect(components["c-heading"]).toMatchObject({
+			version: "1.0.0",
+			type: "snippet",
+			dependencies: [],
+			files: [
+				{
+					from: "components/c-heading/c-heading.liquid",
+					to: "snippets/c-heading.liquid",
+					checksum: {
+						algorithm: "sha256",
+						value: sha256(source),
+					},
+				},
+			],
+		});
+		expect(source).toContain("assign heading_size = size | default: 'lg'");
+		expect(source).toContain("assign heading_tag = tag | default: 'h2'");
+		expect(source).toContain("font-heading font-bold uppercase");
+		expect(source).toContain("heading_text | escape");
 	});
 
 	it("declares committed c-video metadata with matching checksums", async () => {

@@ -14,6 +14,10 @@
   assign hero_overlay = section.settings.overlay | default: 'medium'
   assign hero_scheme = section.settings.color_scheme | default: 'dark'
   assign hero_alignment = section.settings.alignment | default: 'left'
+  assign hero_heading_size = section.settings.heading_size | default: 'lg'
+  assign hero_section_height = section.settings.section_height | default: 'full'
+  assign hero_content_vertical = section.settings.content_vertical | default: 'bottom'
+  assign hero_layout = section.settings.layout | default: 'stack'
 
   if hero_image_alt == blank and hero_image.alt != blank
     assign hero_image_alt = hero_image.alt
@@ -32,9 +36,23 @@
   elsif hero_overlay == 'dark'
     assign overlay_from = 'from-black/75'
   endif
+
+  case hero_section_height
+    when 'banner'
+      assign min_height = '280px'
+    when 'screen'
+      assign min_height = '100dvh'
+    else
+      assign min_height = 'clamp(560px, 48vw, 700px)'
+  endcase
+
+  assign content_vertical_class = 'justify-end'
+  if hero_content_vertical == 'center'
+    assign content_vertical_class = 'justify-center'
+  endif
 %}
 
-<section class="relative overflow-hidden bg-black" style="min-height: clamp(560px, 48vw, 700px)">
+<section class="relative overflow-hidden bg-black" style="min-height: {{ min_height }}">
 
   {% if hero_video != blank %}
     <div class="absolute inset-0">
@@ -48,44 +66,64 @@
     <div class="absolute inset-0 bg-gradient-to-t {{ overlay_from }} to-transparent lg:bg-gradient-to-r"></div>
   {% endif %}
 
-  <div class="relative z-10 flex flex-col justify-end" style="min-height: clamp(560px, 48vw, 700px)">
+  <div class="relative z-10 flex flex-col {{ content_vertical_class }}" style="min-height: {{ min_height }}">
     <div class="page-width py-[60px]">
-      {% if hero_alignment == 'center' %}
+
+      {% if hero_layout == 'split' %}
+        <div class="{{ text_color_class }} grid grid-cols-1 items-center gap-8 sm:grid-cols-2">
+          <div>
+            {% render 'c-heading', text: hero_heading, size: hero_heading_size, tag: 'h1' %}
+          </div>
+          {% if hero_body != blank %}
+            <div class="text-[14px]/[20px] opacity-90 lg:text-[16px]/[20px] [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
+          {% endif %}
+        </div>
+
+      {% elsif hero_alignment == 'center' %}
         <div class="{{ text_color_class }} mx-auto max-w-[540px] text-center">
+          {% if hero_eyebrow != blank %}
+            <p class="text-xs font-semibold uppercase tracking-widest opacity-75">{{ hero_eyebrow | escape }}</p>
+          {% endif %}
+          {% render 'c-heading', text: hero_heading, size: hero_heading_size, tag: 'h1', class: 'py-5' %}
+          {% if hero_body != blank %}
+            <div class="mb-8 text-[14px]/[20px] opacity-90 lg:text-[16px]/[20px] [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
+          {% endif %}
+          {% if cta_label != blank and cta_url != blank or cta2_label != blank and cta2_url != blank %}
+            <div class="mt-8 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center" style="{% if hero_scheme == 'light' %}--btn-bg: var(--color-foreground); --btn-text: var(--color-background){% else %}--btn-bg: var(--color-background); --btn-text: var(--color-foreground){% endif %}">
+              {% if cta_label != blank and cta_url != blank %}
+                {% render 'c-button', label: cta_label, url: cta_url, scheme: cta_scheme %}
+              {% endif %}
+              {% if cta2_label != blank and cta2_url != blank %}
+                <a href="{{ cta2_url }}" class="self-center text-sm font-semibold uppercase tracking-widest underline-offset-4 hover:underline sm:self-auto">{{ cta2_label | escape }}</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+
       {% else %}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:px-15">
           <div class="{{ text_color_class }}">
-      {% endif %}
-
-        {% if hero_eyebrow != blank %}
-          <p class="text-xs font-semibold uppercase tracking-widest opacity-75">{{ hero_eyebrow | escape }}</p>
-        {% endif %}
-
-        {% if hero_heading != blank %}
-          <h1 class="py-5 text-[70px]/[56px] font-heading uppercase font-bold lg:text-[90px]/[72px]">{{ hero_heading | escape }}</h1>
-        {% endif %}
-
-        {% if hero_body != blank %}
-          <div class="mb-8 text-[14px]/[20px] lg:text-[16px]/[20px] opacity-90 [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
-        {% endif %}
-
-        {% if cta_label != blank and cta_url != blank or cta2_label != blank and cta2_url != blank %}
-          <div class="mt-8 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center" style="{% if hero_scheme == 'light' %}--btn-bg: var(--color-foreground); --btn-text: var(--color-background){% else %}--btn-bg: var(--color-background); --btn-text: var(--color-foreground){% endif %}">
-            {% if cta_label != blank and cta_url != blank %}
-              {% render 'c-button', label: cta_label, url: cta_url, scheme: cta_scheme %}
+            {% if hero_eyebrow != blank %}
+              <p class="text-xs font-semibold uppercase tracking-widest opacity-75">{{ hero_eyebrow | escape }}</p>
             {% endif %}
-            {% if cta2_label != blank and cta2_url != blank %}
-              <a href="{{ cta2_url }}" class="self-center text-sm font-semibold uppercase tracking-widest underline-offset-4 hover:underline sm:self-auto">{{ cta2_label | escape }}</a>
+            {% render 'c-heading', text: hero_heading, size: hero_heading_size, tag: 'h1', class: 'py-5' %}
+            {% if hero_body != blank %}
+              <div class="mb-8 text-[14px]/[20px] opacity-90 lg:text-[16px]/[20px] [&_a:hover]:underline [&_a]:underline-offset-2">{{ hero_body }}</div>
             {% endif %}
-          </div>
-        {% endif %}
-
-      {% if hero_alignment == 'center' %}
-        </div>
-      {% else %}
+            {% if cta_label != blank and cta_url != blank or cta2_label != blank and cta2_url != blank %}
+              <div class="mt-8 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center" style="{% if hero_scheme == 'light' %}--btn-bg: var(--color-foreground); --btn-text: var(--color-background){% else %}--btn-bg: var(--color-background); --btn-text: var(--color-foreground){% endif %}">
+                {% if cta_label != blank and cta_url != blank %}
+                  {% render 'c-button', label: cta_label, url: cta_url, scheme: cta_scheme %}
+                {% endif %}
+                {% if cta2_label != blank and cta2_url != blank %}
+                  <a href="{{ cta2_url }}" class="self-center text-sm font-semibold uppercase tracking-widest underline-offset-4 hover:underline sm:self-auto">{{ cta2_label | escape }}</a>
+                {% endif %}
+              </div>
+            {% endif %}
           </div>
         </div>
       {% endif %}
+
     </div>
   </div>
 
@@ -208,12 +246,55 @@
     },
     {
       "type": "select",
+      "id": "section_height",
+      "label": "Section height",
+      "default": "full",
+      "options": [
+        { "value": "banner", "label": "Banner" },
+        { "value": "full", "label": "Full" },
+        { "value": "screen", "label": "Screen" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "content_vertical",
+      "label": "Vertical alignment",
+      "default": "bottom",
+      "options": [
+        { "value": "bottom", "label": "Bottom" },
+        { "value": "center", "label": "Center" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "stack",
+      "options": [
+        { "value": "stack", "label": "Stack" },
+        { "value": "split", "label": "Split" }
+      ]
+    },
+    {
+      "type": "select",
       "id": "alignment",
       "label": "Content alignment",
       "default": "left",
       "options": [
         { "value": "left", "label": "Left" },
         { "value": "center", "label": "Center" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "default": "lg",
+      "options": [
+        { "value": "sm", "label": "Small" },
+        { "value": "md", "label": "Medium" },
+        { "value": "lg", "label": "Large" },
+        { "value": "xl", "label": "Extra large" }
       ]
     },
     {

@@ -69,6 +69,16 @@ components:
         checksum:
           algorithm: sha256
           value: 3b2a2c3a342c1c4381e858dde8a7394da9f40a195e4c280fb116ad71948f7e0e
+  c-heading:
+    version: 1.0.0
+    type: snippet
+    dependencies: []
+    files:
+      - from: components/c-heading/c-heading.liquid
+        to: snippets/c-heading.liquid
+        checksum:
+          algorithm: sha256
+          value: 9559ae1b78dde72291e08692f2a312331a61aa9cddca9d33e76ace19e90d5a3d
   c-video:
     version: 1.0.4
     type: snippet
@@ -152,17 +162,18 @@ components:
           algorithm: sha256
           value: dd263c8fc35251cf8c72b1f622d112a8bc51fe166c6d1a06727604658887e8e0
   s-hero:
-    version: 1.1.6
+    version: 1.2.0
     type: section
     dependencies:
       - c-bg-video
       - c-button
+      - c-heading
     files:
       - from: components/s-hero/s-hero.liquid
         to: sections/s-hero.liquid
         checksum:
           algorithm: sha256
-          value: 420f8eb0e32ea9d5fcf07523580b62d3f9097fc87225249aca6e4cdf6d5385d3
+          value: 23b62481e22fc0719fe77bfe9e8810fbe5e886f023698ebb2271924c9eb78092
   c-drag-scroll:
     version: 1.0.2-dev.0
     type: snippet

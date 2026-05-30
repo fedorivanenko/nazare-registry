@@ -1,0 +1,39 @@
+{% liquid
+  assign heading_text = text
+  assign heading_size = size | default: 'lg'
+  assign heading_tag = tag | default: 'h2'
+  assign heading_class = class
+
+  unless heading_size == 'sm' or heading_size == 'md' or heading_size == 'lg' or heading_size == 'xl'
+    assign heading_size = 'lg'
+  endunless
+
+  unless heading_tag == 'h1' or heading_tag == 'h2' or heading_tag == 'h3' or heading_tag == 'h4' or heading_tag == 'p'
+    assign heading_tag = 'h2'
+  endunless
+
+  case heading_size
+    when 'sm'
+      assign size_classes = 'text-[40px]/[36px] lg:text-[52px]/[44px]'
+    when 'md'
+      assign size_classes = 'text-[56px]/[48px] lg:text-[72px]/[60px]'
+    when 'xl'
+      assign size_classes = 'text-[100px]/[80px] lg:text-[130px]/[104px]'
+    else
+      assign size_classes = 'text-[70px]/[56px] lg:text-[90px]/[72px]'
+  endcase
+
+  assign base_classes = 'font-heading font-bold uppercase ' | append: size_classes
+  if heading_class != blank
+    assign base_classes = base_classes | append: ' ' | append: heading_class
+  endif
+%}
+
+{% if heading_text != blank %}
+  {% if heading_tag == 'h1' %}<h1 class="{{ base_classes }}">{{ heading_text | escape }}</h1>
+  {% elsif heading_tag == 'h3' %}<h3 class="{{ base_classes }}">{{ heading_text | escape }}</h3>
+  {% elsif heading_tag == 'h4' %}<h4 class="{{ base_classes }}">{{ heading_text | escape }}</h4>
+  {% elsif heading_tag == 'p' %}<p class="{{ base_classes }}">{{ heading_text | escape }}</p>
+  {% else %}<h2 class="{{ base_classes }}">{{ heading_text | escape }}</h2>
+  {% endif %}
+{% endif %}

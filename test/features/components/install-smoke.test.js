@@ -104,6 +104,29 @@ describe("committed component install smoke", () => {
 		expect(lock).toContain("path: snippets/c-button.liquid");
 	});
 
+	it("installs c-heading from local registry", async () => {
+		const cwd = await makeTempDir();
+		await initProject(cwd);
+
+		const result = await runCli(["add", "c-heading"], {
+			cwd,
+			env: { NAZARE_REGISTRY_DIR: registryRoot },
+		});
+
+		expect(result).toMatchObject({ code: 0, stderr: "" });
+		expect(result.stdout).toContain("Wrote snippets/c-heading.liquid");
+		expect(result.stdout).toContain("Installed components: c-heading");
+		const source = await readFile(
+			join(cwd, "snippets", "c-heading.liquid"),
+			"utf8",
+		);
+		expect(source).toContain("font-heading font-bold uppercase");
+		expect(source).toContain("heading_text | escape");
+		const lock = await readLock(cwd);
+		expect(lock).toContain("c-heading:");
+		expect(lock).toContain("path: snippets/c-heading.liquid");
+	});
+
 	it("installs c-video from local registry", async () => {
 		const cwd = await makeTempDir();
 		await initProject(cwd);

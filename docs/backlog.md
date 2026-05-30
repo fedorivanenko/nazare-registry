@@ -55,3 +55,7 @@ Design and UX findings from the feature-design pass.
 
 - Add JSON output mode for CI once CLI surfaces stabilize.
 - Add registry/component install UX after theme commands settle.
+- Add HTML comment annotations to snippet Liquid files (`c-*`).
+  - Wrap each snippet's output with `<!-- begin: c-button -->` / `<!-- end: c-button -->`.
+  - Helps theme developers trace rendered HTML back to source component.
+  - Sections are already identified via schema `"name"`; snippets are the gap.
