@@ -101,7 +101,7 @@ snippets:
     description: Single ingredient tile with image, name, and short benefit description.
     status: not-started
     sections:
-      - s-ingredients-spotlight
+      - s-list
 
   - id: c-stat
     title: Stat Block

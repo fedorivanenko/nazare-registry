@@ -95,9 +95,9 @@ sections:
     description: Horizontally scrollable carousel of bundle offers with pricing.
     status: not-started
 
-  - id: s-ingredients-spotlight
-    title: Ingredients Spotlight
-    description: Grid of key ingredient cards each with an image, name, and benefit copy.
+  - id: s-list
+    title: List
+    description: Grid of cards each with an image, title, and short description.
     status: not-started
 
   - id: s-comparison-table
