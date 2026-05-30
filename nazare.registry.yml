@@ -351,7 +351,7 @@ components:
           algorithm: sha256
           value: d2771e0ebd2bfcbc9c181d5db12c04246ff5e29a10ed3cd665fa2c0f966cfcd0
   c-product-card:
-    version: 1.0.1
+    version: 1.1.0
     type: snippet
     dependencies:
       - c-badge
@@ -362,7 +362,7 @@ components:
         to: snippets/c-product-card.liquid
         checksum:
           algorithm: sha256
-          value: f41596c80d2faf53f52f4861e70dc7dc635521ba3aaf1d11682d4b2a96c18e4e
+          value: 31473b2c402c786b99f0e574b8dbc7243df9e500e53d70f7b4bc93c177e314e1
   c-product-carousel:
     version: 1.0.0
     type: snippet

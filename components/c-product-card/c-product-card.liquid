@@ -4,6 +4,7 @@
   assign card_badge_tags = badge_tags
   assign card_show_ratings = show_ratings
   assign card_show_swatches = show_swatches
+  assign card_show_add_to_cart = show_add_to_cart
   assign card_color_option = color_option_name | default: 'Color'
   assign card_class = class
   assign card_custom_tag = custom_tag
@@ -14,6 +15,9 @@
   endif
   if card_show_swatches == nil
     assign card_show_swatches = true
+  endif
+  if card_show_add_to_cart == nil
+    assign card_show_add_to_cart = true
   endif
 %}
 
@@ -68,9 +72,16 @@
     {% endif %}
 
     {% comment %} Title + price {% endcomment %}
-    <div class="flex items-baseline justify-between gap-2">
-      <p class="text-sm font-semibold">{{ card_product.title }}</p>
-      <p class="shrink-0 text-sm font-semibold">{{ card_selected_variant.price | money }}</p>
+    <div class="flex flex-col gap-0.5">
+      <p class="text-base font-semibold">{{ card_product.title }}</p>
+      {% if card_selected_variant.compare_at_price > card_selected_variant.price %}
+        <div class="flex items-baseline gap-2">
+          <p class="text-sm text-foreground/50 line-through">{{ card_selected_variant.compare_at_price | money }}</p>
+          <p class="text-base font-semibold text-blue-600">{{ card_selected_variant.price | money }}</p>
+        </div>
+      {% else %}
+        <p class="text-base font-semibold">{{ card_selected_variant.price | money }}</p>
+      {% endif %}
     </div>
 
     {% comment %} Swatches {% endcomment %}
@@ -80,6 +91,19 @@
         option_name: card_color_option,
         selected_variant: card_selected_variant
       %}
+    {% endif %}
+
+    {% comment %} Add to cart {% endcomment %}
+    {% if card_show_add_to_cart %}
+      <form action="/cart/add" method="post">
+        <input type="hidden" name="id" value="{{ card_selected_variant.id }}">
+        <button
+          type="submit"
+          class="w-full rounded-full bg-foreground py-3 text-sm font-semibold uppercase tracking-widest text-background"
+        >
+          Add to cart
+        </button>
+      </form>
     {% endif %}
 
   </div>
