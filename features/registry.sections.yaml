@@ -21,13 +21,13 @@ sections:
   - id: s-social-gallery
     title: UGC / Social Gallery
     description: Instagram handle heading, social icons, and a grid of user-generated photos.
-    status: planned
+    status: implemented
     file: components/s-social-gallery.md
 
   - id: s-footer
     title: Footer
     description: Nav columns, newsletter signup, brand display headline, and legal bar.
-    status: planned
+    status: implemented
     file: components/s-footer.md
 
   # — Homepage —
