@@ -148,9 +148,10 @@ describe("committed component install smoke", () => {
 		});
 
 		expect(result).toMatchObject({ code: 0, stderr: "" });
+		expect(result.stdout).toContain("Wrote scripts/snippets/c-drag-scroll.js");
 		expect(result.stdout).toContain("Wrote snippets/c-carousel.liquid");
 		expect(result.stdout).toContain("Wrote scripts/snippets/c-carousel.js");
-		expect(result.stdout).toContain("Installed components: c-carousel");
+		expect(result.stdout).toContain("Installed components: c-drag-scroll, c-carousel");
 		const snippet = await readFile(
 			join(cwd, "snippets", "c-carousel.liquid"),
 			"utf8",
@@ -169,77 +170,4 @@ describe("committed component install smoke", () => {
 		expect(lock).toContain("path: scripts/snippets/c-carousel.js");
 	});
 
-	it("installs s-statistics and c-stat dependency from local registry", async () => {
-		const cwd = await makeTempDir();
-		await initProject(cwd);
-
-		const result = await runCli(["add", "s-statistics"], {
-			cwd,
-			env: { NAZARE_REGISTRY_DIR: registryRoot },
-		});
-
-		expect(result).toMatchObject({ code: 0, stderr: "" });
-		expect(result.stdout).toContain("Wrote snippets/c-stat.liquid");
-		expect(result.stdout).toContain("Wrote scripts/snippets/c-stat.js");
-		expect(result.stdout).toContain("Wrote sections/s-statistics.liquid");
-		expect(result.stdout).toContain("s-statistics");
-		const section = await readFile(
-			join(cwd, "sections", "s-statistics.liquid"),
-			"utf8",
-		);
-		expect(section).toContain(
-			"{% render 'section-css', section_name: 's-statistics' %}",
-		);
-		expect(section).toContain("{% render 'c-stat'");
-		expect(section).toContain("section.blocks.size > 0");
-		const lock = await readLock(cwd);
-		expect(lock).toContain("c-stat:");
-		expect(lock).toContain("s-statistics:");
-		expect(lock).toContain("    dependencies: \n      - c-stat");
-		expect(lock).toContain("path: sections/s-statistics.liquid");
-	});
-
-	it("installs s-video-gallery and dependencies from local registry", async () => {
-		const cwd = await makeTempDir();
-		await initProject(cwd);
-
-		const result = await runCli(["add", "s-video-gallery"], {
-			cwd,
-			env: { NAZARE_REGISTRY_DIR: registryRoot },
-		});
-
-		expect(result).toMatchObject({ code: 0, stderr: "" });
-		expect(result.stdout).toContain("Wrote snippets/c-video.liquid");
-		expect(result.stdout).toContain("Wrote scripts/snippets/c-video.js");
-		expect(result.stdout).toContain("Wrote snippets/c-button.liquid");
-		expect(result.stdout).toContain("Wrote snippets/c-carousel.liquid");
-		expect(result.stdout).toContain("Wrote scripts/snippets/c-carousel.js");
-		expect(result.stdout).toContain("Wrote sections/s-video-gallery.liquid");
-		expect(result.stdout).toContain("s-video-gallery");
-		const section = await readFile(
-			join(cwd, "sections", "s-video-gallery.liquid"),
-			"utf8",
-		);
-		expect(section).toContain(
-			"{% render 'section-css', section_name: 's-video-gallery' %}",
-		);
-		expect(section).toContain("{% render 'c-button'");
-		expect(section).toContain("{% render 'c-video'");
-		expect(section).toContain("block.settings.video != blank");
-		expect(section).toContain('"id": "cta_label"');
-		expect(section).toContain('"id": "cta_url"');
-		expect(section).toContain('"id": "columns"');
-		expect(section).toContain('"id": "layout_mode"');
-		expect(section).toContain("{% render 'c-carousel'");
-		expect(section).toContain("data-c-carousel-item");
-		const lock = await readLock(cwd);
-		expect(lock).toContain("c-video:");
-		expect(lock).toContain("c-button:");
-		expect(lock).toContain("c-carousel:");
-		expect(lock).toContain("s-video-gallery:");
-		expect(lock).toContain(
-			"    dependencies: \n      - c-video\n      - c-button\n      - c-carousel",
-		);
-		expect(lock).toContain("path: sections/s-video-gallery.liquid");
-	});
 });

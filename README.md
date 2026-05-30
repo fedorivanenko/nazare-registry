@@ -159,6 +159,14 @@ nazare update c-button
 
 `nazare update` compares local files with the checksums recorded in `nazare.lock.yml`. Existing files require an interactive choice before overwrite: overwrite, skip, or write manual conflict markers. Use `--dry-run` to preview the plan, or `--force` to overwrite/recreate/delete files without prompting.
 
+Uninstall a component:
+
+```sh
+nazare remove c-button
+```
+
+`nazare remove` reads installed file paths from `nazare.lock.yml` (no registry fetch), deletes unmodified owned files, warns and prompts `y/N` if other installed components depend on it, and removes the lockfile entry. Modified files are skipped by default; pass `--force` to delete them. Use `--dry-run` to preview. Dependency removal is never automatic — each component must be removed explicitly.
+
 ## Available components
 
 ### Snippets

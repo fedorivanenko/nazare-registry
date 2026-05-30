@@ -23,7 +23,7 @@ const shopifyThemeConfigPath = new URL(
 	import.meta.url,
 );
 const layoutPath = new URL(
-	"../../../theme/default/layout/theme.liquid",
+	"../../../theme/default/layout/theme.source.liquid",
 	import.meta.url,
 );
 const sectionPath = new URL(

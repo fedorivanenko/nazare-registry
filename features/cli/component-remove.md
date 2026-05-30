@@ -3,7 +3,7 @@ schemaVersion: 1
 
 id: component-remove
 title: Remove Component
-status: planned
+status: done
 
 dependencies:
   - cli-install

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 const manifestPath = new URL("../../../nazare.registry.yml", import.meta.url);
 const layoutPath = new URL(
-	"../../../theme/default/layout/theme.liquid",
+	"../../../theme/default/layout/theme.source.liquid",
 	import.meta.url,
 );
 const templatePath = new URL(
@@ -28,10 +28,10 @@ describe("theme scaffold", () => {
 		const manifest = await readText(manifestPath);
 
 		expect(manifest).toContain(
-			"theme:\n  version: 1.1.3-dev.0\n  source: theme/default",
+			"theme:\n  version: 1.2.4\n  source: theme/default",
 		);
 		expect(manifest).toContain(
-			"- from: theme/default/layout/theme.liquid\n      to: layout/theme.liquid",
+			"- from: theme/default/layout/theme.source.liquid\n      to: layout/theme.source.liquid",
 		);
 		expect(manifest).toContain(
 			"- from: theme/default/templates/index.json\n      to: templates/index.json",

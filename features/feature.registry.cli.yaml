@@ -33,7 +33,7 @@ cli:
   - id: component-remove
     title: Remove Component
     description: Uninstalls an installed component, deleting its owned files and removing its lockfile entry. No cascade.
-    status: planned
+    status: done
     file: cli/component-remove.md
 
   - id: update

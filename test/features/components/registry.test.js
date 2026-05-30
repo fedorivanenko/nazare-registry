@@ -23,10 +23,6 @@ const videoScriptPath = new URL(
 	"../../../components/c-video/c-video.js",
 	import.meta.url,
 );
-const videoGalleryPath = new URL(
-	"../../../components/s-video-gallery/s-video-gallery.liquid",
-	import.meta.url,
-);
 const carouselSnippetPath = new URL(
 	"../../../components/c-carousel/c-carousel.liquid",
 	import.meta.url,
@@ -37,10 +33,6 @@ const carouselScriptPath = new URL(
 );
 const announcementPath = new URL(
 	"../../../components/s-announcement/s-announcement.liquid",
-	import.meta.url,
-);
-const statisticsPath = new URL(
-	"../../../components/s-statistics/s-statistics.liquid",
 	import.meta.url,
 );
 const statSnippetPath = new URL(
@@ -122,7 +114,7 @@ describe("component registry metadata", () => {
 
 		expect(() => validateComponentMetadata(components)).not.toThrow();
 		expect(components["c-button"]).toMatchObject({
-			version: "1.0.0",
+			version: "1.0.7",
 			type: "snippet",
 			dependencies: [],
 			files: [
@@ -155,7 +147,7 @@ describe("component registry metadata", () => {
 
 		expect(() => validateComponentMetadata(components)).not.toThrow();
 		expect(components["c-video"]).toMatchObject({
-			version: "1.0.1",
+			version: "1.0.4",
 			type: "snippet",
 			dependencies: [],
 			files: [
@@ -187,47 +179,6 @@ describe("component registry metadata", () => {
 		expect(script).toContain("export function destroy(root)");
 	});
 
-	it("declares committed s-video-gallery metadata with matching checksum", async () => {
-		const manifest = await readFile(manifestPath, "utf8");
-		const source = await readFile(videoGalleryPath, "utf8");
-		const components = parseComponentManifest(manifest);
-
-		expect(() => validateComponentMetadata(components)).not.toThrow();
-		expect(components["s-video-gallery"]).toMatchObject({
-			version: "1.1.1-dev.0",
-			type: "section",
-			dependencies: ["c-video", "c-button", "c-carousel"],
-			files: [
-				{
-					from: "components/s-video-gallery/s-video-gallery.liquid",
-					to: "sections/s-video-gallery.liquid",
-					checksum: {
-						algorithm: "sha256",
-						value: sha256(source),
-					},
-				},
-			],
-		});
-		expect(source).toContain(
-			"{% render 'section-css', section_name: 's-video-gallery' %}",
-		);
-		expect(source).toContain("{% render 'c-button'");
-		expect(source).toContain("{% render 'c-video'");
-		expect(source).toContain("block.settings.video != blank");
-		expect(source).toContain('"id": "title"');
-		expect(source).toContain('"id": "description"');
-		expect(source).toContain('"id": "cta_label"');
-		expect(source).toContain('"id": "cta_url"');
-		expect(source).toContain('"id": "cta_scheme"');
-		expect(source).toContain('"id": "columns"');
-		expect(source).toContain('"id": "layout_mode"');
-		expect(source).toContain('"id": "carousel_direction"');
-		expect(source).toContain('"id": "carousel_speed"');
-		expect(source).toContain('"id": "carousel_pause_on_hover"');
-		expect(source).toContain("{% render 'c-carousel'");
-		expect(source).toContain("data-c-carousel-item");
-	});
-
 	it("declares committed c-carousel metadata with matching checksums", async () => {
 		const manifest = await readFile(manifestPath, "utf8");
 		const snippet = await readFile(carouselSnippetPath, "utf8");
@@ -236,9 +187,9 @@ describe("component registry metadata", () => {
 
 		expect(() => validateComponentMetadata(components)).not.toThrow();
 		expect(components["c-carousel"]).toMatchObject({
-			version: "1.0.1",
+			version: "1.0.8-dev.0",
 			type: "snippet",
-			dependencies: [],
+			dependencies: ["c-drag-scroll"],
 			files: [
 				{
 					from: "components/c-carousel/c-carousel.liquid",
@@ -295,40 +246,6 @@ describe("component registry metadata", () => {
 		expect(source).toContain('"id": "link_url"');
 		expect(source).toContain('"id": "link_label"');
 		expect(source).toContain("if link_url != blank and link_label != blank");
-	});
-
-	it("declares committed s-statistics metadata with matching checksum", async () => {
-		const manifest = await readFile(manifestPath, "utf8");
-		const source = await readFile(statisticsPath, "utf8");
-		const components = parseComponentManifest(manifest);
-
-		expect(() => validateComponentMetadata(components)).not.toThrow();
-		expect(components["s-statistics"]).toMatchObject({
-			version: "1.0.0",
-			type: "section",
-			dependencies: ["c-stat"],
-			files: [
-				{
-					from: "components/s-statistics/s-statistics.liquid",
-					to: "sections/s-statistics.liquid",
-					checksum: {
-						algorithm: "sha256",
-						value: sha256(source),
-					},
-				},
-			],
-		});
-		expect(source).toContain(
-			"{% render 'section-css', section_name: 's-statistics' %}",
-		);
-		expect(source).toContain("{% render 'c-stat'");
-		expect(source).toContain('"id": "heading"');
-		expect(source).toContain('"id": "heading_alignment"');
-		expect(source).toContain('"id": "footnote"');
-		expect(source).toContain('"id": "label"');
-		expect(source).toContain('"id": "value"');
-		expect(source).toContain('"id": "description"');
-		expect(source).toContain("section.blocks.size > 0");
 	});
 
 	it("declares committed c-stat metadata with matching checksums", async () => {

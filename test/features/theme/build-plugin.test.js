@@ -81,6 +81,7 @@ describe("theme build plugin", () => {
 			{
 				name: "s-hero",
 				cssMode: "preload",
+				layoutPosition: null,
 				sources: ["sections/s-hero.liquid", "snippets/c-button.liquid"],
 			},
 		]);
