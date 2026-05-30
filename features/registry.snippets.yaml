@@ -37,7 +37,7 @@ snippets:
     sections:
       - s-product-gallery
       - s-related-products
-      - s-bundle-save
+      - s-bundle-gallery
 
   - id: c-image-gallery
     title: Image Gallery
@@ -110,14 +110,14 @@ snippets:
     file: components/c-stat.md
     sections:
       - s-statistics
-      - s-statement
+      - s-statistics
 
   - id: c-routine-step
     title: Routine Step Card
     description: Numbered step card with a full-bleed image and short instructional copy.
     status: not-started
     sections:
-      - s-routine
+      - s-steps
 
   # — Reviews —
   - id: c-review-card
@@ -141,7 +141,7 @@ snippets:
     status: planned
     file: components/c-bundle-item.md
     sections:
-      - s-bundle-save
+      - s-bundle-gallery
       - s-feature-bundle
       - s-bundle-hero
 
@@ -198,7 +198,7 @@ snippets:
     sections:
       - s-editorial
       - s-quote-proof
-      - s-statement
+      - s-statistics
       - s-feature-product
 
   - id: c-editorial-card

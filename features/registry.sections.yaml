@@ -78,15 +78,10 @@ sections:
     status: not-started
 
 
-  - id: s-statement
-    title: Stat Banner
-    description: Full-width proof section pairing a bold headline with a large percentage stat.
-    status: planned
-    file: components/s-statement.md
 
-  - id: s-routine
-    title: Routine Section
-    description: Numbered step cards showing the recommended daily product routine.
+  - id: s-steps
+    title: Steps
+    description: Numbered card sequence for presenting ordered steps, routines, or processes.
     status: not-started
 
   - id: s-trust-bar
@@ -95,8 +90,8 @@ sections:
     status: planned
     file: components/s-trust-bar.md
 
-  - id: s-bundle-save
-    title: Bundle & Save
+  - id: s-bundle-gallery
+    title: Bundle Gallery
     description: Horizontally scrollable carousel of bundle offers with pricing.
     status: not-started
 
