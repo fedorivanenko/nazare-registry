@@ -378,90 +378,6 @@ function settingsSchemaMarkerContent() {
   return `# ${GENERATED_MARKER}\n# Marks config/settings_schema.json as generated because JSON cannot contain comments.\n`;
 }
 
-function markerSidecarContent(generatedPath) {
-  return `# ${GENERATED_MARKER}\n# Marks ${generatedPath} as generated because JSON cannot contain comments.\n`;
-}
-
-function readJsonIfExists(filePath) {
-  if (!pathExists(filePath)) return null;
-  return JSON.parse(readText(filePath));
-}
-
-function uniqueSectionGroupKey(baseKey, sections) {
-  if (!sections[baseKey]) return baseKey;
-
-  let index = 2;
-  while (sections[`${baseKey}-${index}`]) index += 1;
-  return `${baseKey}-${index}`;
-}
-
-function sectionGroupContent(position, sectionNames, existingGroup = null) {
-  const existingSections = existingGroup?.sections ?? {};
-  const usedKeys = new Set();
-  const nextSections = {};
-  const keyBySectionName = new Map();
-
-  for (const sectionName of sectionNames) {
-    let key = Object.entries(existingSections).find(
-      ([entryKey, entry]) =>
-        !usedKeys.has(entryKey) && entry?.type === sectionName,
-    )?.[0];
-
-    if (!key) key = uniqueSectionGroupKey(sectionName, existingSections);
-
-    usedKeys.add(key);
-    keyBySectionName.set(sectionName, key);
-    nextSections[key] = {
-      ...existingSections[key],
-      type: sectionName,
-      settings: existingSections[key]?.settings ?? {},
-    };
-  }
-
-  const nextOrder = [];
-  const desiredKeys = new Set(keyBySectionName.values());
-  for (const key of existingGroup?.order ?? []) {
-    if (desiredKeys.has(key)) nextOrder.push(key);
-  }
-  for (const sectionName of sectionNames) {
-    const key = keyBySectionName.get(sectionName);
-    if (!nextOrder.includes(key)) nextOrder.push(key);
-  }
-
-  return `${JSON.stringify(
-    {
-      type: position,
-      name: existingGroup?.name ?? SECTION_GROUPS[position].name,
-      sections: nextSections,
-      order: nextOrder,
-    },
-    null,
-    2,
-  )}\n`;
-}
-
-function generateSectionGroups(root, sections) {
-  const sectionsByPosition = new Map();
-  for (const position of LAYOUT_POSITIONS) sectionsByPosition.set(position, []);
-  for (const section of sections) {
-    if (section.layoutPosition) {
-      sectionsByPosition.get(section.layoutPosition).push(section.name);
-    }
-  }
-
-  for (const [position, sectionNames] of sectionsByPosition) {
-    const group = SECTION_GROUPS[position];
-    const relativePath = `sections/${group.fileName}.json`;
-    const groupPath = path.join(root, relativePath);
-    const existingGroup = readJsonIfExists(groupPath);
-    writeText(
-      groupPath,
-      sectionGroupContent(position, sectionNames, existingGroup),
-    );
-    writeText(`${groupPath}.nazare`, markerSidecarContent(relativePath));
-  }
-}
-
 function generateThemeLayout(root) {
   const sourcePath = path.join(root, "layout", "theme.source.liquid");
   if (!pathExists(sourcePath)) return;
@@ -529,7 +445,6 @@ export function generateThemeBuildFiles(root = process.cwd()) {
     settingsSchemaMarkerContent(),
   );
 
-  generateSectionGroups(root, graph.sections);
   generateThemeLayout(root);
 
   return graph;
@@ -582,11 +497,6 @@ export function nazareThemePlugin() {
       for (const file of listLiquidFiles(path.join(root, dir))) {
         context.addWatchFile(file);
       }
-    }
-
-    for (const group of Object.values(SECTION_GROUPS)) {
-      const groupPath = path.join(root, "sections", `${group.fileName}.json`);
-      if (pathExists(groupPath)) context.addWatchFile(groupPath);
     }
 
     const configDir = path.join(root, "config");
