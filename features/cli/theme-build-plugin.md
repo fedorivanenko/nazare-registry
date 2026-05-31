@@ -33,7 +33,7 @@ invariants:
   - Plugin must pick up newly added config/*.settings.json files in watch mode without restarting the build process
   - settings_schema.json is fully generated and must never be hand-edited
   - layout/theme.liquid is fully generated from layout/theme.source.liquid and must never be hand-edited
-  - nazare:layout directive is valid only in section files and only one section per position (header or footer) is allowed
+  - nazare:layout directive is valid only in section files and multiple sections per position (header or footer) are allowed
 
 nonGoals:
   - Implementing nazare theme pull
@@ -133,6 +133,11 @@ The plugin generates:
 - `snippets/section-css.liquid`
 - `snippets/section-css-preloads.liquid`
 - `config/settings_schema.json`
+- `config/settings_schema.json.nazare` marker sidecar
+- `sections/header-group.json`
+- `sections/header-group.json.nazare` marker sidecar
+- `sections/footer-group.json`
+- `sections/footer-group.json.nazare` marker sidecar
 - `layout/theme.liquid`
 
 Each generated text file must include a generated marker near the top containing:
@@ -230,11 +235,13 @@ Rules:
 - directive is valid only in `sections/*.liquid`
 - one directive maximum per section file
 - directive must appear before first rendered output
-- only one section per layout position (`header` or `footer`) across the whole theme — duplicate positions are build errors
+- multiple sections may declare the same layout position (`header` or `footer`)
+- matching sections are written into Shopify section groups (`sections/header-group.json` or `sections/footer-group.json`) so merchants can reorder them in Shopify admin
+- initial order follows sorted section filename order; existing section group `order` is preserved when present
 - invalid values are build errors
 - missing directive means the section is not a layout section
 
-When `layout/theme.source.liquid` is present, the plugin reads it and replaces each `{%- comment -%}nazare:layout <position>{%- endcomment -%}` placeholder with the matching `{% section 'name' %}` tag, or with nothing if no installed section declares that position. The result is written to `layout/theme.liquid` with a generated-file marker prepended.
+When `layout/theme.source.liquid` is present, the plugin reads it and replaces each `{%- comment -%}nazare:layout <position>{%- endcomment -%}` placeholder with the matching Shopify section group tag (`{% sections 'header-group' %}` or `{% sections 'footer-group' %}`). The result is written to `layout/theme.liquid` with a generated-file marker prepended.
 
 ## Generated layout
 
@@ -251,17 +258,32 @@ When `layout/theme.source.liquid` is present, the plugin reads it and replaces e
 </body>
 ```
 
-With `s-footer` installed, the generated `layout/theme.liquid` body becomes:
+With layout groups enabled, the generated `layout/theme.liquid` body becomes:
 
 ```liquid
 <body>
+  {% sections 'header-group' %}
   {{ content_for_layout }}
-  {% section 's-footer' %}
+  {% sections 'footer-group' %}
   <script type="module" src="{{ 'theme.js' | asset_url }}"></script>
 </body>
 ```
 
-If no section declares a position, the placeholder is replaced with an empty string.
+The plugin also writes Shopify section group JSON files:
+
+```json
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "s-announcement": { "type": "s-announcement", "settings": {} },
+    "s-menu": { "type": "s-menu", "settings": {} }
+  },
+  "order": ["s-announcement", "s-menu"]
+}
+```
+
+If `sections/header-group.json` or `sections/footer-group.json` already exists, the plugin preserves existing `order` and section settings for matching section types, appending newly installed layout sections at the end.
 
 ## Generated settings schema
 
@@ -283,7 +305,7 @@ Each `*.settings.json` file contains a Shopify settings group object or array of
 }
 ```
 
-The generated `settings_schema.json` is a JSON array of all merged groups, prefixed with a generated-file comment embedded in the first group's `info` field or via a leading marker entry:
+The generated `settings_schema.json` is a JSON array of all merged groups:
 
 ```json
 [
@@ -292,7 +314,7 @@ The generated `settings_schema.json` is a JSON array of all merged groups, prefi
 ]
 ```
 
-Because Shopify's `settings_schema.json` is JSON (not text), the generated-file marker is embedded as a `"_generated"` key on the root array wrapper — not possible in JSON arrays. Instead, a marker comment file `config/settings_schema.json.nazare` is written alongside it to signal ownership.
+Because Shopify's `settings_schema.json` is JSON, it cannot safely contain comments or a root ownership object. Instead, a marker comment file `config/settings_schema.json.nazare` is written alongside it to signal ownership.
 
 Rules:
 - `config/settings_schema.json` must never be hand-edited
@@ -363,7 +385,8 @@ No content hashes in v1 output names.
 - plugin generates runtime entry with lazy module loading
 - plugin generates normal and preload CSS bridge snippets
 - plugin generates `config/settings_schema.json` from `config/theme.settings.json` + `config/*.settings.json`
-- plugin generates `layout/theme.liquid` from `layout/theme.source.liquid` by injecting layout section tags at placeholder positions
+- plugin generates `layout/theme.liquid` from `layout/theme.source.liquid` by injecting Shopify section group tags at placeholder positions
+- plugin generates `sections/header-group.json` and `sections/footer-group.json`, preserving existing admin order and section settings when present
 - plugin validates CSS directives, layout directives, and JS module keys
 - plugin reports missing snippets, render cycles, and missing JS modules as build errors
 - plugin warns on dynamic renders that cannot be followed
@@ -383,7 +406,6 @@ No content hashes in v1 output names.
 - duplicate layout directive in a single section fails build
 - layout directive after rendered output fails build
 - layout directive in snippet file fails build
-- two sections declaring the same layout position fails build
 - missing static snippet fails build
 - static render cycle fails build
 - invalid `data-nazare-use` value fails build
@@ -432,10 +454,11 @@ Result: implementation present; final feature-doc checklist still needs reconcil
 - [ ] errors on duplicate layout directive in a section
 - [ ] errors on layout directive in snippet file
 - [ ] errors on layout directive after rendered output
-- [ ] errors when two sections declare the same layout position
+- [ ] allows multiple sections to declare the same layout position
 - [ ] generates layout/theme.liquid with generated marker from theme.source.liquid
-- [ ] injects {% section 'name' %} at header/footer placeholder positions
-- [ ] replaces placeholder with empty string when no section declares that position
+- [ ] injects {% sections 'header-group' %} and {% sections 'footer-group' %} at header/footer placeholder positions
+- [ ] generates sections/header-group.json and sections/footer-group.json
+- [ ] preserves existing section group order and settings when regenerating
 - [ ] in watch mode, editing layout/theme.source.liquid triggers a rebuild
 - [ ] cleans stale generated files
 - [ ] preserves stable Vite output naming contract
@@ -456,9 +479,11 @@ The plugin should be deterministic: same input files produce same generated file
 
 The plugin should write generated files before Vite resolves build inputs.
 
-In watch mode, the `options` hook (called by Rollup before every rebuild) regenerates theme files and updates the Rollup input so new sections are compiled without a process restart. The `buildStart` hook watches the `sections/`, `snippets/`, and `config/` directories so file additions trigger the next rebuild, and individual liquid and settings files so edits trigger rebuilds.
+In watch mode, the `options` hook (called by Rollup before every rebuild) regenerates theme files and updates the Rollup input so new sections are compiled without a process restart. The `buildStart` hook watches the `sections/`, `snippets/`, `config/`, and `layout/` directories so file additions trigger the next rebuild, and individual liquid, section group JSON, and settings files so edits trigger rebuilds.
 
-Settings schema generation reads `config/theme.settings.json` as the manual base, then all `config/*.settings.json` files alphabetically. `config/settings_schema.json` is explicitly excluded from the scan by filename. Because JSON does not support comments, the generated-file marker for `settings_schema.json` is written to a sidecar file `config/.nazare-generated` listing which files in `config/` are plugin-owned and must not be hand-edited.
+Settings schema generation reads `config/theme.settings.json` as the manual base, then all `config/*.settings.json` files alphabetically. `config/settings_schema.json` is explicitly excluded from the scan by filename. Because JSON does not support comments, the generated-file marker for `settings_schema.json` is written to a sidecar comment file `config/settings_schema.json.nazare`.
+
+Section group generation writes `sections/header-group.json` and `sections/footer-group.json` from sections declaring `nazare:layout header` or `nazare:layout footer`. Existing group files are treated as admin state: matching section instances keep their current settings and relative order, while newly installed layout sections append after existing entries. Generated-file markers are written to `.nazare` sidecar files because Shopify section group JSON cannot safely contain comments.
 
 Generated file cleanup must only remove files known to be generated by Nazare and carrying the required generated-file marker.
 
