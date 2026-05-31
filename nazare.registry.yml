@@ -396,6 +396,17 @@ components:
         checksum:
           algorithm: sha256
           value: 248c6cafa67dba77539022faaccc82c75d5a4f9ba6172c635041ef34fd8c96f7
+  s-plp-grid:
+    version: 1.0.0
+    type: section
+    dependencies:
+      - c-product-card
+    files:
+      - from: components/s-plp-grid/s-plp-grid.liquid
+        to: sections/s-plp-grid.liquid
+        checksum:
+          algorithm: sha256
+          value: 09a22037b9c8ce703bc6e9be57cb34bdafd86e3ff67e9f78fd2d8bc42c4d97e1
   s-menu:
     version: 1.0.0
     type: section

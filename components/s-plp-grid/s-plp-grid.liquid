@@ -1,0 +1,312 @@
+{% liquid
+  assign pg_per_page      = section.settings.per_page | default: 12
+  assign pg_badge_tags    = section.settings.badge_tags
+  assign pg_show_ratings  = section.settings.show_ratings
+  assign pg_show_swatches = section.settings.show_swatches
+  assign pg_show_atc      = section.settings.show_add_to_cart
+  assign pg_color_option  = section.settings.color_option_name | default: 'Color'
+  assign pg_filter_source = section.settings.filter_tags_source | default: 'all_tags'
+  assign pg_filter_tags   = section.settings.filter_tags
+  assign pg_show_sort     = section.settings.show_sort
+  assign pg_ed_position   = section.settings.editorial_position | default: 6
+
+  if pg_show_ratings == nil
+    assign pg_show_ratings = true
+  endif
+  if pg_show_swatches == nil
+    assign pg_show_swatches = true
+  endif
+  if pg_show_atc == nil
+    assign pg_show_atc = false
+  endif
+  if pg_show_sort == nil
+    assign pg_show_sort = true
+  endif
+%}
+
+{% comment %} Pre-render editorial card HTML to avoid duplicating markup {% endcomment %}
+{% assign pg_editorial_html = '' %}
+{% for block in section.blocks %}
+  {% if block.type == 'editorial' %}
+    {% capture pg_editorial_html %}
+      <div class="relative overflow-hidden rounded-xl" {{ block.shopify_attributes }}>
+        {% if block.settings.image != blank %}
+          {{
+            block.settings.image
+            | image_url: width: 800
+            | image_tag:
+              class: 'absolute inset-0 size-full object-cover',
+              alt: block.settings.image.alt
+          }}
+        {% endif %}
+        <div class="relative flex min-h-80 flex-col justify-end bg-gradient-to-t from-black/60 via-black/20 to-transparent p-6 text-white lg:min-h-full">
+          {% if block.settings.heading != blank %}
+            <p class="text-3xl font-bold uppercase leading-tight">{{ block.settings.heading | escape }}</p>
+          {% endif %}
+          {% if block.settings.body != blank %}
+            <p class="mt-2 text-sm text-white/80">{{ block.settings.body | escape }}</p>
+          {% endif %}
+          {% if block.settings.cta_label != blank and block.settings.cta_url != blank %}
+            <div class="mt-6">
+              <a
+                href="{{ block.settings.cta_url }}"
+                class="inline-flex items-center rounded-full bg-white px-6 py-2.5 text-sm font-semibold uppercase tracking-widest text-black"
+              >{{ block.settings.cta_label | escape }}</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endcapture %}
+  {% endif %}
+{% endfor %}
+
+{% paginate collection.products by pg_per_page %}
+<section class="bg-background text-foreground">
+  <div class="page-width py-8 lg:py-12">
+
+    {% comment %} Filter pills + sort bar {% endcomment %}
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+
+      <div class="flex flex-wrap gap-2">
+        <a
+          href="{{ collection.url }}"
+          class="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors{% if collection.current_tags.size == 0 %} bg-foreground text-background{% else %} border border-foreground/20 text-foreground hover:bg-foreground/5{% endif %}"
+        >All</a>
+
+        {% if pg_filter_source == 'custom' and pg_filter_tags != blank %}
+          {% assign tag_list = pg_filter_tags | split: ',' %}
+          {% for raw_tag in tag_list %}
+            {% assign tag = raw_tag | strip %}
+            {% assign tag_active = collection.current_tags contains tag %}
+            <a
+              href="{{ collection.url }}/{{ tag | handle }}"
+              class="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors{% if tag_active %} bg-foreground text-background{% else %} border border-foreground/20 text-foreground hover:bg-foreground/5{% endif %}"
+            >{{ tag }}</a>
+          {% endfor %}
+        {% else %}
+          {% for tag in collection.all_tags %}
+            {% assign tag_active = collection.current_tags contains tag %}
+            <a
+              href="{{ collection.url }}/{{ tag | handle }}"
+              class="inline-flex items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors{% if tag_active %} bg-foreground text-background{% else %} border border-foreground/20 text-foreground hover:bg-foreground/5{% endif %}"
+            >{{ tag }}</a>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {% if pg_show_sort %}
+        <label class="flex shrink-0 items-center gap-2 text-sm font-semibold uppercase tracking-widest">
+          Sort:
+          <select
+            onchange="window.location = this.value"
+            class="cursor-pointer border-none bg-transparent text-sm font-semibold uppercase tracking-widest focus:outline-none"
+          >
+            {% for option in collection.sort_options %}
+              <option
+                value="{{ collection.url }}?sort_by={{ option.value }}"
+                {% if collection.sort_by == option.value %}selected{% endif %}
+              >{{ option.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      {% endif %}
+    </div>
+
+    {% comment %} Product grid {% endcomment %}
+    <div class="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-3">
+      {% assign editorial_rendered = false %}
+      {% for product in collection.products %}
+
+        {% unless editorial_rendered %}
+          {% if pg_ed_position > 0 and pg_editorial_html != blank and forloop.index == pg_ed_position %}
+            {{ pg_editorial_html }}
+            {% assign editorial_rendered = true %}
+          {% endif %}
+        {% endunless %}
+
+        <div>
+          {% render 'c-product-card',
+            product: product,
+            badge_tags: pg_badge_tags,
+            show_ratings: pg_show_ratings,
+            show_swatches: pg_show_swatches,
+            show_add_to_cart: pg_show_atc,
+            color_option_name: pg_color_option
+          %}
+        </div>
+      {% endfor %}
+
+      {% unless editorial_rendered %}
+        {{ pg_editorial_html }}
+      {% endunless %}
+    </div>
+
+    {% comment %} Pagination {% endcomment %}
+    {% if paginate.pages > 1 %}
+      <div class="mt-12 flex flex-wrap items-center justify-center gap-2">
+        {% if paginate.previous %}
+          <a
+            href="{{ paginate.previous.url }}"
+            class="inline-flex items-center rounded-full border border-foreground/20 px-6 py-2.5 text-sm font-medium hover:bg-foreground/5"
+          >Previous</a>
+        {% endif %}
+        {% for part in paginate.parts %}
+          {% if part.is_link %}
+            <a
+              href="{{ part.url }}"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-foreground/20 text-sm font-medium hover:bg-foreground/5"
+            >{{ part.title }}</a>
+          {% elsif part.title == paginate.current_page %}
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-foreground text-sm font-medium text-background">{{ part.title }}</span>
+          {% else %}
+            <span class="inline-flex h-10 w-10 items-center justify-center text-sm text-foreground/50">{{ part.title }}</span>
+          {% endif %}
+        {% endfor %}
+        {% if paginate.next %}
+          <a
+            href="{{ paginate.next.url }}"
+            class="inline-flex items-center rounded-full border border-foreground/20 px-6 py-2.5 text-sm font-medium hover:bg-foreground/5"
+          >Next</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "PLP grid",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "range",
+      "id": "per_page",
+      "label": "Products per page",
+      "min": 4,
+      "max": 24,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Filters"
+    },
+    {
+      "type": "select",
+      "id": "filter_tags_source",
+      "label": "Filter tags",
+      "default": "all_tags",
+      "options": [
+        { "value": "all_tags", "label": "All collection tags" },
+        { "value": "custom", "label": "Custom list" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "filter_tags",
+      "label": "Custom filter tags",
+      "info": "Comma-separated tags to show as filter pills"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sort",
+      "label": "Show sort dropdown",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Product cards"
+    },
+    {
+      "type": "text",
+      "id": "badge_tags",
+      "label": "Badge tags",
+      "info": "Comma-separated product tags to show as filled badges"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ratings",
+      "label": "Show ratings",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_swatches",
+      "label": "Show color swatches",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_add_to_cart",
+      "label": "Show add to cart",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "color_option_name",
+      "label": "Color option name",
+      "default": "Color"
+    },
+    {
+      "type": "header",
+      "content": "Editorial card"
+    },
+    {
+      "type": "range",
+      "id": "editorial_position",
+      "label": "Editorial position",
+      "info": "Insert editorial card before this product index (0 to disable)",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "default": 6
+    }
+  ],
+  "blocks": [
+    {
+      "type": "editorial",
+      "name": "Editorial card",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Get Your Greens"
+        },
+        {
+          "type": "text",
+          "id": "body",
+          "label": "Body text"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Button label",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "Button URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "PLP grid"
+    }
+  ]
+}
+{% endschema %}
