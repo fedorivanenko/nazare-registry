@@ -3,154 +3,158 @@ import { describe, expect, it } from "vitest";
 
 const manifestPath = new URL("../../../nazare.registry.yml", import.meta.url);
 const packagePath = new URL(
-	"../../../theme/default/package.json",
-	import.meta.url,
+  "../../../theme/default/package.json",
+  import.meta.url,
 );
 const viteConfigPath = new URL(
-	"../../../theme/default/vite.config.js",
-	import.meta.url,
+  "../../../theme/default/vite.config.js",
+  import.meta.url,
 );
 const baseCssPath = new URL(
-	"../../../theme/default/styles/base.css",
-	import.meta.url,
+  "../../../theme/default/styles/base.css",
+  import.meta.url,
 );
 const gitignorePath = new URL(
-	"../../../theme/default/.gitignore",
-	import.meta.url,
+  "../../../theme/default/.gitignore",
+  import.meta.url,
 );
 const shopifyThemeConfigPath = new URL(
-	"../../../theme/default/shopify.theme.toml",
-	import.meta.url,
+  "../../../theme/default/shopify.theme.toml",
+  import.meta.url,
 );
 const layoutPath = new URL(
-	"../../../theme/default/layout/theme.source.liquid",
-	import.meta.url,
+  "../../../theme/default/layout/theme.source.liquid",
+  import.meta.url,
 );
 const sectionPath = new URL(
-	"../../../theme/default/sections/s-main.liquid",
-	import.meta.url,
+  "../../../theme/default/sections/s-main.liquid",
+  import.meta.url,
 );
 
 async function readText(url) {
-	return readFile(url, "utf8");
+  return readFile(url, "utf8");
 }
 
 describe("theme build pipeline", () => {
-	it("declares build pipeline files in the registry manifest", async () => {
-		const manifest = await readText(manifestPath);
+  it("declares build pipeline files in the registry manifest", async () => {
+    const manifest = await readText(manifestPath);
 
-		expect(manifest).toContain(
-			"- from: theme/default/package.json\n      to: package.json",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/vite.config.js\n      to: vite.config.js",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/styles/base.css\n      to: styles/base.css",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/.gitignore\n      to: .gitignore",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/shopify.theme.toml\n      to: shopify.theme.toml",
-		);
-	});
+    expect(manifest).toContain(
+      "- from: theme/default/package.json\n      to: package.json",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/vite.config.js\n      to: vite.config.js",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/styles/base.css\n      to: styles/base.css",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/.gitignore\n      to: .gitignore",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/shopify.theme.toml\n      to: shopify.theme.toml",
+    );
+  });
 
-	it("exposes dev, build, and watch scripts with Vite and Tailwind dependencies", async () => {
-		const packageJson = JSON.parse(await readText(packagePath));
+  it("exposes dev, build, and watch scripts with Vite and Tailwind dependencies", async () => {
+    const packageJson = JSON.parse(await readText(packagePath));
 
-		expect(packageJson.scripts).toEqual({
-			dev: "shopify theme dev -e development --nodelete",
-			build: "vite build",
-			watch: "vite build --watch",
-		});
-		expect(packageJson.devDependencies).toMatchObject({
-			"@tailwindcss/vite": expect.any(String),
-			tailwindcss: expect.any(String),
-			vite: expect.any(String),
-		});
-	});
+    expect(packageJson.scripts).toEqual({
+      dev: "sh -c 'npm run dev:assets & assets_pid=$!; npm run dev:theme; status=$?; kill $assets_pid 2>/dev/null; exit $status'",
+      "dev:assets": "vite build --watch --mode development",
+      "dev:theme": "shopify theme dev -e development --nodelete",
+      build: "vite build",
+      watch: "vite build --watch --mode development",
+    });
+    expect(packageJson.devDependencies).toMatchObject({
+      "@tailwindcss/vite": expect.any(String),
+      tailwindcss: expect.any(String),
+      vite: expect.any(String),
+    });
+  });
 
-	it("configures stable Vite output into Shopify assets", async () => {
-		const config = await readText(viteConfigPath);
+  it("configures stable Vite output into Shopify assets", async () => {
+    const config = await readText(viteConfigPath);
 
-		expect(config).toContain('import tailwindcss from "@tailwindcss/vite"');
-		expect(config).toContain(
-			'import { nazareThemePlugin } from "./nazare/vite-plugin.js"',
-		);
-		expect(config).toContain("nazareThemePlugin()");
-		expect(config).toContain("tailwindcss()");
-		expect(config).toContain('exclude: ["assets/**"]');
-		expect(config).toContain('outDir: "assets"');
-		expect(config).toContain("emptyOutDir: false");
-		expect(config).toContain('base: "styles/base.css"');
-		expect(config).toContain('entryFileNames: "[name].js"');
-		expect(config).toContain('chunkFileNames: "[name].js"');
-		expect(config).toContain('assetFileNames: "[name][extname]"');
-	});
+    expect(config).toContain('import tailwindcss from "@tailwindcss/vite"');
+    expect(config).toContain(
+      'import { nazareThemePlugin } from "./nazare/vite-plugin.js"',
+    );
+    expect(config).toContain("nazareThemePlugin()");
+    expect(config).toContain("tailwindcss()");
+    expect(config).toContain('exclude: ["assets/**"]');
+    expect(config).toContain("minify: !isWatchBuild");
+    expect(config).toContain("sourcemap: isWatchBuild");
+    expect(config).toContain('outDir: "assets"');
+    expect(config).toContain("emptyOutDir: false");
+    expect(config).toContain('base: "styles/base.css"');
+    expect(config).toContain('entryFileNames: "[name].js"');
+    expect(config).toContain('chunkFileNames: "[name].js"');
+    expect(config).toContain('assetFileNames: "[name][extname]"');
+  });
 
-	it("provides Tailwind base CSS scan sources", async () => {
-		const css = await readText(baseCssPath);
+  it("provides Tailwind base CSS scan sources", async () => {
+    const css = await readText(baseCssPath);
 
-		expect(css).toContain('@import "tailwindcss"');
-		expect(css).toContain('@source "../layout/**/*.liquid"');
-		expect(css).toContain('@source "../sections/**/*.liquid"');
-		expect(css).toContain('@source "../snippets/**/*.liquid"');
-	});
+    expect(css).toContain('@import "tailwindcss"');
+    expect(css).toContain('@source "../layout/**/*.liquid"');
+    expect(css).toContain('@source "../sections/**/*.liquid"');
+    expect(css).toContain('@source "../snippets/**/*.liquid"');
+  });
 
-	it("provides semantic theme design tokens", async () => {
-		const css = await readText(baseCssPath);
+  it("provides semantic theme design tokens", async () => {
+    const css = await readText(baseCssPath);
 
-		expect(css).toContain(":root {");
-		expect(css).toContain("--background: oklch(1 0 0);");
-		expect(css).toContain("--foreground: oklch(0.145 0 0);");
-		expect(css).toContain("--primary: oklch(0.205 0 0);");
-		expect(css).toContain("--primary-foreground: oklch(0.985 0 0);");
-		expect(css).toContain("--radius: 0.625rem;");
-		expect(css).toContain("@theme {");
-		expect(css).toContain("--color-background: var(--background);");
-		expect(css).toContain("--color-foreground: var(--foreground);");
-		expect(css).toContain("--color-primary: var(--primary);");
-		expect(css).toContain(
-			"--color-primary-foreground: var(--primary-foreground);",
-		);
-		expect(css).toContain("--color-border: var(--border);");
-		expect(css).toContain("--color-ring: var(--ring);");
-		expect(css).toContain("--radius-md: calc(var(--radius) - 2px);");
-		expect(css).toContain("--radius-lg: var(--radius);");
-	});
+    expect(css).toContain(":root {");
+    expect(css).toContain("--background: oklch(1 0 0);");
+    expect(css).toContain("--foreground: oklch(0.145 0 0);");
+    expect(css).toContain("--primary: oklch(0.205 0 0);");
+    expect(css).toContain("--primary-foreground: oklch(0.985 0 0);");
+    expect(css).toContain("--radius: 0.625rem;");
+    expect(css).toContain("@theme {");
+    expect(css).toContain("--color-background: var(--background);");
+    expect(css).toContain("--color-foreground: var(--foreground);");
+    expect(css).toContain("--color-primary: var(--primary);");
+    expect(css).toContain(
+      "--color-primary-foreground: var(--primary-foreground);",
+    );
+    expect(css).toContain("--color-border: var(--border);");
+    expect(css).toContain("--color-ring: var(--ring);");
+    expect(css).toContain("--radius-md: calc(var(--radius) - 2px);");
+    expect(css).toContain("--radius-lg: var(--radius);");
+  });
 
-	it("adds CSS and JS bridge hook points", async () => {
-		const layout = await readText(layoutPath);
-		const section = await readText(sectionPath);
+  it("adds CSS and JS bridge hook points", async () => {
+    const layout = await readText(layoutPath);
+    const section = await readText(sectionPath);
 
-		expect(layout).toContain("{{ 'base.css' | asset_url | stylesheet_tag }}");
-		expect(layout).toContain("{% render 'section-css-preloads' %}");
-		expect(layout).toContain(
-			'<script type="module" src="{{ \'theme.js\' | asset_url }}"></script>',
-		);
-		expect(section).toContain(
-			"{% render 'section-css', section_name: 's-main' %}",
-		);
-	});
+    expect(layout).toContain("{{ 'base.css' | asset_url | stylesheet_tag }}");
+    expect(layout).toContain("{% render 'section-css-preloads' %}");
+    expect(layout).toContain(
+      '<script type="module" src="{{ \'theme.js\' | asset_url }}"></script>',
+    );
+    expect(section).toContain(
+      "{% render 'section-css', section_name: 's-main' %}",
+    );
+  });
 
-	it("keeps generated build outputs trackable", async () => {
-		const gitignore = await readText(gitignorePath);
+  it("keeps generated build outputs trackable", async () => {
+    const gitignore = await readText(gitignorePath);
 
-		expect(gitignore).toContain("node_modules/");
-		expect(gitignore).toContain(".env");
-		expect(gitignore).toContain(".env.*");
-		expect(gitignore).not.toContain("assets/");
-		expect(gitignore).not.toContain("styles/");
-		expect(gitignore).not.toContain("scripts/theme.js");
-		expect(gitignore).not.toContain("snippets/section-css");
-	});
+    expect(gitignore).toContain("node_modules/");
+    expect(gitignore).toContain(".env");
+    expect(gitignore).toContain(".env.*");
+    expect(gitignore).not.toContain("assets/");
+    expect(gitignore).not.toContain("styles/");
+    expect(gitignore).not.toContain("scripts/theme.js");
+    expect(gitignore).not.toContain("snippets/section-css");
+  });
 
-	it("documents optional Shopify store pinning", async () => {
-		const config = await readText(shopifyThemeConfigPath);
+  it("documents optional Shopify store pinning", async () => {
+    const config = await readText(shopifyThemeConfigPath);
 
-		expect(config).toContain("[environments.development]");
-		expect(config).toContain('store = "your-store.myshopify.com"');
-		expect(config).toContain("theme-editor-sync = true");
-	});
+    expect(config).toContain("[environments.development]");
+    expect(config).toContain('store = "your-store.myshopify.com"');
+    expect(config).toContain("theme-editor-sync = true");
+  });
 });

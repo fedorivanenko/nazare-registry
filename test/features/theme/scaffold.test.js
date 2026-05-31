@@ -3,75 +3,75 @@ import { describe, expect, it } from "vitest";
 
 const manifestPath = new URL("../../../nazare.registry.yml", import.meta.url);
 const layoutPath = new URL(
-	"../../../theme/default/layout/theme.source.liquid",
-	import.meta.url,
+  "../../../theme/default/layout/theme.source.liquid",
+  import.meta.url,
 );
 const templatePath = new URL(
-	"../../../theme/default/templates/index.json",
-	import.meta.url,
+  "../../../theme/default/templates/index.json",
+  import.meta.url,
 );
 const sectionPath = new URL(
-	"../../../theme/default/sections/s-main.liquid",
-	import.meta.url,
+  "../../../theme/default/sections/s-main.liquid",
+  import.meta.url,
 );
 const themeSettingsPath = new URL(
-	"../../../theme/default/config/theme.settings.json",
-	import.meta.url,
+  "../../../theme/default/config/theme.settings.json",
+  import.meta.url,
 );
 
 async function readText(url) {
-	return readFile(url, "utf8");
+  return readFile(url, "utf8");
 }
 
 describe("theme scaffold", () => {
-	it("contains exact v1 Shopify-only scaffold file list in manifest", async () => {
-		const manifest = await readText(manifestPath);
+  it("contains exact v1 Shopify-only scaffold file list in manifest", async () => {
+    const manifest = await readText(manifestPath);
 
-		expect(manifest).toContain(
-			"theme:\n  version: 1.2.8\n  source: theme/default",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/layout/theme.source.liquid\n      to: layout/theme.source.liquid",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/templates/index.json\n      to: templates/index.json",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/sections/s-main.liquid\n      to: sections/s-main.liquid",
-		);
-		expect(manifest).toContain(
-			"- from: theme/default/config/theme.settings.json\n      to: config/theme.settings.json",
-		);
-	});
+    expect(manifest).toContain(
+      "theme:\n  version: 1.2.9\n  source: theme/default",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/layout/theme.source.liquid\n      to: layout/theme.source.liquid",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/templates/index.json\n      to: templates/index.json",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/sections/s-main.liquid\n      to: sections/s-main.liquid",
+    );
+    expect(manifest).toContain(
+      "- from: theme/default/config/theme.settings.json\n      to: config/theme.settings.json",
+    );
+  });
 
-	it("keeps Shopify scaffold sources present", async () => {
-		await expect(readText(layoutPath)).resolves.toContain(
-			"{{ content_for_layout }}",
-		);
-		await expect(readText(templatePath)).resolves.toContain('"type": "s-main"');
-		await expect(readText(sectionPath)).resolves.toContain("{% schema %}");
-		await expect(readText(themeSettingsPath)).resolves.toBe("[]\n");
-	});
+  it("keeps Shopify scaffold sources present", async () => {
+    await expect(readText(layoutPath)).resolves.toContain(
+      "{{ content_for_layout }}",
+    );
+    await expect(readText(templatePath)).resolves.toContain('"type": "s-main"');
+    await expect(readText(sectionPath)).resolves.toContain("{% schema %}");
+    await expect(readText(themeSettingsPath)).resolves.toBe("[]\n");
+  });
 
-	it("uses one starter section only and index template points to it", async () => {
-		const template = JSON.parse(await readText(templatePath));
+  it("uses one starter section only and index template points to it", async () => {
+    const template = JSON.parse(await readText(templatePath));
 
-		expect(Object.keys(template.sections)).toEqual(["main"]);
-		expect(template.sections.main).toEqual({
-			type: "s-main",
-			settings: {},
-		});
-		expect(template.order).toEqual(["main"]);
-	});
+    expect(Object.keys(template.sections)).toEqual(["main"]);
+    expect(template.sections.main).toEqual({
+      type: "s-main",
+      settings: {},
+    });
+    expect(template.order).toEqual(["main"]);
+  });
 
-	it("layout renders minimal Shopify document structure", async () => {
-		const layout = await readText(layoutPath);
+  it("layout renders minimal Shopify document structure", async () => {
+    const layout = await readText(layoutPath);
 
-		expect(layout).toContain("<!doctype html>");
-		expect(layout).toContain("<html");
-		expect(layout).toContain("<head>");
-		expect(layout).toContain("{{ content_for_header }}");
-		expect(layout).toContain("<body>");
-		expect(layout).toContain("{{ content_for_layout }}");
-	});
+    expect(layout).toContain("<!doctype html>");
+    expect(layout).toContain("<html");
+    expect(layout).toContain("<head>");
+    expect(layout).toContain("{{ content_for_header }}");
+    expect(layout).toContain("<body>");
+    expect(layout).toContain("{{ content_for_layout }}");
+  });
 });

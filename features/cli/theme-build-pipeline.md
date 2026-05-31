@@ -124,7 +124,7 @@ These entries are additive to the Shopify-only files from `theme-scaffold`.
 
 ### Required file intent
 
-- `package.json`: local `dev`, `build`, and `watch` scripts plus package metadata required by the scaffold.
+- `package.json`: local `dev`, `dev:assets`, `dev:theme`, `build`, and `watch` scripts plus package metadata required by the scaffold.
 - `vite.config.js`: Vite, Tailwind, and relative import wiring for the vendored Nazare Vite plugin.
 - `styles/base.css`: Tailwind-powered base CSS entry imported by the build pipeline.
 - `.gitignore`: ignores dependency folders and local-only tooling state, including local `.env` files, but does not ignore generated build outputs.
@@ -252,7 +252,9 @@ V1 asset output names must be stable and must not include content hashes.
 
 Script contract:
 
-- `dev`: runs Shopify theme development through global `shopify theme dev -e development --nodelete`.
+- `dev`: runs Vite asset watch and Shopify theme development together.
+- `dev:assets`: runs `vite build --watch --mode development` so Rollup/Vite can reuse watch cache and avoid production minification.
+- `dev:theme`: runs Shopify theme development through global `shopify theme dev -e development --nodelete`.
 - `build`: runs a one-shot Vite production build into `assets/`.
 - `watch`: runs the Vite build pipeline in watch mode for use beside Shopify theme development.
 
@@ -338,7 +340,7 @@ Result: implementation present; final feature-doc checklist still needs reconcil
   - Verify manifest-to-filesystem test.
 - [ ] every build pipeline `theme.files[].to` is safe
   - Verify path safety test.
-- [ ] `package.json` exposes local `dev`, `build`, and `watch` scripts
+- [ ] `package.json` exposes local `dev`, `dev:assets`, `dev:theme`, `build`, and `watch` scripts
   - Verify package fixture assertions, including `shopify theme dev -e development --nodelete`.
 - [ ] `vite.config.js` wires Nazare theme build behavior
   - Verify config fixture assertions, including real Nazare Vite plugin import/use and `assets/**` watch exclusion.

@@ -1,15 +1,17 @@
 {
-	"name": "nazare-theme",
-	"private": true,
-	"type": "module",
-	"scripts": {
-		"dev": "shopify theme dev -e development --nodelete",
-		"build": "vite build",
-		"watch": "vite build --watch"
-	},
-	"devDependencies": {
-		"@tailwindcss/vite": "^4.0.0",
-		"tailwindcss": "^4.0.0",
-		"vite": "^7.0.0"
-	}
+  "name": "nazare-theme",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "sh -c 'npm run dev:assets & assets_pid=$!; npm run dev:theme; status=$?; kill $assets_pid 2>/dev/null; exit $status'",
+    "dev:assets": "vite build --watch --mode development",
+    "dev:theme": "shopify theme dev -e development --nodelete",
+    "build": "vite build",
+    "watch": "vite build --watch --mode development"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "vite": "^7.0.0"
+  }
 }
