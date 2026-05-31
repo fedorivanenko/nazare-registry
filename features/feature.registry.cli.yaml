@@ -72,6 +72,12 @@ cli:
     status: in-progress
     file: cli/theme-build-pipeline.md
 
+  - id: theme-dev-asset-watcher
+    title: Fast Theme Dev Asset Watcher
+    description: Development-only asset watcher that avoids full Vite/Rollup rebuilds for local Shopify theme work.
+    status: planned
+    file: cli/theme-dev-asset-watcher.md
+
   - id: local-registry-dev-server
     title: Local Registry Dev Server
     description: Local dev server that serves the component registry over HTTP so nazare CLI commands can consume it during development.
