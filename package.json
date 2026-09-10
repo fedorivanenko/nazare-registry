@@ -1,0 +1,20 @@
+{
+  "name": "@nazare/registry",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Typed immutable registry for Nazare capabilities, providers, carcass parts, verifiers, and components.",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "tsc -p tsconfig.json --noEmit && vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
