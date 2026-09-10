@@ -1,0 +1,36 @@
+{
+  "kind": "capability",
+  "capability": "commerce.cart.upsell",
+  "intent": {
+    "title": "Cart upsell",
+    "description": "Offer additional products to a shopper in the cart.",
+    "aliases": ["cart recommendations", "cart cross-sell"]
+  },
+  "state": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean" },
+      "products": { "type": "array", "items": { "type": "string" } }
+    }
+  },
+  "operations": {
+    "setProducts": {
+      "description": "Replace the products offered by the cart upsell.",
+      "input": {
+        "type": "object",
+        "properties": { "products": { "type": "array", "items": { "type": "string" } } },
+        "required": ["products"]
+      },
+      "mutates": ["products"]
+    }
+  },
+  "bindings": [
+    { "provider": "@nazare/provider-rebuy", "adapter": "providers/rebuy.ts" },
+    { "provider": "@nazare/provider-storefront", "adapter": "providers/storefront.ts" }
+  ],
+  "invariants": ["Existing experiments must remain assigned unless explicitly changed."],
+  "verify": [
+    { "verifier": "@nazare/verifier-dom", "required": true },
+    { "verifier": "@nazare/verifier-provider-state", "required": true }
+  ]
+}
